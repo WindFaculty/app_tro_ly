@@ -21,12 +21,12 @@ class SttService:
         if self._settings.stt_provider == "faster_whisper":
             try:
                 import faster_whisper  # noqa: F401
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 payload = {
                     "available": False,
                     "provider": "faster-whisper",
                     "model_path": self._settings.faster_whisper_model_path or self._settings.faster_whisper_model_size,
-                    "reason": "module_not_installed",
+                    "reason": "module_not_available",
                 }
                 fallback = self._whisper_cpp_health()
                 if fallback.get("available"):
@@ -44,7 +44,7 @@ class SttService:
         if self._settings.stt_provider == "faster_whisper":
             try:
                 return self._transcribe_with_faster_whisper(audio_path, language)
-            except ModuleNotFoundError:
+            except (ModuleNotFoundError, ImportError):
                 logger.warning("faster-whisper is not installed, falling back to whisper.cpp")
             except Exception as exc:
                 logger.warning("faster-whisper transcription failed, falling back to whisper.cpp: %s", exc)

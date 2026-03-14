@@ -16,9 +16,9 @@
 - Tradeoff: Cross-device sync is explicitly out of scope for MVP.
 
 ## 2026-03-13
-- Decision: Use Ollama, whisper.cpp, and Piper behind backend-owned adapters.
-- Why: The assistant must work offline and local runtime failures need a single place for diagnostics and fallback logic.
-- Tradeoff: Packaging and runtime setup become more complex.
+- Decision: Keep LLM and speech runtimes behind backend-owned adapters.
+- Why: The assistant needs one place for diagnostics, fallback logic, and provider switching across Groq, Gemini, Ollama, whisper.cpp, Piper, and ChatTTS.
+- Tradeoff: Packaging, setup, and runtime validation become more complex.
 
 ## 2026-03-13
 - Decision: Keep conversation history, selected date, focus task, and planner context in the backend.
@@ -42,5 +42,10 @@
 
 ## 2026-03-13
 - Decision: Keep `agent-platform` optional and outside the MVP critical path.
-- Why: The desktop assistant should run with Unity, the local backend, SQLite, and local AI runtimes only.
+- Why: The desktop assistant should run with Unity, the local backend, SQLite, and bounded AI or speech adapters only.
 - Tradeoff: Any operator automation or extra orchestration must remain additive.
+
+## 2026-03-14
+- Decision: Document the current AI runtime as Groq or Gemini by default instead of claiming the repo is already local-only.
+- Why: The implemented backend currently routes through cloud providers for LLM responses, while Ollama remains a future local path.
+- Tradeoff: Documentation now distinguishes more clearly between target architecture and implemented behavior.

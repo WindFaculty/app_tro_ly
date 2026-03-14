@@ -4,7 +4,21 @@ Updated: 2026-03-14
 Status values: TODO | DOING | DONE | BLOCKED
 Ownership: `Axx` = Codex/AI-executable repo work | `Pxx` = human/manual/off-repo work tracked in `tasks/task-people.md`
 
+## How To Use This File
+
+- This file tracks work Codex or AI can execute directly inside the repo.
+- `tasks/task-people.md` tracks machine setup, manual validation, assets, or approvals that must come from a person.
+- Documentation note: AI and task docs were refreshed on 2026-03-14, but `A06` stays open until there is a step-by-step runbook for setup, release validation, and troubleshooting.
+
+## Current AI Themes
+
+- Runtime hardening: `A01`, `A02`
+- Unity degraded or recovery UX polish: `A04`
+- Validation and regression coverage: `A03`, `A05`
+- Runbooks and operational docs: `A06`
+
 ## Milestone Summary
+
 - `M0 - Product reset and documentation baseline`: DONE
 - `M1 - Foundation skeleton`: DONE
 - `M2 - Task engine and views`: DONE
@@ -14,14 +28,16 @@ Ownership: `Axx` = Codex/AI-executable repo work | `Pxx` = human/manual/off-repo
 - `M6 - Polish and Windows packaging`: DOING
 
 ## Active AI Queue
+
 - `A01 | DOING | Expand preflight checks for backend and release scripts to detect missing Python dependencies, missing Whisper/Piper/Ollama runtimes, broken runtime paths, and invalid release folders. | Done when: startup and packaging flows fail fast with actionable diagnostics before partial startup. | Blocked by: P05`
 - `A02 | DOING | Harden scripts/setup_windows.ps1, scripts/run_all.ps1, and scripts/package_release.ps1 with clearer logs, stable exit codes, and safe startup/shutdown flow. | Done when: the scripts report failures consistently and leave fewer dangling processes or ambiguous outcomes. | Blocked by: P05`
 - `A03 | TODO | Add smoke automation for health, REST task flows, WebSocket /v1/events, and degraded runtime paths. | Done when: a repeatable smoke suite can exercise healthy and degraded local backend behavior during validation. | Blocked by: P01 P02 P03 P04 P05`
 - `A04 | DOING | Polish Unity degraded/offline/recovery UX, reconnect handling, and user-facing error messaging. | Done when: the client surfaces partial/error states clearly and reconnects or recovers without confusing the user. | Blocked by: P01 P02 P03 P04 P05`
-- `A05 | TODO | Expand backend tests and Unity tests for settings, reminders, subtitles, startup health, and runtime fallback behavior. | Done when: automated coverage is added for the main regression-prone flows across backend and Unity test suites.`
-- `A06 | TODO | Add runbook-style docs for local runtime setup, release validation, and troubleshooting. | Done when: a new machine can follow the written steps to install, validate, and diagnose the app. | Blocked by: P05`
+- `A05 | TODO | Expand backend tests and Unity tests for settings, reminders, subtitles, startup health, assistant streaming, and runtime fallback behavior. | Done when: automated coverage is added for the main regression-prone flows across backend and Unity test suites.`
+- `A06 | TODO | Add runbook-style docs for local AI/runtime setup, release validation, health checks, and troubleshooting. | Done when: a new machine can follow the written steps to install, validate, and diagnose the app. | Blocked by: P05`
 
 ## Future AI Roadmap
+
 - `A07 | TODO | Upgrade the runtime-generated Unity UI into a production-ready shell while keeping Today, Week, Inbox, Completed, and Settings flows intact. | Done when: the assistant shell looks intentional, keeps the existing information architecture, and remains wired to the current backend flows. | Blocked by: P01 P02 P03 P04 P05`
 - `A08 | TODO | Add the mini-assistant mode from docs/04-ui.md with open-main-app, mute speech, push-to-talk, and dismiss reminder controls. | Done when: a compact assistant mode exists and can handle the core quick-access flows without opening the full app.`
 - `A09 | TODO | Polish task interactions, including quick add, edit, reschedule UX, empty states, and overdue or due-soon emphasis. | Done when: task management flows are faster, clearer, and easier to understand in normal and edge-case states.`
@@ -41,8 +57,16 @@ Ownership: `Axx` = Codex/AI-executable repo work | `Pxx` = human/manual/off-repo
 - `A23 | TODO | Build the first cross-device sync transport and storage baseline plus sync status UI surface. | Done when: a minimal sync path exists end-to-end and surfaces its status clearly in the app. | Blocked by: P08`
 
 ## Dependencies
+
 - `P01-P05` gate hands-on validation and environment-backed UX work for `A03 A04 A07 A10 A11 A14 A15`.
 - `P05` is the release-folder validation dependency for `A01 A02 A06`.
 - `P06` gates `A16` until calendar credentials and project setup exist.
 - `P07` gates `A17 A20 A21` until automation environments and permissions exist.
 - `P08` gates `A22 A23` until cross-device topology and storage assumptions are fixed.
+
+## Tóm Tắt Tiếng Việt
+
+- File này theo dõi các việc Codex hoặc AI có thể làm trực tiếp trong repo.
+- Các lane đang chạy là `A01`, `A02`, và `A04`.
+- `A06` vẫn chưa xong vì mới chỉ cập nhật tài liệu tổng quan; runbook từng bước cho setup, release validation, và troubleshooting vẫn còn thiếu.
+- Các blocker thủ công `P01-P05` đang chặn phần lớn việc polish, smoke test, avatar thật, và xác minh release.

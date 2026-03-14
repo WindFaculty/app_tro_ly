@@ -11,6 +11,8 @@
 - D006: Implemented a backend-backed Settings panel in the Unity shell and wired it to the local settings API.
 - D007: Updated milestone tracking to reflect that implementation has already reached M6 polish work rather than the original documentation-reset baseline.
 - D008: Added backend log file output, health recovery actions, and Unity degraded-runtime guidance for local recovery paths.
+- D009: Refreshed AI runtime documentation to match the implemented backend orchestration, route selection, and assistant streaming API.
+- D010: Cleaned task tracking docs, clarified AI versus manual ownership, and repaired the Vietnamese task documentation text.
 
 ## Notes
 - The documentation now targets the local desktop assistant project.

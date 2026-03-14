@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import re
 import shutil
 import subprocess
@@ -17,8 +18,16 @@ logger = get_logger("tts")
 class TtsService:
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
+        self._chattts: Any | None = None
+        self._chattts_module: Any | None = None
+        self._chattts_speakers: dict[str, Any] = {}
 
     def health(self) -> dict[str, Any]:
+        if self._settings.tts_provider == "chattts":
+            return self._chattts_health()
+        return self._piper_health()
+
+    def _piper_health(self) -> dict[str, Any]:
         command = self._resolve_command(self._settings.piper_command)
         payload: dict[str, Any] = {
             "available": command is not None,
@@ -32,37 +41,34 @@ class TtsService:
             payload["reason"] = "command not configured or not found"
         return payload
 
-    def synthesize(self, text: str, voice: str | None = None, cache: bool = True) -> dict[str, Any]:
-        command = self._resolve_command(self._settings.piper_command)
-        if command is None:
-            logger.warning("TTS requested but Piper runtime is not configured")
-            raise RuntimeError("Piper runtime is not configured")
+    def _chattts_health(self) -> dict[str, Any]:
+        try:
+            self._import_chattts()
+        except ModuleNotFoundError:
+            return {
+                "available": False,
+                "provider": "chattts",
+                "reason": "module_not_installed",
+                "sample_rate": self._settings.chattts_sample_rate,
+            }
+        return {
+            "available": True,
+            "provider": "chattts",
+            "compile": self._settings.chattts_compile,
+            "sample_rate": self._settings.chattts_sample_rate,
+        }
 
-        key = hashlib.sha256(f"{voice or self._settings.default_tts_voice}:{text}".encode("utf-8")).hexdigest()
+    def synthesize(self, text: str, voice: str | None = None, cache: bool = True) -> dict[str, Any]:
+        key = hashlib.sha256(
+            f"{self._settings.tts_provider}:{voice or self._settings.default_tts_voice}:{text}".encode("utf-8")
+        ).hexdigest()
         output_path = self._settings.audio_dir / f"{key}.wav"
         cached = cache and output_path.exists()
         if not cached:
-            process = subprocess.run(
-                [
-                    command,
-                    "-m",
-                    self._settings.piper_model_path or "",
-                    "-f",
-                    str(output_path),
-                ],
-                input=text,
-                capture_output=True,
-                text=True,
-                timeout=self._settings.piper_timeout_sec,
-                check=False,
-            )
-            if process.returncode != 0:
-                logger.error(
-                    "Piper synthesis failed for voice %s: %s",
-                    voice or self._settings.default_tts_voice,
-                    process.stderr.strip(),
-                )
-                raise RuntimeError(process.stderr.strip() or "Piper synthesis failed")
+            if self._settings.tts_provider == "chattts":
+                self._synthesize_with_chattts(text, output_path, voice)
+            else:
+                self._synthesize_with_piper(text, output_path, voice)
 
         return {
             "audio_path": output_path,
@@ -90,6 +96,110 @@ class TtsService:
         if path.exists():
             return str(path)
         return shutil.which(value)
+
+    def _synthesize_with_piper(self, text: str, output_path: Path, voice: str | None) -> None:
+        command = self._resolve_command(self._settings.piper_command)
+        if command is None:
+            logger.warning("TTS requested but Piper runtime is not configured")
+            raise RuntimeError("Piper runtime is not configured")
+
+        process = subprocess.run(
+            [
+                command,
+                "-m",
+                self._settings.piper_model_path or "",
+                "-f",
+                str(output_path),
+            ],
+            input=text,
+            capture_output=True,
+            text=True,
+            timeout=self._settings.piper_timeout_sec,
+            check=False,
+        )
+        if process.returncode != 0:
+            logger.error(
+                "Piper synthesis failed for voice %s: %s",
+                voice or self._settings.default_tts_voice,
+                process.stderr.strip(),
+            )
+            raise RuntimeError(process.stderr.strip() or "Piper synthesis failed")
+
+    def _synthesize_with_chattts(self, text: str, output_path: Path, voice: str | None) -> None:
+        try:
+            chattts_module = self._import_chattts()
+        except ModuleNotFoundError:
+            logger.warning("TTS requested but ChatTTS is not installed")
+            raise RuntimeError("ChatTTS is not installed")
+
+        try:
+            chat = self._load_chattts(chattts_module)
+            infer_kwargs: dict[str, Any] = {}
+            speaker = self._chattts_speaker(chat, voice)
+            infer_code_params = getattr(chattts_module.Chat, "InferCodeParams", None)
+            if speaker is not None and callable(infer_code_params):
+                infer_kwargs["params_infer_code"] = infer_code_params(spk_emb=speaker)
+            wavs = chat.infer([text], **infer_kwargs)
+        except Exception as exc:
+            logger.error("ChatTTS synthesis failed for voice %s: %s", voice or self._settings.default_tts_voice, exc)
+            raise RuntimeError(f"ChatTTS synthesis failed: {exc}") from exc
+
+        if not wavs:
+            raise RuntimeError("ChatTTS did not return audio data")
+        self._write_pcm16_wav(output_path, wavs[0], self._settings.chattts_sample_rate)
+
+    def _import_chattts(self) -> Any:
+        if self._chattts_module is None:
+            self._chattts_module = importlib.import_module("ChatTTS")
+        return self._chattts_module
+
+    def _load_chattts(self, chattts_module: Any) -> Any:
+        if self._chattts is None:
+            chat = chattts_module.Chat()
+            chat.load(compile=self._settings.chattts_compile)
+            self._chattts = chat
+        return self._chattts
+
+    def _chattts_speaker(self, chat: Any, voice: str | None) -> Any | None:
+        speaker_key = voice or self._settings.default_tts_voice
+        if speaker_key in self._chattts_speakers:
+            return self._chattts_speakers[speaker_key]
+        sample_random_speaker = getattr(chat, "sample_random_speaker", None)
+        if not callable(sample_random_speaker):
+            return None
+        speaker = sample_random_speaker()
+        self._chattts_speakers[speaker_key] = speaker
+        return speaker
+
+    def _write_pcm16_wav(self, output_path: Path, samples: Any, sample_rate: int) -> None:
+        import numpy as np
+
+        if hasattr(samples, "detach"):
+            samples = samples.detach().cpu().numpy()
+        elif hasattr(samples, "cpu") and hasattr(samples, "numpy"):
+            samples = samples.cpu().numpy()
+
+        audio = np.asarray(samples)
+        audio = np.squeeze(audio)
+        if audio.ndim == 2:
+            audio = audio[0]
+        if audio.ndim != 1:
+            audio = audio.reshape(-1)
+
+        if np.issubdtype(audio.dtype, np.integer):
+            pcm = audio.astype(np.int16, copy=False)
+        else:
+            audio = np.nan_to_num(audio.astype(np.float32, copy=False))
+            peak = float(np.max(np.abs(audio))) if audio.size else 0.0
+            if peak > 1.0:
+                audio = audio / peak
+            pcm = (np.clip(audio, -1.0, 1.0) * 32767.0).astype(np.int16)
+
+        with wave.open(str(output_path), "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(sample_rate)
+            handle.writeframes(pcm.tobytes())
 
     def _audio_duration_ms(self, output_path: Path) -> int:
         with wave.open(str(output_path), "rb") as handle:

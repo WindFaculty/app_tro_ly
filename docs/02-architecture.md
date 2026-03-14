@@ -1,6 +1,6 @@
 # Architecture - Local Desktop Assistant
 
-Updated: 2026-03-13
+Updated: 2026-03-14
 
 ## High-level
 
@@ -8,24 +8,24 @@ Updated: 2026-03-13
 Unity desktop app
   -> REST + WebSocket client
      -> Python local backend
-        -> Task service
-        -> Conversation service
-        -> Planner service
-        -> Scheduler service
-        -> Speech service
-        -> SQLite
-        -> Groq or Ollama
-        -> whisper.cpp
-        -> Piper
+        -> AssistantOrchestrator
+           -> ActionValidator -> TaskService -> SQLite
+           -> PlannerService
+           -> RouterService
+              -> FastResponseService -> Groq or Gemini
+              -> PlanningService -> Gemini or Groq
+           -> MemoryService
+           -> SpeechService -> faster-whisper or whisper.cpp / Piper or ChatTTS
+        -> SchedulerService -> EventBus -> reminder and state events
 ```
 
 ## Runtime Components
 
 ### Unity client
+
 - `AvatarRenderer`
-  - model load
-  - camera and lighting
-  - background and presentation shell
+  - placeholder model load today
+  - camera, lighting, and presentation shell
 - `AvatarAnimator`
   - idle
   - listening
@@ -35,116 +35,132 @@ Unity desktop app
   - confirming
   - warning
 - `LipSyncController`
-  - MVP: map audio amplitude to `mouth_open`
+  - amplitude-based mouth movement for MVP
 - `TaskUI`
-  - today list
-  - week list or grouped timeline
+  - today
+  - week
   - inbox
   - completed
-  - quick add
+  - quick add and edit surfaces
 - `ChatUI`
   - message thread
+  - transcript preview
   - subtitle
-  - typing and thinking states
+  - thinking and talking states
   - mic button
 - `LocalApiClient`
-  - REST for reads and mutations
-  - WebSocket for reminder and state events
+  - REST for health, settings, speech, and task mutations
+  - `WS /v1/events` for reminder and state events
+  - `WS /v1/assistant/stream` for live assistant turns
 - `NotificationPresenter`
   - reminder popups
   - overdue alerts
-  - degraded-runtime warnings
+  - degraded-runtime recovery guidance
 
 ### Python local backend
+
+- `AssistantOrchestrator`
+  - single turn pipeline for `/chat` and `/assistant/stream`
+  - session creation, state transitions, route logging, and final response assembly
+- `ActionValidator`
+  - keyword and regex-based intent parsing
+  - safe task actions only
+  - deterministic summaries for day, week, overdue, urgency, and free-time requests
+- `RouterService`
+  - chooses `groq_fast`, `gemini_deep`, or `hybrid_plan_then_groq`
+  - considers complexity, planning keywords, notes length, voice mode, and provider health
+- `FastResponseService`
+  - short, voice-friendly final phrasing
+- `PlanningService`
+  - deep planning prompt
+  - structured JSON plan payload
+  - fallback plan when provider calls fail
+- `MemoryService`
+  - recent-message window
+  - rolling conversation summary
+  - long-term memory extraction and retrieval
 - `TaskService`
   - task CRUD
   - status changes
-  - reschedule logic
   - repeat expansion
-  - today/week/overdue aggregation
-- `ConversationService`
-  - history management
-  - intent parsing
-  - prompt assembly
-  - action routing
+  - reminder generation
+  - today, week, overdue, inbox, and completed views
 - `PlannerService`
   - daily summary
   - weekly summary
-  - urgency and conflict suggestions
+  - overdue summary
+  - urgency summary
+  - free-slot detection
 - `SchedulerService`
   - reminder polling
   - event emission
   - due-soon calculations
 - `SpeechService`
-  - STT
-  - TTS
-  - temp and cached audio files
+  - STT upload and byte-stream transcription
+  - TTS synthesis and sentence-level streaming support
 - `PersistenceLayer`
   - SQLite repositories
-  - settings JSON if needed
-  - local logs
+  - settings and session storage
+  - logs and route logs
 
 ### LLM and speech runtimes
+
 - `Groq API`
-  - cloud reply refinement option
-  - same backend action pipeline and task validation rules
+  - fast-response path by default
+- `Gemini API`
+  - deep-planning path by default
 - `Ollama`
-  - reasoning and phrasing only
-  - backend keeps history and task context
+  - present in config as a future local path
+  - currently reported as disabled for this phase
+- `faster-whisper`
+  - default STT path
 - `whisper.cpp`
-  - local speech-to-text
-  - MVP flow uses push-to-talk only
+  - optional STT fallback when configured
 - `Piper`
-  - local text-to-speech
-  - cache common short phrases where useful
+- `ChatTTS`
+  - local TTS runtime with content-hash caching
 
 ## Data Model
+
 - `tasks`
   - source of truth for user-visible work items
 - `task_occurrences`
-  - optional expanded rows for repeating items shown in daily and weekly views
+  - expanded rows for repeating items shown in day and week views
+- `reminders`
+  - reminder schedule plus delivery state
 - `conversations`
   - chat sessions
 - `messages`
   - user and assistant messages
-- `reminders`
-  - reminder schedule plus delivery state
+- `assistant_sessions`
+  - active assistant stream or chat session metadata
+- `conversation_summaries`
+  - rolling short-term summary for a conversation
+- `memory_items`
+  - extracted long-term memory records
+- `route_logs`
+  - route, provider, latency, fallback, and token-usage trace
 - `app_settings`
-  - voice, model, window mode, avatar config, startup preferences
+  - voice, model, window mode, avatar, reminder, startup, and memory preferences
 - `session_state`
-  - currently focused date, selected task, current mode, voice state
+  - focused date and other lightweight backend-owned UI state
 
-## Integration Boundaries
+## AI Contract Boundaries
+
 - Unity renders and presents state; it does not own task planning rules.
-- The backend owns session state, prompt context, validation, and persistence.
-- Local runtimes stay behind adapters so failures can be reported cleanly.
+- The backend owns validation, persistence, routing, and session memory.
+- LLMs help phrase or plan, but they never write directly to SQLite.
+- Local speech runtimes stay behind adapters so failures can be surfaced cleanly.
 - `agent-platform` is optional and must not become a hidden dependency of the MVP runtime.
 
-## Startup Flow
-1. Start the configured LLM and local speech runtimes if needed.
+## Startup and Runtime Flow
+
+1. Start the configured speech runtimes if needed.
 2. Start the Python backend.
 3. Launch the Unity client.
 4. Unity calls `GET /v1/health`.
-5. Backend returns overall readiness plus DB, LLM, STT, and TTS diagnostics.
+5. Backend returns DB, LLM, STT, and TTS diagnostics plus logs and recovery actions.
 6. Unity shows `ready`, `partial`, or `error` status and adjusts available features.
-
-## Target Repository Layout
-
-```text
-virtual-assistant/
-  unity-client/
-    Assets/
-    Packages/
-    ProjectSettings/
-  local-backend/
-    app/
-    data/
-    tests/
-    run_local.py
-  runtime/
-    ollama/
-    whisper/
-    piper/
-  docs/
-  scripts/
-```
+7. Text chat can use `POST /v1/chat`.
+8. Live assistant mode can use `WS /v1/assistant/stream`.
+9. Background reminder and state events flow through `WS /v1/events`.

@@ -1,6 +1,6 @@
 # Test Plan - Local Desktop Assistant
 
-Updated: 2026-03-13
+Updated: 2026-03-14
 
 ## Target Automated Commands
 
@@ -24,8 +24,8 @@ Unity:
 - ST6: Push-to-talk voice input returns a visible transcript and a correct routed action.
 - ST7: TTS playback returns an audio asset and drives avatar `talking` state plus subtitles.
 - ST8: Reminder polling emits a reminder event before a due task and the Unity client shows it.
-- ST9: The app starts in offline mode with local runtimes only.
-- ST10: Missing STT, TTS, or Ollama runtime degrades features cleanly without taking down the app.
+- ST9: The app starts on a clean machine and reports accurate health for the configured runtimes.
+- ST10: Missing STT, TTS, or configured LLM provider degrades features cleanly without taking down the app.
 
 ## Functional Areas
 - Data validation:
@@ -59,12 +59,12 @@ Unity:
 - MV3: Speak a reschedule command and confirm both the transcript and resulting task update.
 - MV4: Force TTS failure and confirm text replies still work.
 - MV5: Set a task due within 15 minutes and confirm a reminder event appears.
-- MV6: Launch with network disconnected and confirm the assistant still works locally.
+- MV6: Launch with network disconnected or provider credentials missing and confirm degraded health plus recovery guidance is surfaced cleanly.
 
 ## Packaging Checks
 - Windows standalone build launches from a clean release folder.
 - Startup script can bring up required local services in the right order.
-- Release build reports missing runtimes with actionable guidance.
+- Release build reports missing runtimes or provider configuration with actionable guidance.
 
 ## Optional Secondary Checks
 - If `agent-platform` later gains assistant-specific wrappers, add contract tests for task, chat, and speech tool calls there.

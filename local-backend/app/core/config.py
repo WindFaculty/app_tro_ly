@@ -59,6 +59,9 @@ class Settings(BaseSettings):
     piper_command: str | None = None
     piper_model_path: str | None = None
     piper_timeout_sec: float = 30.0
+    tts_provider: str = "piper"
+    chattts_compile: bool = False
+    chattts_sample_rate: int = 24000
 
     reminder_lead_minutes: int = 15
     reminder_poll_seconds: int = 5
@@ -90,6 +93,9 @@ class Settings(BaseSettings):
         self.stt_provider = self.stt_provider.strip().lower()
         if self.stt_provider not in {"faster_whisper", "whisper_cpp"}:
             raise ValueError("assistant_stt_provider must be either 'faster_whisper' or 'whisper_cpp'")
+        self.tts_provider = self.tts_provider.strip().lower()
+        if self.tts_provider not in {"piper", "chattts"}:
+            raise ValueError("assistant_tts_provider must be either 'piper' or 'chattts'")
         self.ollama_base_url = self.ollama_base_url.rstrip("/")
         self.groq_base_url = self.groq_base_url.rstrip("/")
         self.gemini_base_url = self.gemini_base_url.rstrip("/")

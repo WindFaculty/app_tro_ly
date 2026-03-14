@@ -1,6 +1,6 @@
 # Scope - Local Desktop Assistant
 
-Updated: 2026-03-13
+Updated: 2026-03-14
 
 ## Goals (MVP baseline)
 
@@ -45,9 +45,13 @@ Updated: 2026-03-13
 - Flag obvious time conflicts and urgent work within the next 24 hours.
 
 ### G5. Local-first delivery
-- Run on one Windows machine without cloud dependencies during normal use.
-- Keep Ollama, whisper.cpp, and Piper behind local adapters.
+- Run on one Windows machine with local persistence and backend-owned runtime adapters.
+- Keep Groq, Gemini, Ollama, whisper.cpp, Piper, and ChatTTS behind backend adapters instead of letting the client talk to them directly.
 - Ship a repeatable local startup flow for backend, runtimes, and the desktop app.
+
+Current implementation note:
+- The active default LLM route still uses Groq and Gemini.
+- A fully local Ollama path remains a target direction, not the default runtime today.
 
 ## Non-goals (MVP)
 - Google Calendar sync
@@ -77,4 +81,4 @@ Updated: 2026-03-13
 5. Voice input can create a transcript locally and return a reply with local TTS.
 6. Reminder events can raise an in-app popup and optional spoken alert.
 7. Closing and reopening the app keeps task and conversation state in local storage.
-8. Core flows work without Internet access.
+8. Core task flows remain usable when optional runtimes are degraded, while a fully offline LLM path stays as future work.

@@ -63,5 +63,10 @@ def build_recovery_actions(
         else:
             actions.append("Configure assistant_whisper_command and assistant_whisper_model_path for speech-to-text.")
     if not tts.get("available", False):
-        actions.append("Configure assistant_piper_command and assistant_piper_model_path for speech output.")
+        if str(tts.get("provider") or settings.tts_provider).lower() == "chattts":
+            actions.append(
+                "Install ChatTTS and its torch runtime, or switch assistant_tts_provider=piper and configure assistant_piper_command plus assistant_piper_model_path for speech output."
+            )
+        else:
+            actions.append("Configure assistant_piper_command and assistant_piper_model_path for speech output.")
     return actions

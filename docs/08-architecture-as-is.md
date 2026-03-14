@@ -27,9 +27,11 @@ This document describes the implemented repo state today, not the target assista
 - `agent-platform/` still exists, but it is not the assistant MVP backend.
 - `local-backend/` now implements:
   - `/v1` REST APIs
-  - WebSocket events
+  - WebSocket events for reminders and assistant state
+  - assistant streaming over `WS /v1/assistant/stream`
   - SQLite schema and repositories
-  - task, planner, scheduler, conversation, and speech service scaffolding
+  - task, planner, scheduler, conversation, and speech services
+  - assistant orchestration with route selection, task validation, rolling summaries, long-term memory items, and route logs
   - rotating local log file output plus actionable health recovery actions
 - Backend automated tests exist and pass in the current workspace.
 
@@ -39,7 +41,8 @@ This document describes the implemented repo state today, not the target assista
 
 ## 3. Remaining Gaps
 - No real avatar asset, animator controller, or blendshape face mesh is checked in yet.
-- Whisper.cpp and Piper still depend on machine-local runtime paths and models being configured.
+- Whisper.cpp, Piper, and ChatTTS still depend on machine-local runtime setup or model download before end-to-end voice validation.
+- The current default LLM route still depends on Groq and Gemini rather than a fully local Ollama path.
 - Unity runtime has not been validated in the Unity Editor inside this terminal session.
 - Windows packaging is scaffolded with scripts, but no final release build artifact is checked in.
 
@@ -50,7 +53,7 @@ This document describes the implemented repo state today, not the target assista
 
 ## 5. Recommended Next Path
 1. Validate the Unity client in-editor and replace the placeholder avatar with the real character asset.
-2. Configure whisper.cpp and Piper paths on the target machine and smoke-test voice flows end-to-end.
+2. Configure faster-whisper plus either Piper or ChatTTS on the target machine and smoke-test voice flows end-to-end.
 3. Harden the Unity client scene/layout and migrate from runtime-generated placeholder UI to the intended production presentation where needed.
 4. Keep `agent-platform/` optional until there is a real need for operator automation.
 

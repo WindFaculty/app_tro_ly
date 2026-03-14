@@ -1,19 +1,22 @@
 # API Spec - Local Desktop Assistant
 
-Updated: 2026-03-13
+Updated: 2026-03-14
 Base URL: `/v1`
 
 ## Conventions
-- The Python backend is the source of truth for task, reminder, settings, and conversation state.
+
+- The Python backend is the source of truth for task, reminder, settings, session, and conversation state.
 - Times are stored and returned as ISO 8601 strings in local time unless otherwise noted.
 - Natural-language task mutations must be validated by backend rules before they change the database.
+- `POST /chat` and `WS /assistant/stream` share the same assistant orchestration pipeline.
 - REST covers request-response flows.
-- WebSocket covers reminder and assistant state events.
+- WebSockets cover reminder events, assistant state, and live streamed assistant turns.
 - No auth layer is planned for MVP because the app targets trusted local use.
 
 ## Enumerations
 
 ### Task status
+
 - `inbox`
 - `planned`
 - `in_progress`
@@ -21,12 +24,14 @@ Base URL: `/v1`
 - `cancelled`
 
 ### Task priority
+
 - `low`
 - `medium`
 - `high`
 - `critical`
 
 ### Repeat rule
+
 - `none`
 - `daily`
 - `weekdays`
@@ -34,6 +39,7 @@ Base URL: `/v1`
 - `monthly`
 
 ### Assistant emotion
+
 - `neutral`
 - `happy`
 - `serious`
@@ -41,6 +47,7 @@ Base URL: `/v1`
 - `thinking`
 
 ### Animation hint
+
 - `idle`
 - `greet`
 - `nod`
@@ -76,18 +83,20 @@ Base URL: `/v1`
 ```
 
 Notes:
+
 - `scheduled_date` is the primary calendar bucket for day and week views.
 - `due_at` is optional and is used for deadlines and reminders.
 - `start_at` and `end_at` are optional for time-blocked work.
 
 ## Health
+
 - `GET /v1/health`
 
 Response shape:
 
 ```json
 {
-  "status": "ready",
+  "status": "partial",
   "service": "local-desktop-assistant-backend",
   "version": "0.1.0",
   "database": {
@@ -97,39 +106,60 @@ Response shape:
   "runtimes": {
     "llm": {
       "available": true,
-      "provider": "groq",
-      "base_url": "https://api.groq.com/openai/v1",
-      "model": "llama-3.1-8b-instant"
+      "provider": "hybrid",
+      "model": "llama-3.1-8b-instant | gemini-2.5-flash",
+      "routing_mode": "auto",
+      "fast": {
+        "available": true,
+        "provider": "groq"
+      },
+      "deep": {
+        "available": true,
+        "provider": "gemini"
+      },
+      "base_url": "hybrid"
     },
     "stt": {
       "available": true,
-      "provider": "whisper.cpp"
+      "provider": "faster-whisper",
+      "model_path": "small"
     },
     "tts": {
-      "available": true,
-      "provider": "piper"
+      "available": false,
+      "provider": "piper",
+      "reason": "command not configured or not found"
     }
   },
-  "degraded_features": []
+  "degraded_features": ["tts"],
+  "logs": {
+    "directory": "D:/Antigaravity_Code/tro_ly/local-backend/data/logs",
+    "app_log": "D:/Antigaravity_Code/tro_ly/local-backend/data/logs/local-desktop-assistant-backend.log"
+  },
+  "recovery_actions": [
+    "Configure assistant_piper_command and assistant_piper_model_path for speech output."
+  ]
 }
 ```
 
 Status values:
+
 - `ready`
 - `partial`
 - `error`
 
 ## Task Queries
+
 - `GET /v1/tasks/today`
 - `GET /v1/tasks/week`
 - `GET /v1/tasks/overdue`
 - `GET /v1/tasks/inbox`
 - `GET /v1/tasks/completed`
 
-Suggested query params:
-- `date=YYYY-MM-DD` for today-style lookups when the client wants a specific date
+Query params:
+
+- `date=YYYY-MM-DD` for day lookups
 - `start_date=YYYY-MM-DD` for week aggregation
-- `limit=<int>` for completed history or inbox trimming
+- `limit=<int>` for inbox or completed history
 
 Example `GET /v1/tasks/week` response:
 
@@ -150,7 +180,10 @@ Example `GET /v1/tasks/week` response:
 }
 ```
 
-## Create Task
+## Task Mutations
+
+### Create task
+
 - `POST /v1/tasks`
 
 Request:
@@ -172,14 +205,18 @@ Request:
 }
 ```
 
-## Update Task
+### Update task
+
 - `PUT /v1/tasks/{task_id}`
 
 Behavior:
+
 - Partial updates are allowed.
 - Backend normalizes time fields and rejects contradictory combinations.
+- Returns `404` when the task does not exist.
 
-## Complete Task
+### Complete task
+
 - `POST /v1/tasks/{task_id}/complete`
 
 Request:
@@ -190,7 +227,8 @@ Request:
 }
 ```
 
-## Reschedule Task
+### Reschedule task
+
 - `POST /v1/tasks/{task_id}/reschedule`
 
 Request:
@@ -205,6 +243,7 @@ Request:
 ```
 
 ## Chat
+
 - `POST /v1/chat`
 
 Request:
@@ -213,9 +252,12 @@ Request:
 {
   "message": "What do I have today?",
   "conversation_id": null,
+  "session_id": null,
   "mode": "text",
   "selected_date": "2026-03-13",
-  "include_voice": true
+  "include_voice": true,
+  "voice_mode": false,
+  "notes_context": null
 }
 ```
 
@@ -224,102 +266,121 @@ Response:
 ```json
 {
   "conversation_id": "conv_01hq7sd2v0t9",
-  "reply_text": "You have 4 tasks today, including 2 high-priority items.",
+  "reply_text": "Ban co 4 viec hom nay, trong do co 2 viec uu tien cao.",
   "emotion": "serious",
   "animation_hint": "explain",
   "speak": true,
-  "audio_url": "/v1/speech/cache/reply_01hq7sd2.wav",
-  "task_actions": [
-    {
-      "type": "summary",
-      "status": "applied"
-    }
-  ],
+  "audio_url": "/v1/speech/cache/a13b4b.wav",
+  "task_actions": [],
   "cards": [
     {
-      "type": "today_summary"
+      "type": "today_summary",
+      "payload": {}
     }
-  ]
+  ],
+  "route": "groq_fast",
+  "provider": "groq",
+  "latency_ms": 412,
+  "token_usage": {
+    "input_tokens": 120,
+    "output_tokens": 40
+  },
+  "fallback_used": false,
+  "plan_id": null
 }
 ```
 
 Notes:
-- The backend should parse intent before or alongside model generation.
-- Database writes must only happen through validated backend actions.
+
+- The backend parses intent before or alongside model generation.
+- Database writes happen only through validated backend actions.
 - `task_actions` reports what the backend actually applied, not raw model guesses.
+- `cards` may include planner output, task action details, or summary payloads.
 
-## Speech to Text
-- `POST /v1/speech/stt`
+## Assistant Streaming
 
-Multipart request:
-- `audio`: wav or mp3 upload from the Unity client
-- `language`: optional, defaults to auto
+- `WS /v1/assistant/stream`
 
-Response:
+This is the preferred path for the Unity live assistant.
+
+Inbound message types:
+
+- `session_start`
+- `context_update`
+- `text_turn`
+- `voice_chunk`
+- `voice_end`
+- `cancel_response`
+- `session_stop`
+
+Example text turn:
 
 ```json
 {
-  "text": "Move task A to Friday",
-  "language": "en",
-  "confidence": 0.92
+  "type": "text_turn",
+  "session_id": "sess_01",
+  "conversation_id": "conv_01",
+  "message": "Lap ke hoach cho hom nay",
+  "selected_date": "2026-03-14",
+  "voice_mode": false,
+  "notes_context": "Deadline bao cao vao 17:00."
 }
 ```
 
-## Text to Speech
-- `POST /v1/speech/tts`
-
-Request:
+Example voice end message:
 
 ```json
 {
-  "text": "Your report is due tomorrow at 5 PM.",
-  "voice": "default_female",
-  "cache": true
+  "type": "voice_end",
+  "session_id": "sess_01",
+  "voice_mode": true,
+  "language": "vi",
+  "audio_base64": "<base64 wav chunk>"
 }
 ```
 
-Response:
+Common outbound event types:
+
+- `assistant_state_changed`
+- `route_selected`
+- `transcript_partial`
+- `transcript_final`
+- `assistant_chunk`
+- `speech_started`
+- `tts_sentence_ready`
+- `speech_finished`
+- `task_action_applied`
+- `assistant_final`
+- `error`
+
+Example `assistant_final` event:
 
 ```json
 {
-  "audio_url": "/v1/speech/cache/tts_01hq7sga.wav",
-  "duration_ms": 2140,
-  "cached": false
-}
-```
-
-## Settings
-- `GET /v1/settings`
-- `PUT /v1/settings`
-
-Suggested setting groups:
-- voice
-- model
-- window_mode
-- avatar
-- reminder
-- startup
-
-Example:
-
-```json
-{
-  "voice": {
-    "input_mode": "push_to_talk",
-    "tts_voice": "default_female",
-    "speak_replies": true
+  "type": "assistant_final",
+  "conversation_id": "conv_01",
+  "session_id": "sess_01",
+  "reply_text": "Minh da tong hop xong va uu tien viec quan trong nhat truoc.",
+  "route": "hybrid_plan_then_groq",
+  "provider": "groq",
+  "latency_ms": 923,
+  "token_usage": {
+    "input_tokens": 420,
+    "output_tokens": 98
   },
-  "model": {
-    "provider": "groq",
-    "name": "llama-3.1-8b-instant"
-  },
-  "window_mode": {
-    "mini_assistant_enabled": true
-  }
+  "fallback_used": false,
+  "plan_id": "plan_01",
+  "cards": [],
+  "task_actions": [],
+  "memory_items": []
 }
 ```
 
-## WebSocket Events
+## Reminder and State Events
+
+- `WS /v1/events`
+
+This socket accepts a client and immediately sends an idle `assistant_state_changed` event. It then forwards published events such as reminders and task updates.
 
 ### `reminder_due`
 
@@ -354,20 +415,104 @@ Example:
 }
 ```
 
-### `speech_started`
+## Speech
+
+### Speech to text
+
+- `POST /v1/speech/stt`
+
+Multipart request:
+
+- `audio`: wav or mp3 upload from the Unity client
+- `language`: optional override
+
+Response:
 
 ```json
 {
-  "type": "speech_started",
-  "utterance_id": "utt_01hq7sjq6m"
+  "text": "Move task A to Friday",
+  "language": "en",
+  "confidence": 0.92
 }
 ```
 
-### `speech_finished`
+Notes:
+
+- Default STT path is `faster-whisper`.
+- If that path is unavailable, the backend can fall back to `whisper.cpp` when configured.
+
+### Text to speech
+
+- `POST /v1/speech/tts`
+
+Request:
 
 ```json
 {
-  "type": "speech_finished",
-  "utterance_id": "utt_01hq7sjq6m"
+  "text": "Your report is due tomorrow at 5 PM.",
+  "voice": "vi-VN-default",
+  "cache": true
 }
 ```
+
+Response:
+
+```json
+{
+  "audio_url": "/v1/speech/cache/tts_01hq7sga.wav",
+  "duration_ms": 2140,
+  "cached": false
+}
+```
+
+Notes:
+
+- TTS can be backed by `piper` or `chattts`, depending on `assistant_tts_provider`.
+
+### Speech cache
+
+- `GET /v1/speech/cache/{filename}`
+
+Returns a generated or cached audio file.
+
+## Settings
+
+- `GET /v1/settings`
+- `PUT /v1/settings`
+
+Setting groups:
+
+- `voice`
+- `model`
+- `window_mode`
+- `avatar`
+- `reminder`
+- `startup`
+- `memory`
+
+Example:
+
+```json
+{
+  "voice": {
+    "input_mode": "continuous",
+    "tts_voice": "vi-VN-default",
+    "speak_replies": true,
+    "show_transcript_preview": true
+  },
+  "model": {
+    "provider": "hybrid",
+    "name": "llama-3.1-8b-instant | gemini-2.5-flash",
+    "routing_mode": "auto",
+    "fast_provider": "groq",
+    "deep_provider": "gemini"
+  },
+  "window_mode": {
+    "main_app_enabled": true,
+    "mini_assistant_enabled": false
+  },
+  "memory": {
+    "auto_extract": true,
+    "short_term_turn_limit": 12
+  }
+}
