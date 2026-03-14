@@ -1,0 +1,107 @@
+# Nhiệm Vụ Xây Dựng Hệ Thống Avatar
+
+Cập nhật: 2026-03-15
+
+---
+
+## Phase 1 — Chốt chuẩn kỹ thuật và naming
+- [x] Chốt cấu trúc skeleton
+- [x] Chốt danh sách slot trang phục (13 slot)
+- [x] Chốt naming convention cho file FBX
+- [x] Chốt body region (15 vùng)
+- [x] Chốt blendshape spec tối thiểu (28 shape)
+- [x] Chốt cấu trúc thư mục `Assets/AvatarSystem/`
+- [x] Tạo tài liệu kỹ thuật `docs/avatar-spec.md`
+- [x] Tạo bảng slot và conflict matrix
+- [x] Tạo code infrastructure (scripts, enums, ScriptableObjects)
+
+---
+
+## Phase 2 — Chuẩn hóa Base Avatar trong Blender
+- [ ] Import avatar gốc (FBX) vào Blender
+- [ ] Làm sạch rig (tên bone ổn định, T-pose/A-pose chuẩn)
+- [ ] Kiểm tra humanoid mapping đúng chuẩn Unity
+- [ ] Tách body thành 15 region mesh riêng biệt (hoặc thiết lập visibility system)
+- [ ] Chốt chiến lược facial mesh (blendshape trên head mesh)
+- [ ] Tạo blendshape tối thiểu cho mắt (Blink_L/R, SmileEye_L/R, WideEye_L/R)
+- [ ] Tạo blendshape cho lông mày (BrowUp_L/R, BrowDown_L/R, BrowInnerUp)
+- [ ] Tạo blendshape miệng cảm xúc (Smile, Sad, Surprise, MouthOpen, v.v.)
+- [ ] Tạo blendshape lip-sync viseme (AA, E, I, O, U, FV, L, MBP, Rest)
+- [ ] Export `CHR_Avatar_Base_v001.fbx` sạch
+- [ ] Import vào Unity, tạo prefab base, test idle chạy ổn
+- [ ] Tạo body region map trong `AvatarBodyVisibilityManager`
+
+---
+
+## Phase 3 — Làm facial và lip-sync tối thiểu
+- [ ] Kết nối `AvatarFacialController` với face mesh thật
+- [ ] Test chớp mắt tự nhiên (blink coroutine)
+- [ ] Test 5–8 expression chính (Happy, Sad, Surprised, Focused, SoftSmile, Curious, Apologetic)
+- [ ] Tạo `ExpressionDefinition` ScriptableObject cho từng expression
+- [ ] Tạo `LipSyncMapDefinition` mapping viseme → blendshape
+- [ ] Test lip-sync prototype bằng amplitude (audio TTS → mở miệng)
+- [ ] Đảm bảo không méo mặt khi chuyển giữa expression và lip-sync
+
+---
+
+## Phase 4 — Làm locomotion và hội thoại sync
+- [ ] Tạo Animator Controller với parameters chuẩn (IsListening, IsThinking, IsSpeaking, IsMoving, v.v.)
+- [ ] Tạo/import animation tối thiểu: Idle_Default, Idle_Breathing, Listen_Idle, Talk_Idle
+- [ ] Tạo/import animation di chuyển: Walk_Forward, Turn_Left, Turn_Right, Approach_Short
+- [ ] Tạo/import gesture: Wave_Small, Nod_Yes, HandExplain_01
+- [ ] Thiết lập anchor points trong scene (IdlePoint, TalkPoint, ListenPoint, WanderA, WanderB)
+- [ ] Kết nối `AvatarLocomotionController` với anchor points
+- [ ] Kết nối `AvatarConversationBridge` với hệ STT/LLM/TTS hiện có trong `AssistantApp`
+- [ ] Kết nối `AvatarLookAtController` với camera hoặc điểm nhìn người dùng
+- [ ] Test luồng hội thoại: Idle → Listening → Thinking → Speaking → Reacting → Idle
+- [ ] Test avatar phản ứng đúng theo voice loop
+
+---
+
+## Phase 5 — Làm modular outfit system
+- [ ] Tạo item đầu tiên: Hair_01 (tạo mesh Blender → export FBX → import Unity → tạo ScriptableObject)
+- [ ] Tạo Top_01 (áo cơ bản)
+- [ ] Tạo Bottom_01 (quần/chân váy cơ bản)
+- [ ] Tạo Dress_01 (váy liền thân)
+- [ ] Tạo Shoes_01 (giày cơ bản)
+- [ ] Test equip/unequip từng slot qua `AvatarEquipmentManager`
+- [ ] Test conflict: equip Dress → tự động unequip Top và Bottom
+- [ ] Test hide body regions: áo dài tay che cánh tay, quần dài che đùi
+- [ ] Tạo thêm: Hair_02, Hair_03, HairAccessory_01, HairAccessory_02
+- [ ] Tạo thêm: Socks_01, Socks_02, Gloves_01, Gloves_02
+- [ ] Tạo thêm: BraceletL_01, BraceletR_01
+- [ ] Test conflict: Gloves full → chặn BraceletL/R
+- [ ] Tạo 3 outfit preset (`OutfitPresetDefinition`) và test bấm 1 nút đổi nguyên set
+- [ ] Test save/load outfit qua `AvatarPresetManager`
+
+---
+
+## Phase 6 — Validation và production hardening
+- [ ] Test 20–50 lần đổi đồ liên tiếp, kiểm tra memory leak
+- [ ] Test nói chuyện khi đang đổi đồ
+- [ ] Test animation khi mặc các loại đồ khác nhau (kiểm tra clipping)
+- [ ] Fix clipping, material lỗi, missing reference
+- [ ] Chạy `Tools > AvatarSystem > Validate All Item Definitions` → 0 errors
+- [ ] Chạy `Tools > AvatarSystem > Validate Outfit Presets` → 0 issues
+- [ ] Tạo 4 scene test riêng:
+  - [ ] `AvatarSandbox.unity` — test prefab cơ bản
+  - [ ] `OutfitTest.unity` — test equip/unequip, preset, conflict
+  - [ ] `FacialAndLipSyncTest.unity` — test blink, expression, viseme
+  - [ ] `ConversationTest.unity` — test luồng hội thoại đầy đủ
+- [ ] Viết README hướng dẫn thêm món đồ mới (quy trình từ Blender → Unity → ScriptableObject)
+- [ ] Kiểm tra thay thế placeholder avatar bằng avatar thật mà không sửa core app nhiều
+
+---
+
+## Mốc Prototype Đạt Yêu Cầu
+
+Prototype coi là đạt khi có đủ:
+- [ ] Avatar import vào Unity ổn định
+- [ ] Có idle, listen, speak, walk nhẹ
+- [ ] Có blink và 5 expression cơ bản
+- [ ] Có mouth movement khi nói
+- [ ] Đổi được tóc (2 kiểu), áo (2 cái), quần (2 cái), váy (1 cái), giày (2 đôi)
+- [ ] Dress tự chặn Top và Bottom
+- [ ] Gloves và bracelet xử lý xung đột đúng
+- [ ] Có ít nhất 3 preset outfit
+- [ ] Có thể dùng trong scene trò chuyện thật

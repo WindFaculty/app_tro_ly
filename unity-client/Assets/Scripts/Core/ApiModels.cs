@@ -13,7 +13,9 @@ namespace LocalAssistant.Core
         Warning,
         Greeting,
         Waiting,
-        Error
+        Error,
+        Reacting,
+        Dormant
     }
 
     [Serializable]

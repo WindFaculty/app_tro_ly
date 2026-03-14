@@ -34,6 +34,7 @@ namespace LocalAssistant.Avatar
                 "greet" => AvatarState.Greeting,
                 "idle" when backendState == "waiting" => AvatarState.Waiting,
                 "explain" when backendState == "talking" => AvatarState.Talking,
+                "react" => AvatarState.Reacting,
                 _ => backendState switch
                 {
                     "listening" => AvatarState.Listening,
@@ -41,6 +42,8 @@ namespace LocalAssistant.Avatar
                     "talking" => AvatarState.Talking,
                     "waiting" => AvatarState.Waiting,
                     "error" => AvatarState.Error,
+                    "dormant" => AvatarState.Dormant,
+                    "reacting" => AvatarState.Reacting,
                     _ => AvatarState.Idle,
                 },
             };
@@ -71,6 +74,8 @@ namespace LocalAssistant.Avatar
                 AvatarState.Greeting => new Color(0.56f, 0.45f, 0.82f),
                 AvatarState.Waiting => new Color(0.54f, 0.62f, 0.78f),
                 AvatarState.Error => new Color(0.72f, 0.14f, 0.16f),
+                AvatarState.Reacting => new Color(0.86f, 0.56f, 0.78f),
+                AvatarState.Dormant => new Color(0.42f, 0.42f, 0.52f),
                 _ => new Color(0.72f, 0.72f, 0.78f),
             };
         }
