@@ -1,6 +1,6 @@
 # Nhiệm Vụ Xây Dựng Hệ Thống Avatar
 
-Cập nhật: 2026-03-15
+Cập nhật: 2026-03-17
 
 ---
 
@@ -18,18 +18,18 @@ Cập nhật: 2026-03-15
 ---
 
 ## Phase 2 — Chuẩn hóa Base Avatar trong Blender
-- [ ] Import avatar gốc (FBX) vào Blender
-- [ ] Làm sạch rig (tên bone ổn định, T-pose/A-pose chuẩn)
-- [ ] Kiểm tra humanoid mapping đúng chuẩn Unity
-- [ ] Tách body thành 15 region mesh riêng biệt (hoặc thiết lập visibility system)
-- [ ] Chốt chiến lược facial mesh (blendshape trên head mesh)
-- [ ] Tạo blendshape tối thiểu cho mắt (Blink_L/R, SmileEye_L/R, WideEye_L/R)
-- [ ] Tạo blendshape cho lông mày (BrowUp_L/R, BrowDown_L/R, BrowInnerUp)
-- [ ] Tạo blendshape miệng cảm xúc (Smile, Sad, Surprise, MouthOpen, v.v.)
-- [ ] Tạo blendshape lip-sync viseme (AA, E, I, O, U, FV, L, MBP, Rest)
-- [ ] Export `CHR_Avatar_Base_v001.fbx` sạch
-- [ ] Import vào Unity, tạo prefab base, test idle chạy ổn
-- [ ] Tạo body region map trong `AvatarBodyVisibilityManager`
+- [x] Import avatar gốc (FBX) vào Blender (`bleder/CHR_Avatar_Base_v001_work.blend`)
+- [x] Làm sạch rig (tên bone ổn định, A-pose chuẩn) (`CHR_Avatar_Base_v001_rigclean.fbx`, `bleder/CHR_Avatar_Base_v001_rigclean.blend`)
+- [x] Kiểm tra humanoid mapping đúng chuẩn Unity (`BaseAvatarHumanoidValidation.json`: 0 errors, 0 warnings; mapping đúng cho Hips/Spine/Chest/UpperChest/Neck/Head/tay/chân/toes)
+- [x] Tách body thành 15 region mesh riêng biệt (export `CHR_Avatar_Base_v001_split15.fbx`, đồng bộ từ `CHR_Avatar_Base_v001_rigclean.fbx`; re-validate OK: 15 mesh, 123272 polys, `Body_Head` có vertex group `Neck`)
+- [x] Chốt chiến lược facial mesh (blendshape trên `Body_Head`; `AvatarRootController.faceMesh` sẽ trỏ vào head renderer, chưa dùng face-only mesh riêng; xem `docs/avatar-spec.md`)
+- [x] Tạo blendshape tối thiểu cho mắt (Blink_L/R, SmileEye_L/R, WideEye_L/R) (`Body_Head` trong `CHR_Avatar_Base_v001_split15.fbx`; source Blender: `bleder/CHR_Avatar_Base_v001_split15_facial.blend`)
+- [x] Tạo blendshape cho lông mày (BrowUp_L/R, BrowDown_L/R, BrowInnerUp) (tạo bằng `tools/blender_add_facial_blendshapes.py`; xem `tools/reports/avatar_facial_blendshape_report.json`)
+- [x] Tạo blendshape miệng cảm xúc (Smile, Sad, Surprise, MouthOpen, v.v.) (`Smile`, `Sad`, `Surprise`, `AngryLight`, `MouthOpen`, `MouthNarrow`, `MouthWide`, `MouthRound`)
+- [x] Tạo blendshape lip-sync viseme (AA, E, I, O, U, FV, L, MBP, Rest) (`Viseme_Rest`, `Viseme_AA`, `Viseme_E`, `Viseme_I`, `Viseme_O`, `Viseme_U`, `Viseme_FV`, `Viseme_L`, `Viseme_MBP`)
+- [x] Export `CHR_Avatar_Base_v001.fbx` sạch (final export ở `Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001.fbx`; validate OK: 15 mesh, 123272 polys, `Body_Head` có 28 blendshape + Basis)
+- [x] Import vào Unity, tạo prefab base, test idle chạy ổn (prefab: `Assets/AvatarSystem/AvatarProduction/BaseAvatar/Prefab/CHR_Avatar_Base_v001.prefab`; idle smoke test pass trong `Logs/BaseAvatarPrefabBuildReport.json` với animator/controller/face mesh hợp lệ)
+- [x] Tạo body region map trong `AvatarBodyVisibilityManager` (15 mapping hoàn chỉnh trên prefab base; xác nhận `bodyRegionMappingCount = 15`, `bodyRegionMappingsComplete = true`)
 
 ---
 

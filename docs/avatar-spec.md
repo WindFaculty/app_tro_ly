@@ -1,6 +1,6 @@
 # Avatar Technical Specification
 
-Updated: 2026-03-15
+Updated: 2026-03-17
 
 ## 1. Naming Conventions
 
@@ -53,7 +53,7 @@ Used by `AvatarBodyVisibilityManager` to hide body mesh under clothing.
 
 | Region | Typical hiders |
 |--------|---------------|
-| Head | — |
+| Head *(includes Neck)* | — |
 | TorsoUpper | Top (all), Dress |
 | TorsoLower | Top (long), Dress, Bottom |
 | ArmUpperL / R | Top (long-sleeve), Dress (long-sleeve) |
@@ -71,13 +71,23 @@ Used by `AvatarBodyVisibilityManager` to hide body mesh under clothing.
 ### Brows (5)
 `BrowUp_L`, `BrowUp_R`, `BrowDown_L`, `BrowDown_R`, `BrowInnerUp`
 
-### Mouth — Emotion (7)
+### Mouth — Emotion (8)
 `Smile`, `Sad`, `Surprise`, `AngryLight`, `MouthOpen`, `MouthNarrow`, `MouthWide`, `MouthRound`
 
 ### Lip-sync Visemes (9)
 `Viseme_Rest`, `Viseme_AA`, `Viseme_E`, `Viseme_I`, `Viseme_O`, `Viseme_U`, `Viseme_FV`, `Viseme_L`, `Viseme_MBP`
 
 > Note: actual naming is flexible as long as `LipSyncMapDefinition` maps `VisemeType` → blendshape name.
+
+### Facial Mesh Strategy
+
+- Keep the current split-body topology for the prototype and final base avatar export: 15 skinned region meshes, with facial blendshapes authored only on `Body_Head`.
+- `Body_Head` is the single facial renderer. It includes the full head region plus neck, and must contain all eyelid, brow, cheek, lip, and jaw-area deformation needed by the 28-shape minimum spec.
+- The other 14 body region meshes must not carry facial blendshapes. Hair, hair accessories, glasses, and other attachments stay as separate slot meshes and are never baked into the facial mesh.
+- In Unity, assign the `Body_Head` `SkinnedMeshRenderer` to `AvatarRootController.faceMesh`; `AvatarFacialController` then drives it directly by blendshape name.
+- Prototype scope does not use a second face-only mesh and does not activate `FaceVariant` swapping yet. If a future `FaceVariant` is introduced, it must preserve the exact blendshape names expected by `AvatarFacialController` and `LipSyncMapDefinition`.
+- Authoring rule: create and tune shape keys on the split head mesh so only `Body_Head` owns the facial data. The clean export should keep the 15-region layout and preserve blendshape import on the head renderer in Unity.
+- Layering rule: blink and eye/brow emotion shapes stay in upper-face blendshapes; lip-sync uses mouth shapes only, preferably the dedicated `Viseme_*` set plus `MouthOpen` as the amplitude fallback.
 
 ## 6. Animator Parameters
 

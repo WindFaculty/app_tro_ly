@@ -1,0 +1,247 @@
+{
+  "sourceType": "blend",
+  "sourcePath": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_split15_facial.blend",
+  "outputPath": "D:\\Antigaravity_Code\\tro_ly\\unity-client\\Assets\\AvatarSystem\\AvatarProduction\\BaseAvatar\\Model\\CHR_Avatar_Base_v001.fbx",
+  "savedBlendPath": null,
+  "armatureObject": "Armature",
+  "headObject": "Body_Head",
+  "requiredShapeKeyCount": 28,
+  "shapeKeyReport": {
+    "removedShapeKeys": [
+      "Blink_L",
+      "Blink_R",
+      "SmileEye_L",
+      "SmileEye_R",
+      "WideEye_L",
+      "WideEye_R",
+      "BrowUp_L",
+      "BrowUp_R",
+      "BrowDown_L",
+      "BrowDown_R",
+      "BrowInnerUp",
+      "Smile",
+      "Sad",
+      "Surprise",
+      "AngryLight",
+      "MouthOpen",
+      "MouthNarrow",
+      "MouthWide",
+      "MouthRound",
+      "Viseme_Rest",
+      "Viseme_AA",
+      "Viseme_E",
+      "Viseme_I",
+      "Viseme_O",
+      "Viseme_U",
+      "Viseme_FV",
+      "Viseme_L",
+      "Viseme_MBP"
+    ],
+    "bounds": {
+      "x": [
+        -10.840679168701172,
+        10.877769470214844
+      ],
+      "y": [
+        137.31065368652344,
+        170.0
+      ],
+      "z": [
+        -13.571712493896484,
+        9.40315055847168
+      ],
+      "width": 21.718448638916016,
+      "height": 32.68934631347656,
+      "depth": 22.974863052368164
+    },
+    "anchors": {
+      "eyeY": 157.51266970825196,
+      "browY": 160.74891499328612,
+      "mouthY": 150.12487744140626,
+      "jawY": 146.62711738586427,
+      "eyeZ": -8.861865568161011,
+      "browZ": -9.551111459732056,
+      "mouthZ": -8.172619676589967,
+      "jawZ": -6.909002208709717,
+      "leftEyeX": 3.583544025421143,
+      "rightEyeX": -3.583544025421143,
+      "leftBrowX": 3.3120634174346923,
+      "rightBrowX": -3.3120634174346923,
+      "cornerX": 3.692136268615723,
+      "cheekX": 4.778058700561523
+    },
+    "shapeKeys": [
+      {
+        "name": "Blink_L",
+        "movedVertexCount": 206,
+        "maxDisplacement": 0.196685
+      },
+      {
+        "name": "Blink_R",
+        "movedVertexCount": 216,
+        "maxDisplacement": 0.199546
+      },
+      {
+        "name": "SmileEye_L",
+        "movedVertexCount": 194,
+        "maxDisplacement": 0.159717
+      },
+      {
+        "name": "SmileEye_R",
+        "movedVertexCount": 210,
+        "maxDisplacement": 0.148173
+      },
+      {
+        "name": "WideEye_L",
+        "movedVertexCount": 195,
+        "maxDisplacement": 0.104039
+      },
+      {
+        "name": "WideEye_R",
+        "movedVertexCount": 211,
+        "maxDisplacement": 0.105553
+      },
+      {
+        "name": "BrowUp_L",
+        "movedVertexCount": 233,
+        "maxDisplacement": 0.380529
+      },
+      {
+        "name": "BrowUp_R",
+        "movedVertexCount": 234,
+        "maxDisplacement": 0.385315
+      },
+      {
+        "name": "BrowDown_L",
+        "movedVertexCount": 225,
+        "maxDisplacement": 0.301953
+      },
+      {
+        "name": "BrowDown_R",
+        "movedVertexCount": 229,
+        "maxDisplacement": 0.305751
+      },
+      {
+        "name": "BrowInnerUp",
+        "movedVertexCount": 186,
+        "maxDisplacement": 0.27581
+      },
+      {
+        "name": "Smile",
+        "movedVertexCount": 3272,
+        "maxDisplacement": 1.114445
+      },
+      {
+        "name": "Sad",
+        "movedVertexCount": 1590,
+        "maxDisplacement": 0.743636
+      },
+      {
+        "name": "Surprise",
+        "movedVertexCount": 4287,
+        "maxDisplacement": 1.504599
+      },
+      {
+        "name": "AngryLight",
+        "movedVertexCount": 1357,
+        "maxDisplacement": 0.316286
+      },
+      {
+        "name": "MouthOpen",
+        "movedVertexCount": 4292,
+        "maxDisplacement": 1.7581
+      },
+      {
+        "name": "MouthNarrow",
+        "movedVertexCount": 1461,
+        "maxDisplacement": 0.163773
+      },
+      {
+        "name": "MouthWide",
+        "movedVertexCount": 1630,
+        "maxDisplacement": 0.398283
+      },
+      {
+        "name": "MouthRound",
+        "movedVertexCount": 1448,
+        "maxDisplacement": 0.807633
+      },
+      {
+        "name": "Viseme_Rest",
+        "movedVertexCount": 698,
+        "maxDisplacement": 0.134026
+      },
+      {
+        "name": "Viseme_AA",
+        "movedVertexCount": 4499,
+        "maxDisplacement": 2.21401
+      },
+      {
+        "name": "Viseme_E",
+        "movedVertexCount": 1608,
+        "maxDisplacement": 0.379252
+      },
+      {
+        "name": "Viseme_I",
+        "movedVertexCount": 1682,
+        "maxDisplacement": 0.375433
+      },
+      {
+        "name": "Viseme_O",
+        "movedVertexCount": 4049,
+        "maxDisplacement": 1.15648
+      },
+      {
+        "name": "Viseme_U",
+        "movedVertexCount": 1464,
+        "maxDisplacement": 0.947212
+      },
+      {
+        "name": "Viseme_FV",
+        "movedVertexCount": 1028,
+        "maxDisplacement": 0.650397
+      },
+      {
+        "name": "Viseme_L",
+        "movedVertexCount": 4092,
+        "maxDisplacement": 1.141846
+      },
+      {
+        "name": "Viseme_MBP",
+        "movedVertexCount": 1009,
+        "maxDisplacement": 0.688047
+      }
+    ],
+    "allShapeKeys": [
+      "Basis",
+      "Blink_L",
+      "Blink_R",
+      "SmileEye_L",
+      "SmileEye_R",
+      "WideEye_L",
+      "WideEye_R",
+      "BrowUp_L",
+      "BrowUp_R",
+      "BrowDown_L",
+      "BrowDown_R",
+      "BrowInnerUp",
+      "Smile",
+      "Sad",
+      "Surprise",
+      "AngryLight",
+      "MouthOpen",
+      "MouthNarrow",
+      "MouthWide",
+      "MouthRound",
+      "Viseme_Rest",
+      "Viseme_AA",
+      "Viseme_E",
+      "Viseme_I",
+      "Viseme_O",
+      "Viseme_U",
+      "Viseme_FV",
+      "Viseme_L",
+      "Viseme_MBP"
+    ]
+  }
+}

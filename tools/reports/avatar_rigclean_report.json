@@ -1,0 +1,35 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\unity-client\\Assets\\Avatar\\Model\\Meshy_AI_Character_output.fbx",
+  "output": "D:\\Antigaravity_Code\\tro_ly\\unity-client\\Assets\\AvatarSystem\\AvatarProduction\\BaseAvatar\\Model\\CHR_Avatar_Base_v001_rigclean.fbx",
+  "savedBlendPath": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_rigclean.blend",
+  "boneRenames": [
+    {
+      "from": "Spine02",
+      "to": "Spine"
+    },
+    {
+      "from": "Spine",
+      "to": "Spine02"
+    },
+    {
+      "from": "neck",
+      "to": "Neck"
+    }
+  ],
+  "objectRenames": [
+    {
+      "from": "char1",
+      "to": "Body_Base",
+      "type": "MESH_OBJECT"
+    }
+  ],
+  "helperBonesSetNonDeform": [
+    "head_end",
+    "headfront"
+  ],
+  "meshCount": 1,
+  "meshNames": [
+    "Body_Base"
+  ],
+  "armatureObject": "Armature"
+}

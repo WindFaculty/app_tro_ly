@@ -49,3 +49,8 @@
 - Decision: Document the current AI runtime as Groq or Gemini by default instead of claiming the repo is already local-only.
 - Why: The implemented backend currently routes through cloud providers for LLM responses, while Ollama remains a future local path.
 - Tradeoff: Documentation now distinguishes more clearly between target architecture and implemented behavior.
+
+## 2026-03-17
+- Decision: Keep facial blendshapes on the split `Body_Head` mesh instead of introducing a separate face-only mesh for the prototype.
+- Why: The repo already uses a 15-region body split, `AvatarRootController` expects a single `faceMesh` renderer, and putting the 28 minimum shapes only on `Body_Head` keeps the facial pipeline simple without disrupting outfit hiding rules.
+- Tradeoff: `FaceVariant` stays reserved for later, and any future alternate face mesh will need to preserve the exact same blendshape names.

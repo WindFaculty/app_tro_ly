@@ -1,0 +1,532 @@
+{
+  "sourceType": "fbx",
+  "sourcePath": "D:\\Antigaravity_Code\\tro_ly\\unity-client\\Assets\\AvatarSystem\\AvatarProduction\\BaseAvatar\\Model\\CHR_Avatar_Base_v001_rigclean.fbx",
+  "savedBlendPath": null,
+  "armatureObject": {
+    "name": "Armature",
+    "location": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "rotationEulerDeg": [
+      -1e-05,
+      0.0,
+      0.0
+    ],
+    "scale": [
+      0.01,
+      0.01,
+      0.01
+    ]
+  },
+  "meshObjects": [
+    {
+      "name": "Body_Base",
+      "vertexCount": 61630,
+      "polygonCount": 123272,
+      "materialSlots": [],
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToTargetArmature": true,
+      "location": [
+        0.0,
+        -0.0,
+        -2e-05
+      ],
+      "rotationEulerDeg": [
+        90.0,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    }
+  ],
+  "boneSummary": {
+    "count": 24,
+    "names": [
+      "Hips",
+      "LeftUpLeg",
+      "LeftLeg",
+      "LeftFoot",
+      "LeftToeBase",
+      "RightUpLeg",
+      "RightLeg",
+      "RightFoot",
+      "RightToeBase",
+      "Spine",
+      "Spine01",
+      "Spine02",
+      "LeftShoulder",
+      "LeftArm",
+      "LeftForeArm",
+      "LeftHand",
+      "RightShoulder",
+      "RightArm",
+      "RightForeArm",
+      "RightHand",
+      "Neck",
+      "Head",
+      "head_end",
+      "headfront"
+    ],
+    "hierarchy": [
+      {
+        "name": "Hips",
+        "parent": null,
+        "head": [
+          0.0,
+          -4.22172,
+          98.05988
+        ],
+        "tail": [
+          -0.06691,
+          1.97402,
+          89.21962
+        ],
+        "rollDeg": 0.682,
+        "useDeform": true
+      },
+      {
+        "name": "LeftUpLeg",
+        "parent": "Hips",
+        "head": [
+          5.24778,
+          -2.80781,
+          89.1556
+        ],
+        "tail": [
+          7.33513,
+          2.84763,
+          53.53856
+        ],
+        "rollDeg": -3.873,
+        "useDeform": true
+      },
+      {
+        "name": "LeftLeg",
+        "parent": "LeftUpLeg",
+        "head": [
+          7.33513,
+          2.8476,
+          53.53855
+        ],
+        "tail": [
+          6.68073,
+          7.49747,
+          12.05857
+        ],
+        "rollDeg": 1.004,
+        "useDeform": true
+      },
+      {
+        "name": "LeftFoot",
+        "parent": "LeftLeg",
+        "head": [
+          6.68073,
+          7.49747,
+          12.05857
+        ],
+        "tail": [
+          6.18713,
+          -1.47641,
+          3.27379
+        ],
+        "rollDeg": 0.918,
+        "useDeform": true
+      },
+      {
+        "name": "LeftToeBase",
+        "parent": "LeftFoot",
+        "head": [
+          6.18713,
+          -1.47642,
+          3.2738
+        ],
+        "tail": [
+          5.49689,
+          -14.02513,
+          3.2738
+        ],
+        "rollDeg": 0.0,
+        "useDeform": true
+      },
+      {
+        "name": "RightUpLeg",
+        "parent": "Hips",
+        "head": [
+          -5.24769,
+          -2.80795,
+          89.15561
+        ],
+        "tail": [
+          -7.33494,
+          2.84694,
+          53.53854
+        ],
+        "rollDeg": 3.873,
+        "useDeform": true
+      },
+      {
+        "name": "RightLeg",
+        "parent": "RightUpLeg",
+        "head": [
+          -7.33495,
+          2.84692,
+          53.53854
+        ],
+        "tail": [
+          -6.68074,
+          7.4934,
+          12.05857
+        ],
+        "rollDeg": -1.004,
+        "useDeform": true
+      },
+      {
+        "name": "RightFoot",
+        "parent": "RightLeg",
+        "head": [
+          -6.68074,
+          7.4934,
+          12.05857
+        ],
+        "tail": [
+          -6.17478,
+          -1.47794,
+          3.27414
+        ],
+        "rollDeg": -0.941,
+        "useDeform": true
+      },
+      {
+        "name": "RightToeBase",
+        "parent": "RightFoot",
+        "head": [
+          -6.17478,
+          -1.47794,
+          3.27414
+        ],
+        "tail": [
+          -5.46721,
+          -14.02411,
+          3.27414
+        ],
+        "rollDeg": -0.0,
+        "useDeform": true
+      },
+      {
+        "name": "Spine",
+        "parent": "Hips",
+        "head": [
+          -0.04857,
+          -2.55917,
+          109.46185
+        ],
+        "tail": [
+          -0.09714,
+          -0.89667,
+          120.86382
+        ],
+        "rollDeg": -0.279,
+        "useDeform": true
+      },
+      {
+        "name": "Spine01",
+        "parent": "Spine",
+        "head": [
+          -0.09714,
+          -0.89672,
+          120.86382
+        ],
+        "tail": [
+          -0.14571,
+          0.76578,
+          132.26579
+        ],
+        "rollDeg": -0.279,
+        "useDeform": true
+      },
+      {
+        "name": "Spine02",
+        "parent": "Spine01",
+        "head": [
+          -0.14571,
+          0.76578,
+          132.26579
+        ],
+        "tail": [
+          -0.1382,
+          2.26917,
+          135.97086
+        ],
+        "rollDeg": 0.16,
+        "useDeform": true
+      },
+      {
+        "name": "LeftShoulder",
+        "parent": "Spine02",
+        "head": [
+          2.58948,
+          2.28746,
+          134.71982
+        ],
+        "tail": [
+          13.53028,
+          3.80912,
+          134.71982
+        ],
+        "rollDeg": -180.0,
+        "useDeform": true
+      },
+      {
+        "name": "LeftArm",
+        "parent": "LeftShoulder",
+        "head": [
+          13.53028,
+          3.80913,
+          134.71979
+        ],
+        "tail": [
+          27.87326,
+          5.92271,
+          117.81081
+        ],
+        "rollDeg": -32.691,
+        "useDeform": true
+      },
+      {
+        "name": "LeftForeArm",
+        "parent": "LeftArm",
+        "head": [
+          27.87326,
+          5.92271,
+          117.81081
+        ],
+        "tail": [
+          45.84015,
+          4.48996,
+          101.13713
+        ],
+        "rollDeg": -28.003,
+        "useDeform": true
+      },
+      {
+        "name": "LeftHand",
+        "parent": "LeftForeArm",
+        "head": [
+          45.84016,
+          4.48997,
+          101.13713
+        ],
+        "tail": [
+          62.39201,
+          5.64421,
+          83.03804
+        ],
+        "rollDeg": -31.428,
+        "useDeform": true
+      },
+      {
+        "name": "RightShoulder",
+        "parent": "Spine02",
+        "head": [
+          -2.82263,
+          2.28546,
+          134.71982
+        ],
+        "tail": [
+          -13.53029,
+          3.80513,
+          134.71982
+        ],
+        "rollDeg": 180.0,
+        "useDeform": true
+      },
+      {
+        "name": "RightArm",
+        "parent": "RightShoulder",
+        "head": [
+          -13.53029,
+          3.80513,
+          134.71982
+        ],
+        "tail": [
+          -27.87306,
+          5.90938,
+          117.81082
+        ],
+        "rollDeg": 32.677,
+        "useDeform": true
+      },
+      {
+        "name": "RightForeArm",
+        "parent": "RightArm",
+        "head": [
+          -27.87307,
+          5.9094,
+          117.81083
+        ],
+        "tail": [
+          -45.1144,
+          4.4442,
+          101.505
+        ],
+        "rollDeg": 27.934,
+        "useDeform": true
+      },
+      {
+        "name": "RightHand",
+        "parent": "RightForeArm",
+        "head": [
+          -45.11441,
+          4.44417,
+          101.50502
+        ],
+        "tail": [
+          -62.11975,
+          3.79247,
+          84.90129
+        ],
+        "rollDeg": 29.088,
+        "useDeform": true
+      },
+      {
+        "name": "Neck",
+        "parent": "Spine02",
+        "head": [
+          -0.18586,
+          1.35463,
+          136.30428
+        ],
+        "tail": [
+          -0.29143,
+          2.90329,
+          146.92545
+        ],
+        "rollDeg": -0.652,
+        "useDeform": true
+      },
+      {
+        "name": "Head",
+        "parent": "Neck",
+        "head": [
+          -0.29143,
+          2.90331,
+          146.92545
+        ],
+        "tail": [
+          -0.44005,
+          -6.17327,
+          162.0692
+        ],
+        "rollDeg": -0.273,
+        "useDeform": true
+      },
+      {
+        "name": "head_end",
+        "parent": "Head",
+        "head": [
+          -0.52413,
+          0.12956,
+          170.63693
+        ],
+        "tail": [
+          -0.69622,
+          -1.92177,
+          188.17267
+        ],
+        "rollDeg": -0.497,
+        "useDeform": true
+      },
+      {
+        "name": "headfront",
+        "parent": "Head",
+        "head": [
+          -0.29143,
+          -8.53469,
+          146.92542
+        ],
+        "tail": [
+          -0.29143,
+          -26.19085,
+          146.92542
+        ],
+        "rollDeg": -0.0,
+        "useDeform": true
+      }
+    ]
+  },
+  "fingerSummary": {
+    "LeftThumb": [],
+    "LeftIndex": [],
+    "LeftMiddle": [],
+    "LeftRing": [],
+    "LeftLittle": [],
+    "RightThumb": [],
+    "RightIndex": [],
+    "RightMiddle": [],
+    "RightRing": [],
+    "RightLittle": []
+  },
+  "unityHumanoid": {
+    "required": {
+      "Hips": "Hips",
+      "Spine": "Spine",
+      "Head": "Head",
+      "LeftUpperLeg": "LeftUpLeg",
+      "LeftLowerLeg": "LeftLeg",
+      "LeftFoot": "LeftFoot",
+      "RightUpperLeg": "RightUpLeg",
+      "RightLowerLeg": "RightLeg",
+      "RightFoot": "RightFoot",
+      "LeftUpperArm": "LeftArm",
+      "LeftLowerArm": "LeftForeArm",
+      "LeftHand": "LeftHand",
+      "RightUpperArm": "RightArm",
+      "RightLowerArm": "RightForeArm",
+      "RightHand": "RightHand"
+    },
+    "optional": {
+      "Chest": "Spine01",
+      "UpperChest": "Spine02",
+      "Neck": "Neck",
+      "LeftShoulder": "LeftShoulder",
+      "RightShoulder": "RightShoulder",
+      "LeftToes": "LeftToeBase",
+      "RightToes": "RightToeBase",
+      "LeftEye": null,
+      "RightEye": null,
+      "Jaw": null
+    },
+    "missingRequired": [],
+    "missingOptional": [
+      "LeftEye",
+      "RightEye",
+      "Jaw"
+    ],
+    "isMinimumValid": true
+  },
+  "poseAudit": {
+    "classification": "a_pose_like",
+    "leftArmAngleFromHorizontalDeg": 49.913,
+    "rightArmAngleFromHorizontalDeg": 49.911,
+    "leftArmAngleFromDownDeg": 40.61,
+    "rightArmAngleFromDownDeg": 40.607,
+    "thresholdsDeg": {
+      "tPoseMax": 25.0,
+      "aPoseMax": 55.0
+    }
+  },
+  "recommendations": [
+    "\u0110\u1ee7 t\u1ed1i thi\u1ec3u 15 bone b\u1eaft bu\u1ed9c \u0111\u1ec3 Unity Humanoid c\u00f3 th\u1ec3 automap.",
+    "C\u00f3 th\u1ec3 import Humanoid nh\u01b0ng \u0111ang thi\u1ebfu/kh\u00f4ng map optional bones: LeftEye, RightEye, Jaw.",
+    "Armature object kh\u00f4ng \u1edf identity transform; n\u00ean ki\u1ec3m tra Apply Transform tr\u01b0\u1edbc khi export FBX s\u1ea1ch."
+  ]
+}

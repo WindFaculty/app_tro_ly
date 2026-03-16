@@ -1,0 +1,306 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\unity-client\\Assets\\AvatarSystem\\AvatarProduction\\BaseAvatar\\Model\\CHR_Avatar_Base_v001.fbx",
+  "armature": "Armature",
+  "meshCount": 15,
+  "expectedMeshCount": 15,
+  "meshNames": [
+    "Body_ArmUpperL",
+    "Body_ArmUpperR",
+    "Body_CalfL",
+    "Body_CalfR",
+    "Body_FootL",
+    "Body_FootR",
+    "Body_ForearmL",
+    "Body_ForearmR",
+    "Body_HandL",
+    "Body_HandR",
+    "Body_Head",
+    "Body_ThighL",
+    "Body_ThighR",
+    "Body_TorsoLower",
+    "Body_TorsoUpper"
+  ],
+  "missingMeshes": [],
+  "extraMeshes": [],
+  "totalPolygons": 123272,
+  "expectedSourcePolygons": 123272,
+  "polygonCountMatchesSource": true,
+  "allMeshesBoundToArmature": true,
+  "headHasNeckVertexGroup": true,
+  "meshReports": [
+    {
+      "name": "Body_ArmUpperL",
+      "vertices": 2456,
+      "polygons": 4679,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "RightShoulder",
+        "Neck",
+        "Head"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_ArmUpperR",
+      "vertices": 3016,
+      "polygons": 5789,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Hips",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "Neck",
+        "Head"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_CalfL",
+      "vertices": 3126,
+      "polygons": 6067,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_CalfR",
+      "vertices": 3104,
+      "polygons": 6016,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_FootL",
+      "vertices": 3487,
+      "polygons": 6892,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_FootR",
+      "vertices": 3567,
+      "polygons": 7047,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_ForearmL",
+      "vertices": 1719,
+      "polygons": 3300,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_ForearmR",
+      "vertices": 1668,
+      "polygons": 3210,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "RightArm",
+        "RightForeArm",
+        "RightHand"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_HandL",
+      "vertices": 3649,
+      "polygons": 7237,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "LeftForeArm",
+        "LeftHand"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_HandR",
+      "vertices": 3735,
+      "polygons": 7410,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "RightForeArm",
+        "RightHand"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_Head",
+      "vertices": 10072,
+      "polygons": 20054,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "RightShoulder",
+        "RightArm",
+        "Neck",
+        "Head"
+      ],
+      "headNeckGroups": [
+        "Neck"
+      ]
+    },
+    {
+      "name": "Body_ThighL",
+      "vertices": 4677,
+      "polygons": 9116,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "RightUpLeg"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_ThighR",
+      "vertices": 4689,
+      "polygons": 9133,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Hips",
+        "LeftUpLeg",
+        "RightUpLeg",
+        "RightLeg"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_TorsoLower",
+      "vertices": 5259,
+      "polygons": 10119,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Hips",
+        "LeftUpLeg",
+        "RightUpLeg",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "RightShoulder"
+      ],
+      "headNeckGroups": []
+    },
+    {
+      "name": "Body_TorsoUpper",
+      "vertices": 8792,
+      "polygons": 17203,
+      "parent": "Armature",
+      "armatureModifiers": [
+        "Armature"
+      ],
+      "boundToArmature": true,
+      "vertexGroups": [
+        "Hips",
+        "LeftUpLeg",
+        "RightUpLeg",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "RightShoulder",
+        "RightArm",
+        "Neck",
+        "Head"
+      ],
+      "headNeckGroups": []
+    }
+  ],
+  "success": true
+}
