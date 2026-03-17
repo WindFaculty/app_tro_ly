@@ -29,6 +29,7 @@ namespace AvatarSystem
         private float currentAmplitude;
 
         public LipSyncMode Mode => mode;
+        public LipSyncMapDefinition LipSyncMap => lipSyncMap;
 
         public void Initialize(AvatarFacialController facial)
         {
@@ -38,6 +39,11 @@ namespace AvatarSystem
         public void BindAudioSource(AudioSource source)
         {
             audioSource = source;
+        }
+
+        public void SetLipSyncMap(LipSyncMapDefinition definition)
+        {
+            lipSyncMap = definition;
         }
 
         public void SetMode(LipSyncMode newMode)
@@ -91,6 +97,15 @@ namespace AvatarSystem
                 {
                     currentAmplitude = Mathf.Lerp(currentAmplitude, 0f, Time.deltaTime * visemeSmoothSpeed);
                     ApplyAmplitudeMouth(currentAmplitude);
+                }
+                else if (currentAmplitude > 0f)
+                {
+                    currentAmplitude = 0f;
+                    facialController.ClearLipSync();
+                }
+                else
+                {
+                    facialController.ClearLipSync();
                 }
                 return;
             }

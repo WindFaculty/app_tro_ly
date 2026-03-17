@@ -9,6 +9,9 @@ namespace AvatarSystem
     /// </summary>
     public sealed class AvatarRootController : MonoBehaviour
     {
+        private const string DefaultFaceRendererName = "Body_Head";
+        private const string DefaultBodyRendererName = "Body_TorsoUpper";
+
         [Header("Sub-Controllers (auto-discovered if left empty)")]
         [SerializeField] private AvatarEquipmentManager equipmentManager;
         [SerializeField] private AvatarBodyVisibilityManager bodyVisibilityManager;
@@ -26,6 +29,8 @@ namespace AvatarSystem
         [SerializeField] private SkinnedMeshRenderer faceMesh;
         [SerializeField] private Transform avatarRoot;
 
+        private bool isInitialized;
+
         public AvatarEquipmentManager Equipment => equipmentManager;
         public AvatarBodyVisibilityManager BodyVisibility => bodyVisibilityManager;
         public AvatarFacialController Facial => facialController;
@@ -35,12 +40,9 @@ namespace AvatarSystem
         public AvatarLocomotionController Locomotion => locomotionController;
         public AvatarLookAtController LookAt => lookAtController;
         public AvatarPresetManager Presets => presetManager;
-
         public Animator AvatarAnimator => avatarAnimator;
         public SkinnedMeshRenderer BodyMesh => bodyMesh;
         public SkinnedMeshRenderer FaceMesh => faceMesh;
-
-        private bool isInitialized;
 
         private void Awake()
         {
@@ -49,10 +51,18 @@ namespace AvatarSystem
 
         public void Initialize()
         {
-            if (isInitialized) return;
+            if (isInitialized)
+            {
+                return;
+            }
+
             isInitialized = true;
 
-            if (avatarRoot == null) avatarRoot = transform;
+            if (avatarRoot == null)
+            {
+                avatarRoot = transform;
+            }
+
             AutoDiscoverControllers();
             InitializeSubSystems();
         }
@@ -69,6 +79,8 @@ namespace AvatarSystem
             if (lookAtController == null) lookAtController = GetComponentInChildren<AvatarLookAtController>();
             if (presetManager == null) presetManager = GetComponentInChildren<AvatarPresetManager>();
             if (avatarAnimator == null) avatarAnimator = GetComponentInChildren<Animator>();
+            if (faceMesh == null) faceMesh = FindFaceMeshRenderer();
+            if (bodyMesh == null) bodyMesh = FindBodyMeshRenderer(faceMesh);
         }
 
         private void InitializeSubSystems()
@@ -77,30 +89,83 @@ namespace AvatarSystem
             {
                 equipmentManager.Initialize(this);
             }
+
             if (bodyVisibilityManager != null)
             {
                 bodyVisibilityManager.Initialize(this);
             }
+
             if (facialController != null)
             {
                 facialController.Initialize(faceMesh);
             }
+
             if (lipSyncDriver != null)
             {
                 lipSyncDriver.Initialize(facialController);
             }
+
             if (animatorBridge != null)
             {
                 animatorBridge.Initialize(avatarAnimator);
             }
+
             if (conversationBridge != null)
             {
                 conversationBridge.Initialize(animatorBridge, facialController, lipSyncDriver);
             }
+
             if (locomotionController != null)
             {
                 locomotionController.Initialize(avatarRoot, animatorBridge);
             }
+        }
+
+        private SkinnedMeshRenderer FindFaceMeshRenderer()
+        {
+            SkinnedMeshRenderer fallback = null;
+            foreach (var renderer in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (renderer == null || renderer.sharedMesh == null)
+                {
+                    continue;
+                }
+
+                if (renderer.name == DefaultFaceRendererName)
+                {
+                    return renderer;
+                }
+
+                if (fallback == null &&
+                    renderer.sharedMesh.GetBlendShapeIndex("Blink_L") >= 0 &&
+                    renderer.sharedMesh.GetBlendShapeIndex("Blink_R") >= 0)
+                {
+                    fallback = renderer;
+                }
+            }
+
+            return fallback;
+        }
+
+        private SkinnedMeshRenderer FindBodyMeshRenderer(SkinnedMeshRenderer resolvedFaceMesh)
+        {
+            foreach (var renderer in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (renderer != null && renderer.name == DefaultBodyRendererName)
+                {
+                    return renderer;
+                }
+            }
+
+            foreach (var renderer in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            {
+                if (renderer != null && renderer != resolvedFaceMesh)
+                {
+                    return renderer;
+                }
+            }
+
+            return null;
         }
     }
 }

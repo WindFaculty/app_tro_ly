@@ -232,6 +232,8 @@ namespace AvatarSystem.Editor
                     instance.transform
                 );
 
+                SetFacialControllerReference(facialController, faceRenderer);
+                BaseAvatarFacialPresetUtility.ApplyExistingAssetReferences(conversationBridge, lipSyncDriver);
                 SetPresetManagerReference(presetManager, equipmentManager);
                 SetBodyRegionMappings(bodyVisibilityManager, renderers);
                 SetLookAtReferences(lookAtController, instance.transform);
@@ -330,6 +332,9 @@ namespace AvatarSystem.Editor
                 };
 
                 var rootController = prefabRoot.GetComponent<AvatarRootController>();
+                var facialController = prefabRoot.GetComponent<AvatarFacialController>();
+                var lipSyncDriver = prefabRoot.GetComponent<AvatarLipSyncDriver>();
+                var conversationBridge = prefabRoot.GetComponent<AvatarConversationBridge>();
                 var bodyVisibilityManager = prefabRoot.GetComponent<AvatarBodyVisibilityManager>();
                 var animator = prefabRoot.GetComponent<Animator>();
                 var renderers = prefabRoot.GetComponentsInChildren<SkinnedMeshRenderer>(true);
@@ -342,9 +347,14 @@ namespace AvatarSystem.Editor
                 report.bodyRegionMappingCount = GetBodyRegionMappingCount(bodyVisibilityManager);
                 report.bodyRegionMappingsComplete = HasCompleteBodyRegionMappings(bodyVisibilityManager);
                 report.hasAvatarRootController = rootController != null;
+                report.hasAvatarFacialController = facialController != null;
                 report.hasAnimator = animator != null;
                 report.hasValidRuntimeController = animator != null && animator.runtimeAnimatorController == controller;
                 report.hasValidFaceRenderer = faceRenderer != null;
+                report.facialControllerHasFaceRenderer = FacialControllerFaceRenderer(facialController) == faceRenderer;
+                report.hasLipSyncMapAssigned = LipSyncDriverMap(lipSyncDriver) != null;
+                report.expressionLibraryCount = ConversationBridgeExpressionCount(conversationBridge);
+                report.hasFullExpressionLibrary = report.expressionLibraryCount >= BaseAvatarFacialPresetUtility.LoadOrderedExpressionDefinitions().Length;
                 report.hasFaceBlendShapes = faceRenderer != null && faceRenderer.sharedMesh != null && faceRenderer.sharedMesh.blendShapeCount >= 28;
                 report.faceBlendShapeNames = faceRenderer != null && faceRenderer.sharedMesh != null
                     ? Enumerable.Range(0, faceRenderer.sharedMesh.blendShapeCount).Select(faceRenderer.sharedMesh.GetBlendShapeName).ToArray()
@@ -362,9 +372,13 @@ namespace AvatarSystem.Editor
                     report.avatarIsHuman &&
                     report.missingScriptCount == 0 &&
                     report.hasAvatarRootController &&
+                    report.hasAvatarFacialController &&
                     report.hasAnimator &&
                     report.hasValidRuntimeController &&
                     report.hasValidFaceRenderer &&
+                    report.facialControllerHasFaceRenderer &&
+                    report.hasLipSyncMapAssigned &&
+                    report.hasFullExpressionLibrary &&
                     report.hasFaceBlendShapes &&
                     report.requiredFaceBlendShapesPresent &&
                     report.bodyRegionMappingCount == RegionRendererMap.Length &&
@@ -376,9 +390,13 @@ namespace AvatarSystem.Editor
                 if (!report.idleSmokeTestPassed)
                 {
                     if (!report.hasAvatarRootController) report.errors.Add("AvatarRootController missing on prefab root.");
+                    if (!report.hasAvatarFacialController) report.errors.Add("AvatarFacialController missing on prefab root.");
                     if (!report.hasAnimator) report.errors.Add("Animator missing on prefab root.");
                     if (!report.hasValidRuntimeController) report.errors.Add("Animator controller missing or not assigned.");
                     if (!report.hasValidFaceRenderer) report.errors.Add("Body_Head face renderer missing.");
+                    if (!report.facialControllerHasFaceRenderer) report.errors.Add("AvatarFacialController is not serialized with the Body_Head face renderer.");
+                    if (!report.hasLipSyncMapAssigned) report.errors.Add("AvatarLipSyncDriver is missing a LipSyncMapDefinition reference.");
+                    if (!report.hasFullExpressionLibrary) report.errors.Add("AvatarConversationBridge expression library is incomplete.");
                     if (!report.hasFaceBlendShapes) report.errors.Add("Body_Head does not expose imported blendshapes.");
                     if (!report.requiredFaceBlendShapesPresent) report.errors.Add("Required face blendshape names are incomplete.");
                     if (report.bodyRegionMappingCount != RegionRendererMap.Length) report.errors.Add("Body region mapping count is incomplete.");
@@ -425,6 +443,13 @@ namespace AvatarSystem.Editor
             serializedObject.FindProperty("bodyMesh").objectReferenceValue = bodyRenderer;
             serializedObject.FindProperty("faceMesh").objectReferenceValue = faceRenderer;
             serializedObject.FindProperty("avatarRoot").objectReferenceValue = avatarRoot;
+            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetFacialControllerReference(AvatarFacialController facialController, SkinnedMeshRenderer faceRenderer)
+        {
+            var serializedObject = new SerializedObject(facialController);
+            serializedObject.FindProperty("faceMesh").objectReferenceValue = faceRenderer;
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
         }
 
@@ -520,6 +545,39 @@ namespace AvatarSystem.Editor
             return true;
         }
 
+        private static SkinnedMeshRenderer FacialControllerFaceRenderer(AvatarFacialController facialController)
+        {
+            if (facialController == null)
+            {
+                return null;
+            }
+
+            var serializedObject = new SerializedObject(facialController);
+            return serializedObject.FindProperty("faceMesh").objectReferenceValue as SkinnedMeshRenderer;
+        }
+
+        private static LipSyncMapDefinition LipSyncDriverMap(AvatarLipSyncDriver lipSyncDriver)
+        {
+            if (lipSyncDriver == null)
+            {
+                return null;
+            }
+
+            var serializedObject = new SerializedObject(lipSyncDriver);
+            return serializedObject.FindProperty("lipSyncMap").objectReferenceValue as LipSyncMapDefinition;
+        }
+
+        private static int ConversationBridgeExpressionCount(AvatarConversationBridge conversationBridge)
+        {
+            if (conversationBridge == null)
+            {
+                return 0;
+            }
+
+            var serializedObject = new SerializedObject(conversationBridge);
+            return serializedObject.FindProperty("expressionLibrary").arraySize;
+        }
+
         private static IEnumerable<string> RequiredFaceBlendshapeNames()
         {
             yield return "Blink_L";
@@ -607,9 +665,14 @@ namespace AvatarSystem.Editor
             public string animatorControllerName = string.Empty;
             public string idleClipName = string.Empty;
             public bool hasAvatarRootController;
+            public bool hasAvatarFacialController;
             public bool hasAnimator;
             public bool hasValidRuntimeController;
             public bool hasValidFaceRenderer;
+            public bool facialControllerHasFaceRenderer;
+            public bool hasLipSyncMapAssigned;
+            public int expressionLibraryCount;
+            public bool hasFullExpressionLibrary;
             public bool hasFaceBlendShapes;
             public bool requiredFaceBlendShapesPresent;
             public bool idleSmokeTestPassed;

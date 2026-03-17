@@ -34,25 +34,25 @@ Cập nhật: 2026-03-17
 ---
 
 ## Phase 3 — Làm facial và lip-sync tối thiểu
-- [ ] Kết nối `AvatarFacialController` với face mesh thật
-- [ ] Test chớp mắt tự nhiên (blink coroutine)
-- [ ] Test 5–8 expression chính (Happy, Sad, Surprised, Focused, SoftSmile, Curious, Apologetic)
-- [ ] Tạo `ExpressionDefinition` ScriptableObject cho từng expression
-- [ ] Tạo `LipSyncMapDefinition` mapping viseme → blendshape
-- [ ] Test lip-sync prototype bằng amplitude (audio TTS → mở miệng)
-- [ ] Đảm bảo không méo mặt khi chuyển giữa expression và lip-sync
+- [x] Kết nối `AvatarFacialController` với face mesh thật (`AvatarFacialController.faceMesh` và `AvatarRootController.faceMesh` cùng trỏ vào `Body_Head`; auto-discover + builder validation đã thêm trong code/prefab, xác minh bằng `unity-client/Logs/BaseAvatarFacialValidation.json`)
+- [x] Test chớp mắt tự nhiên (blink coroutine) (technical pass trong `unity-client/Logs/BaseAvatarFacialValidation.json`: `blinkTestPassed = true`, peak Blink_L/R = 100 trên `Body_Head`; visual sign-off trong Unity Editor vẫn là bước manual nếu cần)
+- [x] Test 5–8 expression chính (Happy, Sad, Surprised, Focused, SoftSmile, Curious, Apologetic) (`unity-client/Logs/BaseAvatarFacialValidation.json`: `expressionCoveragePassed = true`, `expressionTestsPassed = 7`; dùng bộ `ExpressionDefinition` prototype trong `Assets/AvatarSystem/AvatarProduction/Presets/ExpressionPresets/`. Lưu ý: `tasks/task-people.md` mục `P04` vẫn là bước sign-off production riêng)
+- [x] Tạo `ExpressionDefinition` ScriptableObject cho từng expression (đã tạo 7 asset prototype: `EXP_Happy_Prototype`, `EXP_Sad_Prototype`, `EXP_Surprised_Prototype`, `EXP_Focused_Prototype`, `EXP_SoftSmile_Prototype`, `EXP_Curious_Prototype`, `EXP_Apologetic_Prototype`)
+- [x] Tạo `LipSyncMapDefinition` mapping viseme → blendshape (đã tạo `Assets/AvatarSystem/AvatarProduction/Data/LipSyncMaps/LipSyncMap_Prototype_Default.asset` và bind vào base prefab)
+- [x] Test lip-sync prototype bằng amplitude (audio TTS → mở miệng) (`unity-client/Logs/BaseAvatarFacialValidation.json`: `amplitudeLipSyncPassed = true`, `amplitudePeakMouthOpen = 60`, `amplitudePeakVisemeAA = 100`, `lipSyncSettledAfterPlayback = true`)
+- [x] Đảm bảo không méo mặt khi chuyển giữa expression và lip-sync (`unity-client/Logs/BaseAvatarFacialValidation.json`: `expressionLipSyncLayeringPassed = true`, upper-face giữ `SmileEye_L ~= 32`, lower-face expression `Smile = 0` tại peak lip-sync để tránh chồng méo)
 
 ---
 
 ## Phase 4 — Làm locomotion và hội thoại sync
-- [ ] Tạo Animator Controller với parameters chuẩn (IsListening, IsThinking, IsSpeaking, IsMoving, v.v.)
-- [ ] Tạo/import animation tối thiểu: Idle_Default, Idle_Breathing, Listen_Idle, Talk_Idle
-- [ ] Tạo/import animation di chuyển: Walk_Forward, Turn_Left, Turn_Right, Approach_Short
-- [ ] Tạo/import gesture: Wave_Small, Nod_Yes, HandExplain_01
-- [ ] Thiết lập anchor points trong scene (IdlePoint, TalkPoint, ListenPoint, WanderA, WanderB)
-- [ ] Kết nối `AvatarLocomotionController` với anchor points
-- [ ] Kết nối `AvatarConversationBridge` với hệ STT/LLM/TTS hiện có trong `AssistantApp`
-- [ ] Kết nối `AvatarLookAtController` với camera hoặc điểm nhìn người dùng
+- [x] Tạo Animator Controller với parameters chuẩn (IsListening, IsThinking, IsSpeaking, IsMoving, v.v.)
+- [x] Tạo/import animation tối thiểu: Idle_Default, Idle_Breathing, Listen_Idle, Talk_Idle
+- [x] Tạo/import animation di chuyển: Walk_Forward, Turn_Left, Turn_Right, Approach_Short
+- [x] Tạo/import gesture: Wave_Small, Nod_Yes, HandExplain_01
+- [x] Thiết lập anchor points trong scene (IdlePoint, TalkPoint, ListenPoint, WanderA, WanderB)
+- [x] Kết nối `AvatarLocomotionController` với anchor points
+- [x] Kết nối `AvatarConversationBridge` với hệ STT/LLM/TTS hiện có trong `AssistantApp`
+- [x] Kết nối `AvatarLookAtController` với camera hoặc điểm nhìn người dùng
 - [ ] Test luồng hội thoại: Idle → Listening → Thinking → Speaking → Reacting → Idle
 - [ ] Test avatar phản ứng đúng theo voice loop
 
@@ -98,8 +98,8 @@ Cập nhật: 2026-03-17
 Prototype coi là đạt khi có đủ:
 - [ ] Avatar import vào Unity ổn định
 - [ ] Có idle, listen, speak, walk nhẹ
-- [ ] Có blink và 5 expression cơ bản
-- [ ] Có mouth movement khi nói
+- [x] Có blink và 5 expression cơ bản (technical pass qua `unity-client/Logs/BaseAvatarFacialValidation.json`; đã verify 7 expression prototype + blink)
+- [x] Có mouth movement khi nói (prototype amplitude lip-sync pass qua `unity-client/Logs/BaseAvatarFacialValidation.json`)
 - [ ] Đổi được tóc (2 kiểu), áo (2 cái), quần (2 cái), váy (1 cái), giày (2 đôi)
 - [ ] Dress tự chặn Top và Bottom
 - [ ] Gloves và bracelet xử lý xung đột đúng

@@ -10,6 +10,7 @@ using LocalAssistant.Network;
 using LocalAssistant.Notifications;
 using LocalAssistant.Tasks;
 using UnityEngine;
+using AvatarSystem;
 
 namespace LocalAssistant.Core
 {
@@ -31,6 +32,7 @@ namespace LocalAssistant.Core
         private readonly Queue<TtsSentenceReadyEvent> speechQueue = new();
 
         private AvatarStateMachine avatarStateMachine;
+        private AvatarConversationBridge avatarConversationBridge;
         private LipSyncController lipSyncController;
         private AudioPlaybackController audioPlaybackController;
         private SubtitlePresenter subtitlePresenter;
@@ -112,6 +114,9 @@ namespace LocalAssistant.Core
             audioPlaybackController = runtimeRoot.AddComponent<AudioPlaybackController>();
             lipSyncController = runtimeRoot.AddComponent<LipSyncController>();
             lipSyncController.BindAudioSource(audioPlaybackController.Output);
+            
+            // Assuming the Avatar is in the scene with these components. If not found, this will be null.
+            avatarConversationBridge = FindFirstObjectByType<AvatarConversationBridge>();
         }
 
         private void WireUi()
@@ -260,6 +265,7 @@ namespace LocalAssistant.Core
             chatStore.SetListening(true);
             chatStore.SetThinking(false);
             avatarStateMachine.SetState(AvatarState.Listening);
+            avatarConversationBridge?.OnListeningStart();
             await Task.CompletedTask;
             RefreshChatLog();
         }
@@ -273,6 +279,7 @@ namespace LocalAssistant.Core
             chatStore.SetListening(false);
             chatStore.SetThinking(true);
             avatarStateMachine.SetState(AvatarState.Thinking);
+            avatarConversationBridge?.OnListeningEnd();
             RefreshChatLog();
             if (recordingClip == null || position <= 0) return;
             if (assistantStreamClient != null && assistantStreamClient.IsConnected)
@@ -346,7 +353,7 @@ namespace LocalAssistant.Core
                         break;
                     case "tts_sentence_ready":
                         var sentence = UnityJson.Deserialize<TtsSentenceReadyEvent>(payload);
-                        if (sentence != null) { speechQueue.Enqueue(sentence); if (!isPlayingSpeechQueue) _ = PlayQueuedSpeechAsync(); }
+                        if (sentence != null) _ = PlaySentenceAsync(sentence.audio_url, sentence.text);
                         break;
                     case "speech_started":
                         autoResumeListening = continuousVoiceEnabled;
@@ -369,6 +376,7 @@ namespace LocalAssistant.Core
             isPlayingSpeechQueue = true;
             try
             {
+                avatarConversationBridge?.OnSpeakingStart();
                 while (speechQueue.Count > 0)
                 {
                     var sentence = speechQueue.Dequeue();
@@ -377,6 +385,7 @@ namespace LocalAssistant.Core
                     audioPlaybackController.Play(clip, sentence.text, subtitlePresenter, avatarStateMachine);
                     while (audioPlaybackController.IsPlaying) await Task.Delay(50);
                 }
+                avatarConversationBridge?.OnSpeakingEnd();
             }
             finally
             {
@@ -428,7 +437,7 @@ namespace LocalAssistant.Core
         private string BuildStagePlaceholderText() { var builder = new StringBuilder(); builder.AppendLine("KHUNG AVATAR"); builder.AppendLine(); builder.AppendLine("Assistant dang chay theo kieu hybrid stream."); builder.AppendLine("Chat hien route, provider, latency va transcript."); builder.AppendLine(); builder.Append(taskStore.BuildOverviewText()); return builder.ToString().Trim(); }
         private void UpdateTabButtonStyles() { if (!HasLiveUi()) return; SetTabButtonVisual(ui.TodayTab, currentTab == "Today"); SetTabButtonVisual(ui.WeekTab, currentTab == "Week" || currentTab == "Inbox" || currentTab == "Completed"); SetTabButtonVisual(ui.InboxTab, currentTab == "Inbox"); SetTabButtonVisual(ui.CompletedTab, currentTab == "Completed"); SetTabButtonVisual(ui.SettingsTab, currentTab == "Settings"); }
         private static void SetTabButtonVisual(UnityEngine.UI.Button button, bool isActive) { if (button == null) return; var image = button.GetComponent<UnityEngine.UI.Image>(); if (image != null) image.color = isActive ? ActiveTabColor : InactiveTabColor; var label = button.GetComponentInChildren<UnityEngine.UI.Text>(); if (label != null) label.color = isActive ? ActiveTabTextColor : InactiveTabTextColor; }
-        private void ClearSubtitleAndIdle() { subtitlePresenter.Hide(); avatarStateMachine.SetState(AvatarState.Idle); }
+        private void ClearSubtitleAndIdle() { subtitlePresenter.Hide(); avatarStateMachine.SetState(AvatarState.Idle); avatarConversationBridge?.OnIdle(); }
         private void HandleBackendUnavailableState() { SetSettingsStatus("Backend unavailable.", new Color(0.67f, 0.24f, 0.20f, 1f)); avatarStateMachine?.SetState(AvatarState.Warning); }
         private static AudioClip TrimClip(AudioClip source, int samples) { var data = new float[samples * source.channels]; source.GetData(data, 0); var clip = AudioClip.Create("RecordedClip", samples, source.channels, source.frequency, false); clip.SetData(data, 0); return clip; }
         private bool HasLiveUi() => ui != null && ui.HealthBanner != null;

@@ -250,8 +250,10 @@ MonoBehaviour:
   blinkDuration: 0.12
   blinkRandomRange: 2
   expressionBlendSpeed: 4
+  mouthExpressionWeightWhenLipSyncActive: 0
   blinkLeftName: Blink_L
   blinkRightName: Blink_R
+  faceMesh: {fileID: 3247975792538589996}
 --- !u!114 &5093715572060358253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -265,7 +267,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AvatarSystem.AvatarLipSyncDriver
   mode: 0
-  lipSyncMap: {fileID: 0}
+  lipSyncMap: {fileID: 11400000, guid: 18a00847767f28e44b140ef7dd6bd4db, type: 2}
   amplitudeScale: 160
   visemeSmoothSpeed: 12
   audioSource: {fileID: 0}
@@ -293,7 +295,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e73d89f6241c7cc4cb2d0c07451590d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AvatarSystem.AvatarConversationBridge
-  expressionLibrary: []
+  expressionLibrary:
+  - {fileID: 11400000, guid: 4d4563a25126d9145947b88ffa06a8d5, type: 2}
+  - {fileID: 11400000, guid: 4ffb7384a60fb774398d2bb4fa897495, type: 2}
+  - {fileID: 11400000, guid: db57143a498ce0240a060ae757b9c04b, type: 2}
+  - {fileID: 11400000, guid: 475bd9747f7ff8d42b370043d8d3eaf3, type: 2}
+  - {fileID: 11400000, guid: c33ff01b0a7746d4f9f9aa43305d4ae6, type: 2}
+  - {fileID: 11400000, guid: 1ad8c9ec3c30f7540abcf25b85a93a7b, type: 2}
+  - {fileID: 11400000, guid: 43f60ba3aaa7c0c42818bda883aef799, type: 2}
 --- !u!114 &3518588191738121300
 MonoBehaviour:
   m_ObjectHideFlags: 0
