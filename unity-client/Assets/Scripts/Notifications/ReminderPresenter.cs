@@ -7,60 +7,26 @@ namespace LocalAssistant.Notifications
 {
     public sealed class ReminderPresenter : MonoBehaviour
     {
-        private Label reminderText;
-        private VisualElement cardElement;
-        private readonly Queue<string> pendingMessages = new();
+        private readonly ReminderOverlayController controller = new();
 
         public void Bind(Label textElement, VisualElement card)
         {
-            reminderText = textElement;
-            cardElement = card;
-            Clear();
+            controller.Bind(textElement, card);
         }
 
         public void Push(ReminderDueEvent reminder)
         {
-            pendingMessages.Enqueue($"Nhac viec: {reminder.title} trong {reminder.minutes_until} phut.");
-            Render();
+            controller.Push(reminder);
         }
 
         public void Dismiss()
         {
-            if (pendingMessages.Count > 0)
-            {
-                pendingMessages.Dequeue();
-            }
-
-            Render();
+            controller.Dismiss();
         }
 
         public void Clear()
         {
-            pendingMessages.Clear();
-            Render();
-        }
-
-        private void Render()
-        {
-            if (reminderText == null)
-            {
-                return;
-            }
-
-            var hasMessage = pendingMessages.Count > 0;
-            reminderText.text = hasMessage ? pendingMessages.Peek() : string.Empty;
-            SetCardVisibility(hasMessage);
-        }
-
-        private void SetCardVisibility(bool visible)
-        {
-            if (cardElement != null)
-            {
-                if (visible)
-                    cardElement.RemoveFromClassList("hidden");
-                else
-                    cardElement.AddToClassList("hidden");
-            }
+            controller.Clear();
         }
     }
 }

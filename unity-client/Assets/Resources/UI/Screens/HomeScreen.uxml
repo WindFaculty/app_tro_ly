@@ -12,10 +12,6 @@
                 <ui:Label text="o   o" />
                 <ui:Label text="LISTENING" class="avatar-badge" />
             </ui:VisualElement>
-
-            <ui:VisualElement name="SubtitleCard" class="subtitle-box hidden">
-                <ui:Label name="SubtitleText" text="ChÃ o buá»•i sÃ¡ng! TÃ´i Ä‘Ã£ sáºµn sÃ ng há»— trá»£ báº¡n..." />
-            </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:VisualElement class="mini-task-sheet">

@@ -10,6 +10,8 @@
     <ui:Template name="ScheduleScreenTemplate" src="../Screens/ScheduleScreen.uxml" />
     <ui:Template name="SettingsScreenTemplate" src="../Screens/SettingsScreen.uxml" />
     <ui:Template name="ChatPanelTemplate" src="../Panels/ChatPanel.uxml" />
+    <ui:Template name="SubtitleOverlayTemplate" src="../Overlays/SubtitleOverlay.uxml" />
+    <ui:Template name="ReminderOverlayTemplate" src="../Overlays/ReminderOverlay.uxml" />
 
     <ui:VisualElement class="layout-container">
         <ui:VisualElement class="top-bar">
@@ -62,6 +64,7 @@
                 <ui:Instance template="HomeScreenTemplate" />
                 <ui:Instance template="ScheduleScreenTemplate" />
                 <ui:Instance template="SettingsScreenTemplate" />
+                <ui:Instance template="SubtitleOverlayTemplate" />
             </ui:VisualElement>
 
             <ui:VisualElement class="right-panel">
@@ -87,6 +90,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:Instance template="ReminderOverlayTemplate" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

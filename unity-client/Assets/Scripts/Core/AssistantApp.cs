@@ -7,6 +7,7 @@ using LocalAssistant.App;
 using LocalAssistant.Audio;
 using LocalAssistant.Avatar;
 using LocalAssistant.Chat;
+using LocalAssistant.Features.Chat;
 using LocalAssistant.Features.Home;
 using LocalAssistant.Features.Schedule;
 using LocalAssistant.Features.Settings;
@@ -43,6 +44,7 @@ namespace LocalAssistant.Core
         private HomeScreenController homeScreenController;
         private ScheduleScreenController scheduleScreenController;
         private SettingsScreenController settingsScreenController;
+        private ChatPanelController chatPanelController;
 
         private HealthResponse currentHealth = new();
         private AppScreen currentScreen = AppScreen.Week;
@@ -72,8 +74,12 @@ namespace LocalAssistant.Core
             homeScreenController = new HomeScreenController(ui);
             scheduleScreenController = new ScheduleScreenController(ui);
             settingsScreenController = new SettingsScreenController(ui);
+            chatPanelController = new ChatPanelController(ui);
             WireUi();
             appRouter.BindTabs();
+            chatPanelController.Bind();
+            chatPanelController.SendRequested += SubmitFromMessage;
+            chatPanelController.MicRequested += ToggleVoiceSession;
             appRouter.Navigate(currentScreen);
             RefreshTaskView();
             RefreshChatLog();
@@ -111,7 +117,6 @@ namespace LocalAssistant.Core
         private void WireUi()
         {
             ui.RefreshButton.clicked += RefreshWorkspace;
-            ui.SendButton.clicked += () => SubmitFromInput(ui.ChatInput);
             ui.QuickAddButton.clicked += SubmitQuickAdd;
             ui.ReloadSettingsButton.clicked += ReloadSettings;
             ui.SaveSettingsButton.clicked += SaveSettings;
@@ -119,7 +124,6 @@ namespace LocalAssistant.Core
             ui.TranscriptPreviewToggle.RegisterValueChangedCallback(evt => OnTranscriptPreviewChanged(evt.newValue));
             ui.MiniAssistantToggle.RegisterValueChangedCallback(evt => OnMiniAssistantChanged(evt.newValue));
             ui.ReminderSpeechToggle.RegisterValueChangedCallback(evt => OnReminderSpeechChanged(evt.newValue));
-            ui.MicButton.clicked += ToggleVoiceSession;
         }
 
         // Chat logic
@@ -190,7 +194,7 @@ namespace LocalAssistant.Core
 
         private async void RefreshWorkspace() { try { ApplyHealth(await apiClient.GetHealthAsync()); await LoadSettingsAsync("Workspace refreshed."); await ReloadAllAsync(); } catch (Exception exception) { chatStore.AddAssistant("Refresh failed: " + exception.Message); RefreshChatLog(); } }
 
-        private async void SubmitFromInput(TextField input) { var text = input.value; input.value = string.Empty; await SubmitChatAsync(text, false); }
+        private async void SubmitFromMessage(string message) => await SubmitChatAsync(message, false);
 
         private async void SubmitQuickAdd()
         {
@@ -391,7 +395,7 @@ namespace LocalAssistant.Core
             RefreshStagePanel();
         }
 
-        private void RefreshChatLog() { if (HasLiveUi()) ui.ChatLogText.text = chatStore.BuildTranscript(); }
+        private void RefreshChatLog() { if (HasLiveUi()) chatPanelController.Render(chatStore.BuildTranscript()); }
         
         private void ApplyHealth(HealthResponse health) 
         { 
@@ -440,12 +444,10 @@ namespace LocalAssistant.Core
         { 
             if (!HasLiveUi()) return; 
             var enableTaskActions = HealthRecoveryAdvisor.CanUseTaskActions(health); 
-            SetInteractable(ui.ChatInput, enableTaskActions);
-            SetInteractable(ui.SendButton, enableTaskActions);
+            chatPanelController.SetInteractable(enableTaskActions, HealthRecoveryAdvisor.CanUseMic(health));
             SetInteractable(ui.QuickAddInput, enableTaskActions);
             SetInteractable(ui.QuickAddButton, enableTaskActions);
             SetInteractable(ui.RefreshButton, true);
-            SetInteractable(ui.MicButton, HealthRecoveryAdvisor.CanUseMic(health));
             settingsScreenController.SetEditable(HealthRecoveryAdvisor.CanEditSettings(health));
         }
 
