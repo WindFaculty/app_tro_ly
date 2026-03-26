@@ -5,7 +5,13 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <ui:Style src="../MainStyle.uss" />
+    <ui:Style src="../Styles/Tokens.uss" />
+    <ui:Style src="../Styles/Layout.uss" />
+    <ui:Style src="../Styles/Buttons.uss" />
+    <ui:Style src="../Styles/Cards.uss" />
+    <ui:Style src="../Styles/Forms.uss" />
+    <ui:Style src="../Styles/HomeScreen.uss" />
+    <ui:Style src="../Styles/ChatPanel.uss" />
     <ui:Template name="HomeScreenTemplate" src="../Screens/HomeScreen.uxml" />
     <ui:Template name="ScheduleScreenTemplate" src="../Screens/ScheduleScreen.uxml" />
     <ui:Template name="SettingsScreenTemplate" src="../Screens/SettingsScreen.uxml" />

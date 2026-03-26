@@ -1,0 +1,23 @@
+:root {
+    --color-bg-dark: #0A0D14;
+    --color-panel-dark: #121822;
+    --color-primary-cyan: #06B6D4;
+    --color-primary-cyan-hover: #0891B2;
+    --color-text-main: #F8FAFC;
+    --color-text-dim: #94A3B8;
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+}
+
+VisualElement {
+    font-size: 14px;
+    color: var(--color-text-main);
+    -unity-font-definition: resource('Fonts/LegacyRuntime');
+}
+
+.hidden {
+    display: none;
+}
