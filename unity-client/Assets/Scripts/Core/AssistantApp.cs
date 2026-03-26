@@ -15,6 +15,8 @@ using AvatarSystem;
 
 namespace LocalAssistant.Core
 {
+    // Coordinates runtime startup, service lifetimes, state stores, UI wiring,
+    // backend/event integration, voice flow, and avatar/chat/task synchronization.
     public sealed class AssistantApp : MonoBehaviour
     {
         private AssistantUiRefs ui;
@@ -44,6 +46,7 @@ namespace LocalAssistant.Core
         private bool autoResumeListening;
         private AudioClip recordingClip;
 
+        // UI init
         private void Awake()
         {
             cancellationTokenSource = new CancellationTokenSource();
@@ -133,6 +136,7 @@ namespace LocalAssistant.Core
             ui.MicButton.clicked += ToggleVoiceSession;
         }
 
+        // Chat logic
         private async Task InitializeAsync()
         {
             try
@@ -389,8 +393,10 @@ namespace LocalAssistant.Core
             }
         }
 
+        // Routing
         private void SetTab(string tabName) { currentTab = tabName; RefreshTaskView(); RefreshStagePanel(); }
 
+        // Task logic
         private void RefreshTaskView()
         {
             if (!HasLiveUi()) return;
@@ -431,6 +437,7 @@ namespace LocalAssistant.Core
         private static string BoolLabel(bool value) => value ? "On" : "Off";
         private static string BuildLlmStatus(RuntimeHealth runtime) { var label = "LLM"; if (runtime != null && !string.IsNullOrWhiteSpace(runtime.provider)) label += " " + runtime.provider; return $"{label} {BoolLabel(runtime != null && runtime.available)}"; }
         
+        // Settings
         private async void ReloadSettings() { try { await LoadSettingsAsync("Settings reloaded."); } catch (Exception exception) { SetSettingsStatus("Reload failed: " + exception.Message, new Color(0.67f, 0.24f, 0.20f, 1f)); } }
         private async void SaveSettings() { try { settingsStore.Apply(await apiClient.UpdateSettingsAsync(settingsStore.Snapshot())); ApplySettingsToUi(); SetSettingsStatus("Settings saved.", new Color(0.16f, 0.55f, 0.33f, 1f)); } catch (Exception exception) { SetSettingsStatus("Save failed: " + exception.Message, new Color(0.67f, 0.24f, 0.20f, 1f)); } }
         private async Task LoadSettingsAsync(string statusMessage) { settingsStore.Apply(await apiClient.GetSettingsAsync()); ApplySettingsToUi(); SetSettingsStatus(statusMessage, new Color(0.31f, 0.36f, 0.43f, 1f)); }
@@ -510,6 +517,7 @@ namespace LocalAssistant.Core
             else button.RemoveFromClassList("active");
         }
 
+        // Voice
         private void ClearSubtitleAndIdle() { subtitlePresenter.Hide(); avatarStateMachine.SetState(AvatarState.Idle); avatarConversationBridge?.OnIdle(); }
         private void HandleBackendUnavailableState() { SetSettingsStatus("Backend unavailable.", new Color(0.67f, 0.24f, 0.20f, 1f)); avatarStateMachine?.SetState(AvatarState.Warning); }
         private static AudioClip TrimClip(AudioClip source, int samples) { var data = new float[samples * source.channels]; source.GetData(data, 0); var clip = AudioClip.Create("RecordedClip", samples, source.channels, source.frequency, false); clip.SetData(data, 0); return clip; }
