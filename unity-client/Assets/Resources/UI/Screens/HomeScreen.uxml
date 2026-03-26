@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+>
+    <ui:VisualElement name="HomeViewContainer" class="view-container" style="flex-direction: column;">
+        <ui:VisualElement class="avatar-card">
+            <ui:Label name="StagePlaceholderText" text="KHUNG AVATAR&#10;&#10;Assistant dang chay theo kieu hybrid stream." class="hidden" />
+            <ui:VisualElement class="avatar-face">
+                <ui:Label text="o   o" />
+                <ui:Label text="LISTENING" class="avatar-badge" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="SubtitleCard" class="subtitle-box hidden">
+                <ui:Label name="SubtitleText" text="ChÃ o buá»•i sÃ¡ng! TÃ´i Ä‘Ã£ sáºµn sÃ ng há»— trá»£ báº¡n..." />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement class="mini-task-sheet">
+            <ui:Label text="Lá»‹ch trÃ¬nh &amp; CÃ´ng viá»‡c" style="font-size: 18px; -unity-font-style: bold; margin-bottom: 12px; color: white;" />
+            <ui:TextField name="QuickAddInput" text="" placeholder-text="ThÃªm viá»‡c nhanh..." style="margin-bottom: 12px; height: 32px;" />
+            <ui:Button name="QuickAddButton" text="Táº O Má»šI" class="btn-primary hidden" style="margin-bottom: 12px;" />
+
+            <ui:Label name="TaskSummaryText" text="HÃ´m nay: KhÃ´ng cÃ³ task" style="font-size: 14px; margin-bottom: 8px; color: #94A3B8;" />
+            <ui:Label name="TaskContentText" text="..." style="white-space: normal; color: white;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

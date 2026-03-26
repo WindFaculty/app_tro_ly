@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+>
+    <ui:VisualElement name="SettingsPanel" class="view-container hidden settings-panel" style="flex-direction: column;">
+        <ui:Label text="Cáº¥u hÃ¬nh Há»‡ thá»‘ng" class="settings-header" />
+        <ui:Label text="Äiá»u chá»‰nh tráº£i nghiá»‡m tÆ°Æ¡ng tÃ¡c vá»›i Trá»£ lÃ½ áº¢o Ä‘á»ƒ phÃ¹ há»£p nháº¥t vá»›i phong cÃ¡ch lÃ m viá»‡c cá»§a báº¡n." class="settings-desc" />
+
+        <ui:VisualElement class="settings-card">
+            <ui:VisualElement class="settings-card-header">
+                <ui:Label text="TÃ¹y chá»n TÆ°Æ¡ng tÃ¡c" class="settings-card-title" />
+                <ui:Label name="SettingsStatusText" text="ÄÃ£ lÆ°u" style="background-color: rgba(6, 182, 212, 0.2); color: #06B6D4; padding: 4px 12px; border-radius: 12px; font-size: 12px; -unity-font-style: bold;" />
+            </ui:VisualElement>
+
+            <ui:Label name="SettingsSummaryText" text="Status Summary" style="margin-bottom: 16px; color: #94A3B8;" />
+
+            <ui:Toggle name="SpeakRepliesToggle" label="PhÃ¡t giá»ng nÃ³i (AI tráº£ lá»i báº±ng giá»ng thá»±c táº¿)" />
+            <ui:Toggle name="TranscriptPreviewToggle" label="Xem trÆ°á»›c transcript (Hiá»ƒn thá»‹ preview vÄƒn báº£n)" />
+            <ui:Toggle name="MiniAssistantToggle" label="Cháº¿ Ä‘á»™ mini assistant (Popup Assistant thu nhá»)" />
+            <ui:Toggle name="ReminderSpeechToggle" label="Äá»c nháº¯c nhá»Ÿ báº±ng tiáº¿ng (ThÃ´ng bÃ¡o quÃ¡ lá»‹ch trá»±c tiáº¿p)" />
+
+            <ui:VisualElement class="settings-action-row">
+                <ui:Button name="ReloadButton" text="âŸ³ Táº£i láº¡i cÃ i Ä‘áº·t" class="btn-secondary" style="margin-right: 12px;" />
+                <ui:Button name="SaveButton" text="ðŸ’¾ LÆ°u thay Ä‘á»•i" class="btn-primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
