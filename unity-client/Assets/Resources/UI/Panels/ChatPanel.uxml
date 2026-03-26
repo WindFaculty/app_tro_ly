@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
+>
+    <ui:VisualElement name="ChatPanelView" class="view-container" style="flex-direction: column;">
+        <ui:VisualElement class="chat-header">
+            <ui:VisualElement>
+                <ui:Label text="Luminal Assistant" class="chat-title" style="color: white; margin-bottom: 4px;" />
+                <ui:Label text="SYSTEM CORE ONLINE" style="color: #94A3B8; font-size: 10px;" />
+            </ui:VisualElement>
+            <ui:Label text="GPT-4.0" class="chat-model-badge" />
+        </ui:VisualElement>
+
+        <ui:ScrollView class="chat-log-scroll">
+            <ui:Label name="ChatLogText" text="AI: Má»i há»‡ thá»‘ng hoáº¡t Ä‘á»™ng á»•n Ä‘á»‹nh." class="chat-log-text" />
+        </ui:ScrollView>
+
+        <ui:VisualElement class="chat-input-area">
+            <ui:TextField name="ChatInput" text="" placeholder-text="Há»i tÃ´i báº¥t cá»© Ä‘iá»u gÃ¬..." class="chat-input-field" />
+            <ui:Button name="MicButton" text="ðŸŽ¤" class="chat-btn" style="margin-right: 8px;" />
+            <ui:Button name="SendButton" text="âž¤" class="chat-btn primary" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="ReminderCard" class="hidden" style="position: absolute; bottom: 100px; left: 16px; right: 16px; background-color: #121822; padding: 16px; border-radius: 16px; border-width: 1px; border-color: #06B6D4;">
+            <ui:Label text="â° Nháº¯c nhá»Ÿ" style="-unity-font-style: bold; color: white; margin-bottom: 8px;" />
+            <ui:Label name="ReminderText" text="..." style="color: #94A3B8; white-space: normal;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

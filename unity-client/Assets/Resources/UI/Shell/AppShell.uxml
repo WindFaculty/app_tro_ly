@@ -9,6 +9,7 @@
     <ui:Template name="HomeScreenTemplate" src="../Screens/HomeScreen.uxml" />
     <ui:Template name="ScheduleScreenTemplate" src="../Screens/ScheduleScreen.uxml" />
     <ui:Template name="SettingsScreenTemplate" src="../Screens/SettingsScreen.uxml" />
+    <ui:Template name="ChatPanelTemplate" src="../Panels/ChatPanel.uxml" />
 
     <ui:VisualElement class="layout-container">
         <ui:VisualElement class="top-bar">
@@ -64,30 +65,7 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="right-panel">
-                <ui:VisualElement name="ChatPanelView" class="view-container" style="flex-direction: column;">
-                    <ui:VisualElement class="chat-header">
-                        <ui:VisualElement>
-                            <ui:Label text="Luminal Assistant" class="chat-title" style="color: white; margin-bottom: 4px;" />
-                            <ui:Label text="SYSTEM CORE ONLINE" style="color: #94A3B8; font-size: 10px;" />
-                        </ui:VisualElement>
-                        <ui:Label text="GPT-4.0" class="chat-model-badge" />
-                    </ui:VisualElement>
-
-                    <ui:ScrollView class="chat-log-scroll">
-                        <ui:Label name="ChatLogText" text="AI: Má»i há»‡ thá»‘ng hoáº¡t Ä‘á»™ng á»•n Ä‘á»‹nh." class="chat-log-text" />
-                    </ui:ScrollView>
-
-                    <ui:VisualElement class="chat-input-area">
-                        <ui:TextField name="ChatInput" text="" placeholder-text="Há»i tÃ´i báº¥t cá»© Ä‘iá»u gÃ¬..." class="chat-input-field" />
-                        <ui:Button name="MicButton" text="ðŸŽ¤" class="chat-btn" style="margin-right: 8px;" />
-                        <ui:Button name="SendButton" text="âž¤" class="chat-btn primary" />
-                    </ui:VisualElement>
-
-                    <ui:VisualElement name="ReminderCard" class="hidden" style="position: absolute; bottom: 100px; left: 16px; right: 16px; background-color: #121822; padding: 16px; border-radius: 16px; border-width: 1px; border-color: #06B6D4;">
-                        <ui:Label text="â° Nháº¯c nhá»Ÿ" style="-unity-font-style: bold; color: white; margin-bottom: 8px;" />
-                        <ui:Label name="ReminderText" text="..." style="color: #94A3B8; white-space: normal;" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <ui:Instance template="ChatPanelTemplate" />
 
                 <ui:VisualElement name="ScheduleSideView" class="view-container hidden" style="flex-direction: column; padding: 24px;">
                     <ui:VisualElement style="background-color: #0A0D14; border-radius: 16px; padding: 20px; border-left-width: 4px; border-left-color: #06B6D4; margin-bottom: 32px;">
