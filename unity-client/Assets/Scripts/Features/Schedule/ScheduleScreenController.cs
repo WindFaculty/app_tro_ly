@@ -8,18 +8,18 @@ namespace LocalAssistant.Features.Schedule
 {
     public sealed class ScheduleScreenController
     {
-        private readonly AssistantUiRefs ui;
+        private readonly ScheduleScreenRefs schedule;
 
-        public ScheduleScreenController(AssistantUiRefs ui)
+        public ScheduleScreenController(ScheduleScreenRefs schedule)
         {
-            this.ui = ui;
+            this.schedule = schedule;
         }
 
         public void Render(TaskViewModelStore taskStore, AppScreen currentScreen, string selectedDate)
         {
-            if (ui.TaskSheetHeaderTitle != null)
+            if (schedule.TaskSheetHeaderTitle != null)
             {
-                ui.TaskSheetHeaderTitle.text = currentScreen switch
+                schedule.TaskSheetHeaderTitle.text = currentScreen switch
                 {
                     AppScreen.Inbox => "Inbox AI",
                     AppScreen.Completed => "Hoan tat AI",
@@ -27,15 +27,15 @@ namespace LocalAssistant.Features.Schedule
                 };
             }
 
-            if (ui.TaskSheetMonthLabel != null)
+            if (schedule.TaskSheetMonthLabel != null)
             {
                 if (DateTime.TryParse(selectedDate, out var parsed))
                 {
-                    ui.TaskSheetMonthLabel.text = parsed.ToString("MMMM yyyy");
+                    schedule.TaskSheetMonthLabel.text = parsed.ToString("MMMM yyyy");
                 }
             }
 
-            var placeholder = ui.CalendarArea?.Q<Label>();
+            var placeholder = schedule.CalendarArea?.Q<Label>();
             if (placeholder != null)
             {
                 placeholder.text = taskStore.BuildTabText(ToTaskTabName(currentScreen));

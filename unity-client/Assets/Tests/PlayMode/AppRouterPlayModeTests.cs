@@ -10,68 +10,80 @@ namespace LocalAssistant.Tests.PlayMode
         [Test]
         public void NavigateTodayShowsHomeAndChat()
         {
-            var refs = CreateRefs();
-            var router = new AppRouter(refs, null);
+            CreateRefs(out var shell, out var schedule, out var settings, out var chat);
+            var router = new AppRouter(shell, schedule, settings, chat, null);
 
             router.Navigate(AppScreen.Today);
 
-            Assert.AreEqual(DisplayStyle.Flex, refs.HomeViewContainer.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.ScheduleViewContainer.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.SettingsPanel.style.display.value);
-            Assert.AreEqual(DisplayStyle.Flex, refs.ChatPanelView.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.ScheduleSideView.style.display.value);
-            Assert.IsTrue(refs.TodayTab.ClassListContains("active"));
+            Assert.AreEqual(DisplayStyle.Flex, shell.HomeViewContainer.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, shell.ScheduleViewContainer.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, settings.SettingsPanel.style.display.value);
+            Assert.AreEqual(DisplayStyle.Flex, chat.ChatPanelView.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, shell.ScheduleSideView.style.display.value);
+            Assert.IsTrue(shell.TodayTab.ClassListContains("active"));
         }
 
         [Test]
         public void NavigateScheduleScreensShowScheduleAndSidebar()
         {
-            var refs = CreateRefs();
-            var router = new AppRouter(refs, null);
+            CreateRefs(out var shell, out var schedule, out var settings, out var chat);
+            var router = new AppRouter(shell, schedule, settings, chat, null);
 
             router.Navigate(AppScreen.Inbox);
 
-            Assert.AreEqual(DisplayStyle.None, refs.HomeViewContainer.style.display.value);
-            Assert.AreEqual(DisplayStyle.Flex, refs.ScheduleViewContainer.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.SettingsPanel.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.ChatPanelView.style.display.value);
-            Assert.AreEqual(DisplayStyle.Flex, refs.ScheduleSideView.style.display.value);
-            Assert.IsTrue(refs.WeekTab.ClassListContains("active"));
-            Assert.IsTrue(refs.InboxTab.ClassListContains("active"));
+            Assert.AreEqual(DisplayStyle.None, shell.HomeViewContainer.style.display.value);
+            Assert.AreEqual(DisplayStyle.Flex, shell.ScheduleViewContainer.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, settings.SettingsPanel.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, chat.ChatPanelView.style.display.value);
+            Assert.AreEqual(DisplayStyle.Flex, shell.ScheduleSideView.style.display.value);
+            Assert.IsTrue(shell.WeekTab.ClassListContains("active"));
+            Assert.IsTrue(schedule.InboxTab.ClassListContains("active"));
         }
 
         [Test]
         public void NavigateSettingsInvokesCallbackAndShowsSettings()
         {
-            var refs = CreateRefs();
+            CreateRefs(out var shell, out var schedule, out var settings, out var chat);
             AppScreen? observedScreen = null;
-            var router = new AppRouter(refs, screen => observedScreen = screen);
+            var router = new AppRouter(shell, schedule, settings, chat, screen => observedScreen = screen);
 
             router.Navigate(AppScreen.Settings);
 
             Assert.AreEqual(AppScreen.Settings, observedScreen);
-            Assert.AreEqual(DisplayStyle.None, refs.HomeViewContainer.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.ScheduleViewContainer.style.display.value);
-            Assert.AreEqual(DisplayStyle.Flex, refs.SettingsPanel.style.display.value);
-            Assert.AreEqual(DisplayStyle.Flex, refs.ChatPanelView.style.display.value);
-            Assert.AreEqual(DisplayStyle.None, refs.ScheduleSideView.style.display.value);
-            Assert.IsTrue(refs.SettingsTab.ClassListContains("active"));
+            Assert.AreEqual(DisplayStyle.None, shell.HomeViewContainer.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, shell.ScheduleViewContainer.style.display.value);
+            Assert.AreEqual(DisplayStyle.Flex, settings.SettingsPanel.style.display.value);
+            Assert.AreEqual(DisplayStyle.Flex, chat.ChatPanelView.style.display.value);
+            Assert.AreEqual(DisplayStyle.None, shell.ScheduleSideView.style.display.value);
+            Assert.IsTrue(shell.SettingsTab.ClassListContains("active"));
         }
 
-        private static AssistantUiRefs CreateRefs()
+        private static void CreateRefs(out AppShellRefs shell, out ScheduleScreenRefs schedule, out SettingsScreenRefs settings, out ChatPanelRefs chat)
         {
-            return new AssistantUiRefs
+            shell = new AppShellRefs
             {
                 TodayTab = new Button(),
                 WeekTab = new Button(),
-                InboxTab = new Button(),
-                CompletedTab = new Button(),
                 SettingsTab = new Button(),
                 HomeViewContainer = new VisualElement(),
                 ScheduleViewContainer = new VisualElement(),
-                SettingsPanel = new VisualElement(),
-                ChatPanelView = new VisualElement(),
                 ScheduleSideView = new VisualElement(),
+            };
+
+            schedule = new ScheduleScreenRefs
+            {
+                InboxTab = new Button(),
+                CompletedTab = new Button(),
+            };
+
+            settings = new SettingsScreenRefs
+            {
+                SettingsPanel = new VisualElement(),
+            };
+
+            chat = new ChatPanelRefs
+            {
+                ChatPanelView = new VisualElement(),
             };
         }
     }

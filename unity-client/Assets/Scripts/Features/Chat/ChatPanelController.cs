@@ -6,11 +6,11 @@ namespace LocalAssistant.Features.Chat
 {
     public sealed class ChatPanelController
     {
-        private readonly AssistantUiRefs ui;
+        private readonly ChatPanelRefs chat;
 
-        public ChatPanelController(AssistantUiRefs ui)
+        public ChatPanelController(ChatPanelRefs chat)
         {
-            this.ui = ui;
+            this.chat = chat;
         }
 
         public event Action<string> SendRequested;
@@ -18,27 +18,27 @@ namespace LocalAssistant.Features.Chat
 
         public void Bind()
         {
-            ui.SendButton.clicked += SubmitCurrentInput;
-            ui.MicButton.clicked += RequestMicToggle;
+            chat.SendButton.clicked += SubmitCurrentInput;
+            chat.MicButton.clicked += RequestMicToggle;
         }
 
         public void Render(string transcript)
         {
-            if (ui.ChatLogText != null)
+            if (chat.ChatLogText != null)
             {
-                ui.ChatLogText.text = transcript;
+                chat.ChatLogText.text = transcript;
             }
         }
 
         public void SubmitCurrentInput()
         {
-            if (ui.ChatInput == null)
+            if (chat.ChatInput == null)
             {
                 return;
             }
 
-            var text = ui.ChatInput.value;
-            ui.ChatInput.value = string.Empty;
+            var text = chat.ChatInput.value;
+            chat.ChatInput.value = string.Empty;
             SendRequested?.Invoke(text);
         }
 
@@ -49,9 +49,9 @@ namespace LocalAssistant.Features.Chat
 
         public void SetInteractable(bool canSendText, bool canUseMic)
         {
-            ui.ChatInput?.SetEnabled(canSendText);
-            ui.SendButton?.SetEnabled(canSendText);
-            ui.MicButton?.SetEnabled(canUseMic);
+            chat.ChatInput?.SetEnabled(canSendText);
+            chat.SendButton?.SetEnabled(canSendText);
+            chat.MicButton?.SetEnabled(canUseMic);
         }
     }
 }

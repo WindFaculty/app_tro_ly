@@ -7,40 +7,40 @@ namespace LocalAssistant.Features.Home
 {
     public sealed class HomeScreenController
     {
-        private readonly AssistantUiRefs ui;
+        private readonly HomeScreenRefs home;
 
-        public HomeScreenController(AssistantUiRefs ui)
+        public HomeScreenController(HomeScreenRefs home)
         {
-            this.ui = ui;
+            this.home = home;
         }
 
         public void Render(TaskViewModelStore taskStore, string stagePlaceholderText, AppScreen currentScreen)
         {
             var isHome = currentScreen == AppScreen.Today;
-            if (ui.TaskSummaryText != null)
+            if (home.TaskSummaryText != null)
             {
-                ui.TaskSummaryText.text = taskStore.BuildOverviewText().Replace("  |  ", "\n");
+                home.TaskSummaryText.text = taskStore.BuildOverviewText().Replace("  |  ", "\n");
             }
 
-            if (ui.TaskContentText != null)
+            if (home.TaskContentText != null)
             {
-                ui.TaskContentText.text = taskStore.BuildTabText("Today");
-                ui.TaskContentText.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
+                home.TaskContentText.text = taskStore.BuildTabText("Today");
+                home.TaskContentText.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
-            if (ui.QuickAddInput != null)
+            if (home.QuickAddInput != null)
             {
-                ui.QuickAddInput.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
+                home.QuickAddInput.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
-            if (ui.QuickAddButton != null)
+            if (home.QuickAddButton != null)
             {
-                ui.QuickAddButton.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
+                home.QuickAddButton.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
-            if (ui.StagePlaceholderText != null)
+            if (home.StagePlaceholderText != null)
             {
-                ui.StagePlaceholderText.text = stagePlaceholderText;
+                home.StagePlaceholderText.text = stagePlaceholderText;
             }
         }
     }

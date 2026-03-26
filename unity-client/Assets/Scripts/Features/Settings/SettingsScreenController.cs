@@ -6,60 +6,60 @@ namespace LocalAssistant.Features.Settings
 {
     public sealed class SettingsScreenController
     {
-        private readonly AssistantUiRefs ui;
+        private readonly SettingsScreenRefs settings;
 
-        public SettingsScreenController(AssistantUiRefs ui)
+        public SettingsScreenController(SettingsScreenRefs settings)
         {
-            this.ui = ui;
+            this.settings = settings;
         }
 
         public void Render(SettingsViewModelStore settingsStore)
         {
-            if (ui.SpeakRepliesToggle != null)
+            if (settings.SpeakRepliesToggle != null)
             {
-                ui.SpeakRepliesToggle.SetValueWithoutNotify(settingsStore.Current.voice.speak_replies);
+                settings.SpeakRepliesToggle.SetValueWithoutNotify(settingsStore.Current.voice.speak_replies);
             }
 
-            if (ui.TranscriptPreviewToggle != null)
+            if (settings.TranscriptPreviewToggle != null)
             {
-                ui.TranscriptPreviewToggle.SetValueWithoutNotify(settingsStore.Current.voice.show_transcript_preview);
+                settings.TranscriptPreviewToggle.SetValueWithoutNotify(settingsStore.Current.voice.show_transcript_preview);
             }
 
-            if (ui.MiniAssistantToggle != null)
+            if (settings.MiniAssistantToggle != null)
             {
-                ui.MiniAssistantToggle.SetValueWithoutNotify(settingsStore.Current.window_mode.mini_assistant_enabled);
+                settings.MiniAssistantToggle.SetValueWithoutNotify(settingsStore.Current.window_mode.mini_assistant_enabled);
             }
 
-            if (ui.ReminderSpeechToggle != null)
+            if (settings.ReminderSpeechToggle != null)
             {
-                ui.ReminderSpeechToggle.SetValueWithoutNotify(settingsStore.Current.reminder.speech_enabled);
+                settings.ReminderSpeechToggle.SetValueWithoutNotify(settingsStore.Current.reminder.speech_enabled);
             }
 
-            if (ui.SettingsSummaryText != null)
+            if (settings.SettingsSummaryText != null)
             {
-                ui.SettingsSummaryText.text = settingsStore.BuildSummary();
+                settings.SettingsSummaryText.text = settingsStore.BuildSummary();
             }
         }
 
         public void SetStatus(string message, Color color)
         {
-            if (ui.SettingsStatusText == null)
+            if (settings.SettingsStatusText == null)
             {
                 return;
             }
 
-            ui.SettingsStatusText.text = message;
-            ui.SettingsStatusText.style.color = new StyleColor(color);
+            settings.SettingsStatusText.text = message;
+            settings.SettingsStatusText.style.color = new StyleColor(color);
         }
 
         public void SetEditable(bool isEditable)
         {
-            ui.SaveSettingsButton?.SetEnabled(isEditable);
-            ui.ReloadSettingsButton?.SetEnabled(isEditable);
-            ui.SpeakRepliesToggle?.SetEnabled(isEditable);
-            ui.TranscriptPreviewToggle?.SetEnabled(isEditable);
-            ui.MiniAssistantToggle?.SetEnabled(isEditable);
-            ui.ReminderSpeechToggle?.SetEnabled(isEditable);
+            settings.SaveSettingsButton?.SetEnabled(isEditable);
+            settings.ReloadSettingsButton?.SetEnabled(isEditable);
+            settings.SpeakRepliesToggle?.SetEnabled(isEditable);
+            settings.TranscriptPreviewToggle?.SetEnabled(isEditable);
+            settings.MiniAssistantToggle?.SetEnabled(isEditable);
+            settings.ReminderSpeechToggle?.SetEnabled(isEditable);
         }
     }
 }

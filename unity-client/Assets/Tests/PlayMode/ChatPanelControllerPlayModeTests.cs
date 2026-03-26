@@ -37,9 +37,9 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.IsTrue(refs.MicButton.enabledSelf);
         }
 
-        private static AssistantUiRefs CreateRefs()
+        private static ChatPanelRefs CreateRefs()
         {
-            return new AssistantUiRefs
+            return new ChatPanelRefs
             {
                 ChatLogText = new Label(),
                 ChatInput = new TextField(),

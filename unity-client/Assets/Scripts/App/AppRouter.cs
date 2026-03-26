@@ -15,12 +15,18 @@ namespace LocalAssistant.App
 
     public sealed class AppRouter
     {
-        private readonly AssistantUiRefs ui;
+        private readonly AppShellRefs shell;
+        private readonly ScheduleScreenRefs schedule;
+        private readonly SettingsScreenRefs settings;
+        private readonly ChatPanelRefs chat;
         private readonly Action<AppScreen> onScreenChanged;
 
-        public AppRouter(AssistantUiRefs ui, Action<AppScreen> onScreenChanged)
+        public AppRouter(AppShellRefs shell, ScheduleScreenRefs schedule, SettingsScreenRefs settings, ChatPanelRefs chat, Action<AppScreen> onScreenChanged)
         {
-            this.ui = ui;
+            this.shell = shell;
+            this.schedule = schedule;
+            this.settings = settings;
+            this.chat = chat;
             this.onScreenChanged = onScreenChanged;
         }
 
@@ -28,11 +34,11 @@ namespace LocalAssistant.App
 
         public void BindTabs()
         {
-            ui.TodayTab.clicked += () => Navigate(AppScreen.Today);
-            ui.WeekTab.clicked += () => Navigate(AppScreen.Week);
-            ui.InboxTab.clicked += () => Navigate(AppScreen.Inbox);
-            ui.CompletedTab.clicked += () => Navigate(AppScreen.Completed);
-            ui.SettingsTab.clicked += () => Navigate(AppScreen.Settings);
+            shell.TodayTab.clicked += () => Navigate(AppScreen.Today);
+            shell.WeekTab.clicked += () => Navigate(AppScreen.Week);
+            schedule.InboxTab.clicked += () => Navigate(AppScreen.Inbox);
+            schedule.CompletedTab.clicked += () => Navigate(AppScreen.Completed);
+            shell.SettingsTab.clicked += () => Navigate(AppScreen.Settings);
         }
 
         public void Navigate(AppScreen screen)
@@ -43,17 +49,17 @@ namespace LocalAssistant.App
             var isSchedule = screen == AppScreen.Week || screen == AppScreen.Inbox || screen == AppScreen.Completed;
             var isSettings = screen == AppScreen.Settings;
 
-            SetDisplay(ui.HomeViewContainer, isHome);
-            SetDisplay(ui.ScheduleViewContainer, isSchedule);
-            SetDisplay(ui.SettingsPanel, isSettings);
-            SetDisplay(ui.ChatPanelView, !isSchedule);
-            SetDisplay(ui.ScheduleSideView, isSchedule);
+            SetDisplay(shell.HomeViewContainer, isHome);
+            SetDisplay(shell.ScheduleViewContainer, isSchedule);
+            SetDisplay(settings.SettingsPanel, isSettings);
+            SetDisplay(chat.ChatPanelView, !isSchedule);
+            SetDisplay(shell.ScheduleSideView, isSchedule);
 
-            SetTabButtonVisual(ui.TodayTab, screen == AppScreen.Today);
-            SetTabButtonVisual(ui.WeekTab, screen == AppScreen.Week || screen == AppScreen.Inbox || screen == AppScreen.Completed);
-            SetTabButtonVisual(ui.InboxTab, screen == AppScreen.Inbox);
-            SetTabButtonVisual(ui.CompletedTab, screen == AppScreen.Completed);
-            SetTabButtonVisual(ui.SettingsTab, screen == AppScreen.Settings);
+            SetTabButtonVisual(shell.TodayTab, screen == AppScreen.Today);
+            SetTabButtonVisual(shell.WeekTab, screen == AppScreen.Week || screen == AppScreen.Inbox || screen == AppScreen.Completed);
+            SetTabButtonVisual(schedule.InboxTab, screen == AppScreen.Inbox);
+            SetTabButtonVisual(schedule.CompletedTab, screen == AppScreen.Completed);
+            SetTabButtonVisual(shell.SettingsTab, screen == AppScreen.Settings);
 
             onScreenChanged?.Invoke(screen);
         }

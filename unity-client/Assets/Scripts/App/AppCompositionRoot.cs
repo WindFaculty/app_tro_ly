@@ -44,12 +44,12 @@ namespace LocalAssistant.App
             var lipSyncController = runtimeRoot.AddComponent<LipSyncController>();
             lipSyncController.BindAudioSource(audioPlaybackController.Output);
 
-            var ui = UiFactory.Build(parent);
+            var ui = UiDocumentLoader.Load(parent);
             var subtitlePresenter = host.AddComponent<SubtitlePresenter>();
-            subtitlePresenter.Bind(ui.SubtitleText, ui.SubtitleCard);
+            subtitlePresenter.Bind(ui.Subtitle.SubtitleText, ui.Subtitle.SubtitleCard);
 
             var reminderPresenter = host.AddComponent<ReminderPresenter>();
-            reminderPresenter.Bind(ui.ReminderText, ui.ReminderCard);
+            reminderPresenter.Bind(ui.Reminder.ReminderText, ui.Reminder.ReminderCard);
 
             return new AppComposition
             {

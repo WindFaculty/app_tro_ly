@@ -15,7 +15,7 @@ namespace LocalAssistant.Tests.PlayMode
         [Test]
         public void HomeScreenControllerRendersOverviewAndHomeVisibility()
         {
-            var refs = CreateRefs();
+            var refs = CreateHomeRefs();
             var store = new TaskViewModelStore();
             store.ApplyToday(new TodayTasksResponse
             {
@@ -33,7 +33,7 @@ namespace LocalAssistant.Tests.PlayMode
         [Test]
         public void ScheduleScreenControllerRendersTabTextIntoCalendarArea()
         {
-            var refs = CreateRefs();
+            var refs = CreateScheduleRefs();
             var calendarLabel = new Label();
             refs.CalendarArea.Add(calendarLabel);
             var store = new TaskViewModelStore();
@@ -52,7 +52,7 @@ namespace LocalAssistant.Tests.PlayMode
         [Test]
         public void SettingsScreenControllerRendersValuesAndStatus()
         {
-            var refs = CreateRefs();
+            var refs = CreateSettingsRefs();
             var store = new SettingsViewModelStore();
             store.SetSpeakReplies(true);
             store.SetTranscriptPreview(true);
@@ -70,18 +70,32 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.IsFalse(refs.SaveSettingsButton.enabledSelf);
         }
 
-        private static AssistantUiRefs CreateRefs()
+        private static HomeScreenRefs CreateHomeRefs()
         {
-            return new AssistantUiRefs
+            return new HomeScreenRefs
             {
                 TaskSummaryText = new Label(),
                 TaskContentText = new Label(),
                 StagePlaceholderText = new Label(),
                 QuickAddInput = new TextField(),
                 QuickAddButton = new Button(),
+            };
+        }
+
+        private static ScheduleScreenRefs CreateScheduleRefs()
+        {
+            return new ScheduleScreenRefs
+            {
                 TaskSheetHeaderTitle = new Label(),
                 TaskSheetMonthLabel = new Label(),
                 CalendarArea = new VisualElement(),
+            };
+        }
+
+        private static SettingsScreenRefs CreateSettingsRefs()
+        {
+            return new SettingsScreenRefs
+            {
                 SpeakRepliesToggle = new Toggle(),
                 TranscriptPreviewToggle = new Toggle(),
                 MiniAssistantToggle = new Toggle(),

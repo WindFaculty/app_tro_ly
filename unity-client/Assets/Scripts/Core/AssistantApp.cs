@@ -70,11 +70,11 @@ namespace LocalAssistant.Core
             reminderPresenter = composition.ReminderPresenter;
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
-            appRouter = new AppRouter(ui, OnScreenChanged);
-            homeScreenController = new HomeScreenController(ui);
-            scheduleScreenController = new ScheduleScreenController(ui);
-            settingsScreenController = new SettingsScreenController(ui);
-            chatPanelController = new ChatPanelController(ui);
+            appRouter = new AppRouter(ui.Shell, ui.Schedule, ui.Settings, ui.Chat, OnScreenChanged);
+            homeScreenController = new HomeScreenController(ui.Home);
+            scheduleScreenController = new ScheduleScreenController(ui.Schedule);
+            settingsScreenController = new SettingsScreenController(ui.Settings);
+            chatPanelController = new ChatPanelController(ui.Chat);
             WireUi();
             appRouter.BindTabs();
             chatPanelController.Bind();
@@ -116,14 +116,14 @@ namespace LocalAssistant.Core
 
         private void WireUi()
         {
-            ui.RefreshButton.clicked += RefreshWorkspace;
-            ui.QuickAddButton.clicked += SubmitQuickAdd;
-            ui.ReloadSettingsButton.clicked += ReloadSettings;
-            ui.SaveSettingsButton.clicked += SaveSettings;
-            ui.SpeakRepliesToggle.RegisterValueChangedCallback(evt => OnSpeakRepliesChanged(evt.newValue));
-            ui.TranscriptPreviewToggle.RegisterValueChangedCallback(evt => OnTranscriptPreviewChanged(evt.newValue));
-            ui.MiniAssistantToggle.RegisterValueChangedCallback(evt => OnMiniAssistantChanged(evt.newValue));
-            ui.ReminderSpeechToggle.RegisterValueChangedCallback(evt => OnReminderSpeechChanged(evt.newValue));
+            ui.Shell.RefreshButton.clicked += RefreshWorkspace;
+            ui.Home.QuickAddButton.clicked += SubmitQuickAdd;
+            ui.Settings.ReloadSettingsButton.clicked += ReloadSettings;
+            ui.Settings.SaveSettingsButton.clicked += SaveSettings;
+            ui.Settings.SpeakRepliesToggle.RegisterValueChangedCallback(evt => OnSpeakRepliesChanged(evt.newValue));
+            ui.Settings.TranscriptPreviewToggle.RegisterValueChangedCallback(evt => OnTranscriptPreviewChanged(evt.newValue));
+            ui.Settings.MiniAssistantToggle.RegisterValueChangedCallback(evt => OnMiniAssistantChanged(evt.newValue));
+            ui.Settings.ReminderSpeechToggle.RegisterValueChangedCallback(evt => OnReminderSpeechChanged(evt.newValue));
         }
 
         // Chat logic
@@ -198,10 +198,10 @@ namespace LocalAssistant.Core
 
         private async void SubmitQuickAdd()
         {
-            if (!string.IsNullOrWhiteSpace(ui.QuickAddInput.value))
+            if (!string.IsNullOrWhiteSpace(ui.Home.QuickAddInput.value))
             {
-                var quickText = "Add task " + ui.QuickAddInput.value.Trim();
-                ui.QuickAddInput.value = string.Empty;
+                var quickText = "Add task " + ui.Home.QuickAddInput.value.Trim();
+                ui.Home.QuickAddInput.value = string.Empty;
                 await SubmitChatAsync(quickText, false);
             }
         }
@@ -401,8 +401,8 @@ namespace LocalAssistant.Core
         { 
             if (!HasLiveUi()) return; 
             currentHealth = HealthResponseNormalizer.Normalize(health); 
-            ui.HealthBanner.text = $"{HealthStatusMapper.ToLabel(currentHealth.status)}\nDB {BoolLabel(currentHealth.database.available)} | STT {BoolLabel(currentHealth.runtimes.stt.available)}"; 
-            ui.HealthBanner.style.color = new StyleColor(HealthStatusMapper.ToColor(currentHealth.status)); 
+            ui.Shell.HealthBanner.text = $"{HealthStatusMapper.ToLabel(currentHealth.status)}\nDB {BoolLabel(currentHealth.database.available)} | STT {BoolLabel(currentHealth.runtimes.stt.available)}"; 
+            ui.Shell.HealthBanner.style.color = new StyleColor(HealthStatusMapper.ToColor(currentHealth.status)); 
             ApplyInteractionState(currentHealth); 
             RefreshStagePanel(); 
         }
@@ -445,9 +445,9 @@ namespace LocalAssistant.Core
             if (!HasLiveUi()) return; 
             var enableTaskActions = HealthRecoveryAdvisor.CanUseTaskActions(health); 
             chatPanelController.SetInteractable(enableTaskActions, HealthRecoveryAdvisor.CanUseMic(health));
-            SetInteractable(ui.QuickAddInput, enableTaskActions);
-            SetInteractable(ui.QuickAddButton, enableTaskActions);
-            SetInteractable(ui.RefreshButton, true);
+            SetInteractable(ui.Home.QuickAddInput, enableTaskActions);
+            SetInteractable(ui.Home.QuickAddButton, enableTaskActions);
+            SetInteractable(ui.Shell.RefreshButton, true);
             settingsScreenController.SetEditable(HealthRecoveryAdvisor.CanEditSettings(health));
         }
 
@@ -460,7 +460,7 @@ namespace LocalAssistant.Core
         private void OnAvatarStateChanged(AvatarState _) => RefreshStagePanel();
         private void OnAudioPlaybackCompleted() => RefreshStagePanel();
         
-        private void RefreshStagePanel() { if (!HasLiveUi() || avatarStateMachine == null) return; ui.AvatarStateText.text = avatarStateMachine.CurrentState.ToString(); ui.StageStatusText.text = BuildStageStatusText(); ui.StagePlaceholderText.text = BuildStagePlaceholderText(); }
+        private void RefreshStagePanel() { if (!HasLiveUi() || avatarStateMachine == null) return; ui.Shell.AvatarStateText.text = avatarStateMachine.CurrentState.ToString(); ui.Shell.StageStatusText.text = BuildStageStatusText(); ui.Home.StagePlaceholderText.text = BuildStagePlaceholderText(); }
         
         private string BuildStageStatusText() { var builder = new StringBuilder(); builder.AppendLine($"Health: {HealthStatusMapper.ToLabel(currentHealth.status)}"); builder.AppendLine($"Focus: {ToTaskTabName(currentScreen)}  |  Date: {(string.IsNullOrEmpty(selectedDate) ? "Auto" : selectedDate)}"); builder.AppendLine($"{BuildLlmStatus(currentHealth.runtimes.llm)}  |  STT {BoolLabel(currentHealth.runtimes.stt.available)}  |  TTS {BoolLabel(currentHealth.runtimes.tts.available)}"); builder.AppendLine($"Voice replies {BoolLabel(settingsStore.Current.voice.speak_replies)}  |  Transcript {BoolLabel(settingsStore.Current.voice.show_transcript_preview)}"); builder.Append($"Route {chatStore.CurrentRoute}  |  Provider {chatStore.CurrentProvider}  |  Fallbacks {chatStore.FallbackCount}"); return builder.ToString().Trim(); }
         
@@ -470,7 +470,7 @@ namespace LocalAssistant.Core
         private void ClearSubtitleAndIdle() { subtitlePresenter.Hide(); avatarStateMachine.SetState(AvatarState.Idle); avatarConversationBridge?.OnIdle(); }
         private void HandleBackendUnavailableState() { SetSettingsStatus("Backend unavailable.", new Color(0.67f, 0.24f, 0.20f, 1f)); avatarStateMachine?.SetState(AvatarState.Warning); }
         private static AudioClip TrimClip(AudioClip source, int samples) { var data = new float[samples * source.channels]; source.GetData(data, 0); var clip = AudioClip.Create("RecordedClip", samples, source.channels, source.frequency, false); clip.SetData(data, 0); return clip; }
-        private bool HasLiveUi() => ui != null && ui.HealthBanner != null;
+        private bool HasLiveUi() => ui?.Shell?.HealthBanner != null;
         private static string ToTaskTabName(AppScreen screen) => screen switch
         {
             AppScreen.Today => "Today",
