@@ -44,6 +44,8 @@ namespace LocalAssistant.Core
         public VisualElement ScheduleSideView;
         
         public VisualElement CalendarArea;
+        public Label TaskSheetHeaderTitle;
+        public Label TaskSheetMonthLabel;
     }
 
     public static class UiFactory
@@ -116,6 +118,8 @@ namespace LocalAssistant.Core
             refs.SettingsTab = root.Q<Button>("SettingsTab");
             
             refs.CalendarArea = root.Q<VisualElement>("CalendarArea");
+            refs.TaskSheetHeaderTitle = root.Q<Label>("TaskSheetHeaderTitle");
+            refs.TaskSheetMonthLabel = root.Q<Label>("TaskSheetMonthLabel");
             
             refs.HomeViewContainer = root.Q<VisualElement>("HomeViewContainer");
             refs.ScheduleViewContainer = root.Q<VisualElement>("ScheduleViewContainer");

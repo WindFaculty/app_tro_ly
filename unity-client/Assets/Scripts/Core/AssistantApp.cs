@@ -7,6 +7,9 @@ using LocalAssistant.App;
 using LocalAssistant.Audio;
 using LocalAssistant.Avatar;
 using LocalAssistant.Chat;
+using LocalAssistant.Features.Home;
+using LocalAssistant.Features.Schedule;
+using LocalAssistant.Features.Settings;
 using LocalAssistant.Network;
 using LocalAssistant.Notifications;
 using LocalAssistant.Tasks;
@@ -37,6 +40,9 @@ namespace LocalAssistant.Core
         private SubtitlePresenter subtitlePresenter;
         private ReminderPresenter reminderPresenter;
         private AppRouter appRouter;
+        private HomeScreenController homeScreenController;
+        private ScheduleScreenController scheduleScreenController;
+        private SettingsScreenController settingsScreenController;
 
         private HealthResponse currentHealth = new();
         private AppScreen currentScreen = AppScreen.Week;
@@ -63,6 +69,9 @@ namespace LocalAssistant.Core
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
             appRouter = new AppRouter(ui, OnScreenChanged);
+            homeScreenController = new HomeScreenController(ui);
+            scheduleScreenController = new ScheduleScreenController(ui);
+            settingsScreenController = new SettingsScreenController(ui);
             WireUi();
             appRouter.BindTabs();
             appRouter.Navigate(currentScreen);
@@ -377,14 +386,8 @@ namespace LocalAssistant.Core
         private void RefreshTaskView()
         {
             if (!HasLiveUi()) return;
-            var isHome = currentScreen == AppScreen.Today;
-            
-            ui.TaskSummaryText.text = taskStore.BuildOverviewText().Replace("  |  ", "\n");
-            ui.TaskContentText.text = taskStore.BuildTabText(ToTaskTabName(currentScreen));
-            
-            ui.TaskContentText.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
-            ui.QuickAddInput.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
-            ui.QuickAddButton.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
+            homeScreenController.Render(taskStore, BuildStagePlaceholderText(), currentScreen);
+            scheduleScreenController.Render(taskStore, currentScreen, selectedDate);
             RefreshStagePanel();
         }
 
@@ -414,20 +417,16 @@ namespace LocalAssistant.Core
             isBindingSettingsUi = true; 
             try 
             { 
-                ui.SpeakRepliesToggle.SetValueWithoutNotify(settingsStore.Current.voice.speak_replies); 
-                ui.TranscriptPreviewToggle.SetValueWithoutNotify(settingsStore.Current.voice.show_transcript_preview); 
-                ui.MiniAssistantToggle.SetValueWithoutNotify(settingsStore.Current.window_mode.mini_assistant_enabled); 
-                ui.ReminderSpeechToggle.SetValueWithoutNotify(settingsStore.Current.reminder.speech_enabled); 
+                settingsScreenController.Render(settingsStore);
             } 
             finally 
             { 
                 isBindingSettingsUi = false; 
             } 
-            RefreshSettingsPanel(); 
             RefreshStagePanel(); 
         }
 
-        private void RefreshSettingsPanel() { if (HasLiveUi()) ui.SettingsSummaryText.text = settingsStore.BuildSummary(); }
+        private void RefreshSettingsPanel() { if (HasLiveUi()) settingsScreenController.Render(settingsStore); }
         
         private void OnSpeakRepliesChanged(bool value) { if (!isBindingSettingsUi) { settingsStore.SetSpeakReplies(value); OnSettingsChanged(); } }
         private void OnTranscriptPreviewChanged(bool value) { if (!isBindingSettingsUi) { settingsStore.SetTranscriptPreview(value); if (!value) chatStore.SetTranscriptPreview(string.Empty); RefreshChatLog(); OnSettingsChanged(); } }
@@ -435,7 +434,7 @@ namespace LocalAssistant.Core
         private void OnReminderSpeechChanged(bool value) { if (!isBindingSettingsUi) { settingsStore.SetReminderSpeechEnabled(value); OnSettingsChanged(); } }
         private void OnSettingsChanged() { RefreshSettingsPanel(); RefreshStagePanel(); SetSettingsStatus("Unsaved changes.", new Color(0.74f, 0.49f, 0.14f, 1f)); }
         
-        private void SetSettingsStatus(string message, Color color) { if (HasLiveUi()) { ui.SettingsStatusText.text = message; ui.SettingsStatusText.style.color = new StyleColor(color); } }
+        private void SetSettingsStatus(string message, Color color) { if (HasLiveUi()) settingsScreenController.SetStatus(message, color); }
         
         private void ApplyInteractionState(HealthResponse health) 
         { 
@@ -447,8 +446,7 @@ namespace LocalAssistant.Core
             SetInteractable(ui.QuickAddButton, enableTaskActions);
             SetInteractable(ui.RefreshButton, true);
             SetInteractable(ui.MicButton, HealthRecoveryAdvisor.CanUseMic(health));
-            SetInteractable(ui.SaveSettingsButton, HealthRecoveryAdvisor.CanEditSettings(health));
-            SetInteractable(ui.ReloadSettingsButton, HealthRecoveryAdvisor.CanEditSettings(health));
+            settingsScreenController.SetEditable(HealthRecoveryAdvisor.CanEditSettings(health));
         }
 
         private void SetInteractable(VisualElement element, bool interactable)
