@@ -36,9 +36,10 @@ namespace LocalAssistant.Core
         private AudioPlaybackController audioPlaybackController;
         private SubtitlePresenter subtitlePresenter;
         private ReminderPresenter reminderPresenter;
+        private AppRouter appRouter;
 
         private HealthResponse currentHealth = new();
-        private string currentTab = "Week";
+        private AppScreen currentScreen = AppScreen.Week;
         private string selectedDate = string.Empty;
         private bool isBindingSettingsUi;
         private bool continuousVoiceEnabled;
@@ -61,7 +62,10 @@ namespace LocalAssistant.Core
             reminderPresenter = composition.ReminderPresenter;
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
+            appRouter = new AppRouter(ui, OnScreenChanged);
             WireUi();
+            appRouter.BindTabs();
+            appRouter.Navigate(currentScreen);
             RefreshTaskView();
             RefreshChatLog();
             RefreshStagePanel();
@@ -97,11 +101,6 @@ namespace LocalAssistant.Core
 
         private void WireUi()
         {
-            ui.TodayTab.clicked += () => SetTab("Today");
-            ui.WeekTab.clicked += () => SetTab("Week");
-            ui.InboxTab.clicked += () => SetTab("Inbox");
-            ui.CompletedTab.clicked += () => SetTab("Completed");
-            ui.SettingsTab.clicked += () => SetTab("Settings");
             ui.RefreshButton.clicked += RefreshWorkspace;
             ui.SendButton.clicked += () => SubmitFromInput(ui.ChatInput);
             ui.QuickAddButton.clicked += SubmitQuickAdd;
@@ -372,31 +371,20 @@ namespace LocalAssistant.Core
         }
 
         // Routing
-        private void SetTab(string tabName) { currentTab = tabName; RefreshTaskView(); RefreshStagePanel(); }
+        private void OnScreenChanged(AppScreen screen) { currentScreen = screen; RefreshTaskView(); RefreshStagePanel(); }
 
         // Task logic
         private void RefreshTaskView()
         {
             if (!HasLiveUi()) return;
-            var isHome = currentTab == "Today";
-            var isSchedule = currentTab == "Week" || currentTab == "Inbox" || currentTab == "Completed";
-            var isSettings = currentTab == "Settings";
+            var isHome = currentScreen == AppScreen.Today;
             
             ui.TaskSummaryText.text = taskStore.BuildOverviewText().Replace("  |  ", "\n");
-            ui.TaskContentText.text = taskStore.BuildTabText(currentTab);
+            ui.TaskContentText.text = taskStore.BuildTabText(ToTaskTabName(currentScreen));
             
             ui.TaskContentText.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
             ui.QuickAddInput.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
             ui.QuickAddButton.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
-            
-            if (ui.HomeViewContainer != null) ui.HomeViewContainer.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
-            if (ui.ScheduleViewContainer != null) ui.ScheduleViewContainer.style.display = isSchedule ? DisplayStyle.Flex : DisplayStyle.None;
-            if (ui.SettingsPanel != null) ui.SettingsPanel.style.display = isSettings ? DisplayStyle.Flex : DisplayStyle.None;
-            
-            if (ui.ChatPanelView != null) ui.ChatPanelView.style.display = isSchedule ? DisplayStyle.None : DisplayStyle.Flex;
-            if (ui.ScheduleSideView != null) ui.ScheduleSideView.style.display = isSchedule ? DisplayStyle.Flex : DisplayStyle.None;
-
-            UpdateTabButtonStyles();
             RefreshStagePanel();
         }
 
@@ -474,31 +462,23 @@ namespace LocalAssistant.Core
         
         private void RefreshStagePanel() { if (!HasLiveUi() || avatarStateMachine == null) return; ui.AvatarStateText.text = avatarStateMachine.CurrentState.ToString(); ui.StageStatusText.text = BuildStageStatusText(); ui.StagePlaceholderText.text = BuildStagePlaceholderText(); }
         
-        private string BuildStageStatusText() { var builder = new StringBuilder(); builder.AppendLine($"Health: {HealthStatusMapper.ToLabel(currentHealth.status)}"); builder.AppendLine($"Focus: {currentTab}  |  Date: {(string.IsNullOrEmpty(selectedDate) ? "Auto" : selectedDate)}"); builder.AppendLine($"{BuildLlmStatus(currentHealth.runtimes.llm)}  |  STT {BoolLabel(currentHealth.runtimes.stt.available)}  |  TTS {BoolLabel(currentHealth.runtimes.tts.available)}"); builder.AppendLine($"Voice replies {BoolLabel(settingsStore.Current.voice.speak_replies)}  |  Transcript {BoolLabel(settingsStore.Current.voice.show_transcript_preview)}"); builder.Append($"Route {chatStore.CurrentRoute}  |  Provider {chatStore.CurrentProvider}  |  Fallbacks {chatStore.FallbackCount}"); return builder.ToString().Trim(); }
+        private string BuildStageStatusText() { var builder = new StringBuilder(); builder.AppendLine($"Health: {HealthStatusMapper.ToLabel(currentHealth.status)}"); builder.AppendLine($"Focus: {ToTaskTabName(currentScreen)}  |  Date: {(string.IsNullOrEmpty(selectedDate) ? "Auto" : selectedDate)}"); builder.AppendLine($"{BuildLlmStatus(currentHealth.runtimes.llm)}  |  STT {BoolLabel(currentHealth.runtimes.stt.available)}  |  TTS {BoolLabel(currentHealth.runtimes.tts.available)}"); builder.AppendLine($"Voice replies {BoolLabel(settingsStore.Current.voice.speak_replies)}  |  Transcript {BoolLabel(settingsStore.Current.voice.show_transcript_preview)}"); builder.Append($"Route {chatStore.CurrentRoute}  |  Provider {chatStore.CurrentProvider}  |  Fallbacks {chatStore.FallbackCount}"); return builder.ToString().Trim(); }
         
         private string BuildStagePlaceholderText() { var builder = new StringBuilder(); builder.AppendLine("KHUNG AVATAR"); builder.AppendLine(); builder.AppendLine("Assistant dang chay theo kieu hybrid stream."); builder.AppendLine("Chat hien route, provider, latency va transcript."); builder.AppendLine(); builder.Append(taskStore.BuildOverviewText()); return builder.ToString().Trim(); }
-        
-        private void UpdateTabButtonStyles() 
-        { 
-            if (!HasLiveUi()) return; 
-            SetTabButtonVisual(ui.TodayTab, currentTab == "Today"); 
-            SetTabButtonVisual(ui.WeekTab, currentTab == "Week" || currentTab == "Inbox" || currentTab == "Completed"); 
-            SetTabButtonVisual(ui.InboxTab, currentTab == "Inbox"); 
-            SetTabButtonVisual(ui.CompletedTab, currentTab == "Completed"); 
-            SetTabButtonVisual(ui.SettingsTab, currentTab == "Settings"); 
-        }
-
-        private static void SetTabButtonVisual(Button button, bool isActive) 
-        { 
-            if (button == null) return; 
-            if (isActive) button.AddToClassList("active");
-            else button.RemoveFromClassList("active");
-        }
 
         // Voice
         private void ClearSubtitleAndIdle() { subtitlePresenter.Hide(); avatarStateMachine.SetState(AvatarState.Idle); avatarConversationBridge?.OnIdle(); }
         private void HandleBackendUnavailableState() { SetSettingsStatus("Backend unavailable.", new Color(0.67f, 0.24f, 0.20f, 1f)); avatarStateMachine?.SetState(AvatarState.Warning); }
         private static AudioClip TrimClip(AudioClip source, int samples) { var data = new float[samples * source.channels]; source.GetData(data, 0); var clip = AudioClip.Create("RecordedClip", samples, source.channels, source.frequency, false); clip.SetData(data, 0); return clip; }
         private bool HasLiveUi() => ui != null && ui.HealthBanner != null;
+        private static string ToTaskTabName(AppScreen screen) => screen switch
+        {
+            AppScreen.Today => "Today",
+            AppScreen.Week => "Week",
+            AppScreen.Inbox => "Inbox",
+            AppScreen.Completed => "Completed",
+            AppScreen.Settings => "Settings",
+            _ => "Week",
+        };
     }
 }
