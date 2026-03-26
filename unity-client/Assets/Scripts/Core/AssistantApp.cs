@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using LocalAssistant.App;
 using LocalAssistant.Audio;
 using LocalAssistant.Avatar;
 using LocalAssistant.Chat;
@@ -50,14 +51,16 @@ namespace LocalAssistant.Core
         private void Awake()
         {
             cancellationTokenSource = new CancellationTokenSource();
-            SetupScene();
-            ui = UiFactory.Build(transform);
+            var composition = AppCompositionRoot.Compose(gameObject, transform);
+            ui = composition.Ui;
+            avatarStateMachine = composition.AvatarStateMachine;
+            avatarConversationBridge = composition.AvatarConversationBridge;
+            lipSyncController = composition.LipSyncController;
+            audioPlaybackController = composition.AudioPlaybackController;
+            subtitlePresenter = composition.SubtitlePresenter;
+            reminderPresenter = composition.ReminderPresenter;
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
-            subtitlePresenter = gameObject.AddComponent<SubtitlePresenter>();
-            subtitlePresenter.Bind(ui.SubtitleText, ui.SubtitleCard);
-            reminderPresenter = gameObject.AddComponent<ReminderPresenter>();
-            reminderPresenter.Bind(ui.ReminderText, ui.ReminderCard);
             WireUi();
             RefreshTaskView();
             RefreshChatLog();
@@ -91,31 +94,6 @@ namespace LocalAssistant.Core
 
         public async void BeginPushToTalk() => await BeginListeningAsync();
         public async void EndPushToTalk() => await FinishVoiceCaptureAsync(false);
-
-        private void SetupScene()
-        {
-            var sceneCamera = Camera.main;
-            if (sceneCamera == null)
-            {
-                var cameraGo = new GameObject("AssistantCamera", typeof(Camera), typeof(AudioListener));
-                sceneCamera = cameraGo.GetComponent<Camera>();
-            }
-
-            sceneCamera.orthographic = true;
-            sceneCamera.clearFlags = CameraClearFlags.SolidColor;
-            sceneCamera.transform.position = new Vector3(0f, 0f, -10f);
-            sceneCamera.transform.rotation = Quaternion.identity;
-            sceneCamera.backgroundColor = new Color(0.14f, 0.08f, 0.05f, 1f);
-
-            var runtimeRoot = new GameObject("AssistantRuntime");
-            runtimeRoot.transform.SetParent(transform, false);
-            avatarStateMachine = runtimeRoot.AddComponent<AvatarStateMachine>();
-            audioPlaybackController = runtimeRoot.AddComponent<AudioPlaybackController>();
-            lipSyncController = runtimeRoot.AddComponent<LipSyncController>();
-            lipSyncController.BindAudioSource(audioPlaybackController.Output);
-            
-            avatarConversationBridge = FindFirstObjectByType<AvatarConversationBridge>();
-        }
 
         private void WireUi()
         {

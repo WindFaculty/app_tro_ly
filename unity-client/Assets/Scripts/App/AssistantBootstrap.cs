@@ -1,7 +1,8 @@
 using System;
+using LocalAssistant.Core;
 using UnityEngine;
 
-namespace LocalAssistant.Core
+namespace LocalAssistant.App
 {
     public static class AssistantBootstrap
     {
