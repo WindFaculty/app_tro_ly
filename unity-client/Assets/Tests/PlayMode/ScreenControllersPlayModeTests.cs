@@ -23,11 +23,25 @@ namespace LocalAssistant.Tests.PlayMode
             });
 
             var controller = new HomeScreenController(refs);
-            controller.Render(store, "Stage placeholder", AppScreen.Today);
+            controller.Render(store, AppScreen.Today);
 
             StringAssert.Contains("Today", refs.TaskSummaryText.text);
             Assert.AreEqual(DisplayStyle.Flex, refs.TaskContentText.style.display.value);
-            Assert.AreEqual("Stage placeholder", refs.StagePlaceholderText.text);
+            StringAssert.Contains("KHUNG AVATAR", refs.StagePlaceholderText.text);
+        }
+
+        [Test]
+        public void HomeScreenControllerBindRaisesQuickAddRequestAndClearsInput()
+        {
+            var refs = CreateHomeRefs();
+            refs.QuickAddInput.value = "nap task";
+            var controller = new HomeScreenController(refs);
+            string submitted = null;
+            controller.QuickAddRequested += value => submitted = value;
+            controller.RequestQuickAdd();
+
+            Assert.AreEqual("Add task nap task", submitted);
+            Assert.AreEqual(string.Empty, refs.QuickAddInput.value);
         }
 
         [Test]
@@ -68,6 +82,26 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.IsTrue(refs.TranscriptPreviewToggle.value);
             Assert.AreEqual("Saved", refs.SettingsStatusText.text);
             Assert.IsFalse(refs.SaveSettingsButton.enabledSelf);
+        }
+
+        [Test]
+        public void SettingsScreenControllerBindRaisesSettingEvents()
+        {
+            var refs = CreateSettingsRefs();
+            var controller = new SettingsScreenController(refs);
+            bool reloadRequested = false;
+            bool saveRequested = false;
+            bool? speakReplies = null;
+            controller.ReloadRequested += () => reloadRequested = true;
+            controller.SaveRequested += () => saveRequested = true;
+            controller.SpeakRepliesChanged += value => speakReplies = value;
+            controller.RequestReload();
+            controller.RequestSave();
+            controller.NotifySpeakRepliesChanged(true);
+
+            Assert.IsTrue(reloadRequested);
+            Assert.IsTrue(saveRequested);
+            Assert.AreEqual(true, speakReplies);
         }
 
         private static HomeScreenRefs CreateHomeRefs()

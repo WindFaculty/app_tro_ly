@@ -1,6 +1,7 @@
 using LocalAssistant.App;
 using LocalAssistant.Core;
 using LocalAssistant.Tasks;
+using System;
 using UnityEngine.UIElements;
 
 namespace LocalAssistant.Features.Home
@@ -14,7 +15,17 @@ namespace LocalAssistant.Features.Home
             this.home = home;
         }
 
-        public void Render(TaskViewModelStore taskStore, string stagePlaceholderText, AppScreen currentScreen)
+        public event Action<string> QuickAddRequested;
+
+        public void Bind()
+        {
+            if (home.QuickAddButton != null)
+            {
+                home.QuickAddButton.clicked += RequestQuickAdd;
+            }
+        }
+
+        public void Render(TaskViewModelStore taskStore, AppScreen currentScreen)
         {
             var isHome = currentScreen == AppScreen.Today;
             if (home.TaskSummaryText != null)
@@ -40,8 +51,34 @@ namespace LocalAssistant.Features.Home
 
             if (home.StagePlaceholderText != null)
             {
-                home.StagePlaceholderText.text = stagePlaceholderText;
+                home.StagePlaceholderText.text = BuildStagePlaceholderText(taskStore);
             }
+        }
+
+        public void SetTaskActionsEnabled(bool isEnabled)
+        {
+            home.QuickAddInput?.SetEnabled(isEnabled);
+            home.QuickAddButton?.SetEnabled(isEnabled);
+        }
+
+        public void RequestQuickAdd()
+        {
+            if (home.QuickAddInput == null)
+            {
+                return;
+            }
+
+            var value = home.QuickAddInput.value?.Trim();
+            home.QuickAddInput.value = string.Empty;
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                QuickAddRequested?.Invoke("Add task " + value);
+            }
+        }
+
+        private static string BuildStagePlaceholderText(TaskViewModelStore taskStore)
+        {
+            return $"KHUNG AVATAR\n\nAssistant dang chay theo kieu hybrid stream.\nChat hien route, provider, latency va transcript.\n\n{taskStore.BuildOverviewText()}";
         }
     }
 }
