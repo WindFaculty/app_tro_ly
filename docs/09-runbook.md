@@ -1,150 +1,153 @@
 # Runbook
 
-Step-by-step runbook for setting up, validating, packaging, and troubleshooting the local desktop assistant on Windows.
+Updated: 2026-03-26
+
+Windows setup, startup, smoke validation, packaging, and troubleshooting for the current assistant runtime.
 
 ## Scope
 
-- Target machine: Windows desktop or laptop with PowerShell and Python available.
-- Repo-backed flows covered here:
-  - backend dependency setup
-  - runtime preflight checks
-  - local startup and health validation
-  - backend smoke validation
-  - release folder packaging and verification
-  - common failure diagnosis
-- Out of scope:
-  - Unity visual polish sign-off that requires Editor or built client interaction
-  - machine-specific runtime installation that is still tracked in `tasks/task-people.md`
+Covered here:
+
+- backend dependency setup
+- runtime preflight
+- backend startup
+- optional packaged-client startup
+- backend smoke validation
+- release packaging
+- common troubleshooting
+
+Not fully covered here:
+
+- Unity Editor visual validation
+- target-machine microphone and speaker quality checks
+- production-avatar sign-off
+- external runtime installs that are not already available on the machine
 
 ## 1. Prerequisites
 
-Before running setup:
+- Windows with PowerShell
+- Python available as `python`
+- repo checked out locally
+- optional speech runtimes if you want non-degraded speech validation
+- optional Groq or Gemini credentials if you want non-degraded LLM validation
 
-- Python 3.11+ should be available as `python`
-- PowerShell should be available
-- The repo should already be checked out locally
-- If you want non-degraded speech:
-  - Piper executable and voice model paths must exist
-  - Whisper runtime or faster-whisper dependencies must exist
-- If you want cloud LLM access:
-  - configure Groq or Gemini environment variables before startup
+Useful paths:
 
-Useful repo paths:
+- `local-backend/`
+- `unity-client/`
+- `scripts/`
+- `tasks/task-queue.md`
+- `tasks/task-people.md`
 
-- backend: `local-backend/`
-- helper scripts: `scripts/`
-- task tracker: `tasks/task-queue.md`
-- manual blocker tracker: `tasks/task-people.md`
+## 2. Fresh-Machine Setup
 
-## 2. Fresh Machine Setup
-
-From the repo root:
+From repo root:
 
 ```powershell
 .\scripts\setup_windows.ps1
 ```
 
-What this does:
+What it does:
 
-- resolves the backend folder automatically
-- installs `local-backend/requirements.txt`
-- checks core Python modules needed by the backend
-- runs runtime preflight diagnostics for configured STT, TTS, and Ollama-adjacent paths
+- resolves the backend folder
+- resolves the backend Python command
+- installs backend requirements
+- runs runtime preflight checks for current config
 
-Expected outcome:
+Expected result:
 
 - exit code `0`
-- log ends with `[assistant][ok] Backend setup complete.`
 
-If setup fails:
+Current setup-script exit codes:
 
-- missing Python modules:
-  - rerun `python -m pip install -r local-backend\requirements.txt`
-- bad Piper or Whisper path:
-  - fix the corresponding `assistant_*` environment variable or `.env` value
-- Ollama warning only:
-  - warning is acceptable unless your intended LLM provider is Ollama
+- `10`: backend Python command could not be resolved
+- `11`: dependency install or dependency validation failed
+- `12`: runtime preflight diagnostics failed
 
 ## 3. Runtime Configuration
 
-The backend reads `.env` under `local-backend/` and also reads `assistant_*` environment variables from the current shell.
+The backend reads:
 
-Common variables:
+- `local-backend/.env`
+- shell environment variables prefixed with `assistant_`
+
+Common settings:
 
 - `assistant_llm_provider`
+- `assistant_routing_mode`
+- `assistant_fast_provider`
+- `assistant_deep_provider`
 - `assistant_groq_api_key`
 - `assistant_gemini_api_key`
+- `assistant_stt_provider`
+- `assistant_faster_whisper_model_path`
+- `assistant_whisper_command`
+- `assistant_whisper_model_path`
 - `assistant_tts_provider`
 - `assistant_piper_command`
 - `assistant_piper_model_path`
-- `assistant_stt_provider`
-- `assistant_whisper_command`
-- `assistant_whisper_model_path`
-- `assistant_faster_whisper_model_path`
+- `assistant_chattts_compile`
 
-Recommended starting points:
+Important current-state note:
 
-- safer Windows TTS fallback:
-  - `assistant_tts_provider=piper`
-- if validating ChatTTS:
-  - `assistant_tts_provider=chattts`
-  - `assistant_chattts_compile=false`
-- if you use hybrid routing:
-  - configure both `assistant_groq_api_key` and `assistant_gemini_api_key` to avoid partial-mode LLM warnings
+- Backend-routed LLM providers are `hybrid`, `groq`, and `gemini`.
+- Ollama-related settings are still used by preflight helpers and future planning, but not by the current routed assistant backend.
 
-Example PowerShell session:
+## 4. Startup
 
-```powershell
-$env:assistant_llm_provider = "gemini"
-$env:assistant_gemini_api_key = "<your key>"
-$env:assistant_tts_provider = "piper"
-$env:assistant_piper_command = "C:\runtime\piper\piper.exe"
-$env:assistant_piper_model_path = "C:\runtime\piper\vi-VN-default.onnx"
-```
-
-## 4. Local Startup And Health Check
-
-Run the integrated startup flow from the repo root:
+From repo root:
 
 ```powershell
 .\scripts\run_all.ps1
 ```
 
-Optional arguments:
+Useful variants:
 
 ```powershell
-.\scripts\run_all.ps1 -BackendPython python -UnityExecutablePath "D:\Builds\Client\TroLy.exe"
-.\scripts\run_all.ps1 -BackendPython python -ShutdownBackendOnExit
+.\scripts\run_all.ps1 -BackendPython python
+.\scripts\run_all.ps1 -UnityExecutablePath "D:\Builds\TroLy.exe"
+.\scripts\run_all.ps1 -ShutdownBackendOnExit
 ```
 
-What this does:
+What it does:
 
 - verifies backend Python dependencies
-- runs runtime preflight diagnostics
+- runs runtime preflight checks
+- verifies port `8096` is free
 - starts `local-backend/run_local.py`
 - waits for `http://127.0.0.1:8096/v1/health`
-- optionally launches a packaged Unity client executable
-- optionally stops the backend again after validation when `-ShutdownBackendOnExit` is used
+- optionally starts a packaged Unity client executable
+- optionally shuts the backend down after validation
 
-Health interpretation:
+Current startup-script exit codes:
 
-- `ready`: backend and configured runtimes are available
-- `partial`: backend is usable, but some optional runtime is degraded
-- `error`: do not continue; fix the reported health issue first
+- `20`: backend Python command could not be resolved
+- `21`: backend dependency preflight failed
+- `22`: runtime preflight diagnostics failed
+- `23`: backend port already in use
+- `24`: backend process could not be started
+- `25`: backend health never became reachable
+- `26`: backend health reported `error`
+- `27`: Unity client launch failed
+- `28`: backend shutdown-after-validation failed
 
-Quick manual health check:
+## 5. Health Check
+
+Manual health query:
 
 ```powershell
 Invoke-RestMethod http://127.0.0.1:8096/v1/health | ConvertTo-Json -Depth 6
 ```
 
-Validation-only startup tip:
+Interpretation:
 
-- use `.\scripts\run_all.ps1 -ShutdownBackendOnExit` when you want to prove setup, preflight, and startup work without leaving the backend running after the script exits
+- `ready`: database and configured runtime groups are available
+- `partial`: app is usable, but one or more runtime groups are degraded
+- `error`: do not continue until the database or startup problem is fixed
 
-## 5. Backend Smoke Validation
+## 6. Smoke Validation
 
-After the backend is running:
+After the backend is reachable:
 
 ```powershell
 python .\scripts\smoke_backend.py
@@ -153,87 +156,59 @@ python .\scripts\smoke_backend.py
 Useful variants:
 
 ```powershell
-python .\scripts\smoke_backend.py --base-url http://127.0.0.1:8096 --allow-health-status ready partial
+python .\scripts\smoke_backend.py --base-url http://127.0.0.1:8096
+python .\scripts\smoke_backend.py --allow-health-status ready partial
 python .\scripts\smoke_backend.py --timeout 20
 ```
 
-What the smoke script verifies:
+The smoke script currently verifies:
 
-- `/v1/health` is reachable
-- task create, update, reschedule, complete flows
-- `/v1/events` sequencing
-- `/v1/assistant/stream` reaches `assistant_final`
-- degraded or available behavior for `/v1/speech/tts`
-- degraded or available behavior for `/v1/speech/stt`
+- `/v1/health`
+- task create, update, reschedule, and complete flows
+- `/v1/events`
+- `/v1/assistant/stream`
+- available versus unavailable STT responses
+- available versus unavailable TTS responses
 
-Expected outcome:
-
-- exit code `0`
-- JSON summary printed to stdout
-
-Treat smoke failure as blocking if:
+Treat smoke failure as blocking when:
 
 - health never becomes reachable
-- `assistant_final` is missing from stream events
-- STT or TTS returns a status that does not match health availability
+- stream flow never reaches `assistant_final`
+- task update events do not match mutation results
+- STT or TTS behavior does not match health availability
 
-## 6. Release Packaging
+## 7. Packaging
 
-Create a release folder from the repo root:
+From repo root:
 
 ```powershell
 .\scripts\package_release.ps1
 ```
 
-Optional packaged client copy:
+Useful variants:
 
 ```powershell
 .\scripts\package_release.ps1 -UnityBuildPath "D:\Builds\TroLyClient"
-```
-
-Optional custom output path:
-
-```powershell
 .\scripts\package_release.ps1 -OutputDir "D:\Releases\TroLy"
 ```
 
-What packaging validates automatically:
+What it does:
 
-- output path is not empty, repo root, or drive root
-- backend files are copied into `release\backend`
-- helper scripts are copied into `release\scripts`
-- smoke helpers and fake Piper assets are present
-- if `-UnityBuildPath` is supplied, at least one client `.exe` exists in `release\client`
+- validates the output directory
+- prepares a clean release folder
+- copies backend files and helper scripts
+- optionally copies a Unity build
+- validates the packaged layout
 
-Expected outcome:
+Current packaging exit codes:
 
-- exit code `0`
-- log ends with `[assistant][ok] Release package prepared successfully.`
+- `30`: output path or packaging input validation failed
+- `31`: release folder preparation failed
+- `32`: backend or script copy failed
+- `33`: Unity client copy failed
+- `34`: packaged release layout validation failed
 
-Script exit-code map:
-
-- `setup_windows.ps1`
-  - `10`: backend Python command could not be resolved
-  - `11`: dependency installation or post-install dependency validation failed
-  - `12`: runtime preflight diagnostics failed
-- `run_all.ps1`
-  - `20`: backend Python command could not be resolved
-  - `21`: backend dependency preflight failed
-  - `22`: runtime preflight diagnostics failed
-  - `23`: backend port was already in use
-  - `24`: backend process could not be started
-  - `25`: backend health never became ready
-  - `26`: health endpoint reported an error state
-  - `27`: Unity client launch failed
-  - `28`: backend shutdown-after-validation failed
-- `package_release.ps1`
-  - `30`: output directory or packaging input validation failed
-  - `31`: release folder preparation failed
-  - `32`: backend or script asset copy failed
-  - `33`: Unity client copy failed
-  - `34`: packaged release layout validation failed
-
-## 7. Release Folder Validation
+## 8. Release Folder Validation
 
 From the packaged release root:
 
@@ -244,90 +219,78 @@ cd .\release
 python .\scripts\smoke_backend.py
 ```
 
-Validation goal:
+Use this when you want evidence that the packaged backend and scripts still work outside the repo checkout.
 
-- prove the packaged backend and scripts work outside the repo layout
-- confirm health and smoke flows still pass from the release folder
+Historical note:
 
-Current limitation:
+- Release-folder validation has already been recorded as completed work in `tasks/task-people.md`.
+- You may still need to repeat it on a different target machine if runtime binaries, models, or permissions differ.
 
-- full release-folder validation on a target machine is still gated by `P05` in `tasks/task-people.md`
+## 9. Troubleshooting
 
-## 8. Troubleshooting
+### Setup fails on Python dependencies
 
-### Setup script fails with missing Python modules
+Run:
 
-Symptoms:
+```powershell
+python -m pip install -r local-backend\requirements.txt
+```
 
-- preflight reports missing `fastapi`, `uvicorn`, `httpx`, or similar
-
-Actions:
-
-- run `python -m pip install -r local-backend\requirements.txt`
-- confirm the same `python` executable is used by your shell and scripts:
+Then confirm the Python path you are using:
 
 ```powershell
 python -c "import sys; print(sys.executable)"
 ```
 
-### Runtime preflight fails on Piper or Whisper path
+### Runtime preflight fails
 
-Symptoms:
+Typical causes:
 
-- `assistant_piper_command is configured but not found`
-- `assistant_piper_model_path does not exist`
-- `assistant_whisper_command is configured but not found`
-- `assistant_whisper_model_path does not exist`
+- invalid Piper executable path
+- invalid Piper model path
+- invalid whisper.cpp executable path
+- invalid whisper.cpp model path
+- missing Python modules for selected runtime
+- missing API keys for the chosen LLM path
 
-Actions:
-
-- correct the path in `.env` or current shell env vars
-- if you intentionally want degraded mode, remove the broken path override instead of leaving an invalid path configured
+Fix the configured path or remove the broken override if degraded mode is acceptable.
 
 ### Health reports `partial`
 
-Symptoms:
-
-- `run_all.ps1` warns and prints recovery actions
-
 Actions:
 
-- inspect recovery actions from `/v1/health`
-- decide whether degraded speech is acceptable for the current validation goal
-- if not acceptable, fix the missing runtime and rerun startup plus smoke
+- inspect `recovery_actions`
+- decide whether degraded mode is acceptable for the current test
+- rerun startup and smoke after fixing the missing runtime if not acceptable
 
 ### Health reports `error`
 
 Actions:
 
-- do not continue to client validation
-- query the health payload directly and capture `recovery_actions`
-- fix runtime or configuration errors, then rerun `.\scripts\run_all.ps1`
+- stop and inspect `/v1/health`
+- fix the underlying startup or database issue
+- rerun `.\scripts\run_all.ps1`
 
-### Smoke fails on TTS or assistant streaming with ChatTTS
+### ChatTTS validation varies by machine
 
-Context:
+Current repo state:
 
-- `A12` is still open because ChatTTS degraded-path behavior is not fully hardened yet
+- backend tests and degraded-path code exist
+- actual ChatTTS availability still depends on local Python and torch compatibility
 
-Actions:
+Practical advice:
 
-- retry with `assistant_tts_provider=piper` for baseline validation
-- if validating degraded behavior, capture the exact smoke output and `/v1/health` payload for the task log
+- use Piper for baseline validation if you only need a stable smoke path
+- validate ChatTTS explicitly on the target machine when that runtime matters
 
 ### Backend never becomes reachable
 
-Actions:
-
-- run the backend manually from `local-backend/`:
+Try manual backend start:
 
 ```powershell
 cd .\local-backend
 python run_local.py
 ```
-
-- if manual startup fails, keep the traceback or log output and fix that first
-- if manual startup succeeds but `run_all.ps1` still times out, verify port `8096` is not occupied by another process
 
 Port check:
 
@@ -335,18 +298,18 @@ Port check:
 Get-NetTCPConnection -LocalPort 8096 -ErrorAction SilentlyContinue
 ```
 
-## 9. Evidence To Capture During Validation
+## 10. Evidence To Keep
 
-When reporting status or handoff, keep:
+When handing off or reporting status, keep:
 
 - setup script exit code
 - startup script exit code
-- `/v1/health` JSON
-- smoke JSON summary
-- release package path used for validation
-- any warning or error lines from preflight diagnostics
+- health JSON
+- smoke summary JSON
+- release path if packaging was used
+- any runtime warnings or errors
 
-## 10. Operator Notes
+## 11. Validation Rule
 
-- Do not mark runtime hardening work done from docs alone; use test, log, or smoke evidence.
-- If a step needs Unity Editor visuals, external credentials, or machine-local runtimes that terminal cannot confirm, record it as not fully verified instead of assuming success.
+Do not mark runtime, packaging, or Unity behavior done from docs alone.
+Use tests, script output, logs, or manual evidence.

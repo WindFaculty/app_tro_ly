@@ -1,76 +1,55 @@
 # Project Context
 
-Last Updated: 2026-03-14
+Last updated: 2026-03-26
 
 ## Project
 
 - Name: Local Desktop Assistant
-- One-liner: A Windows-first desktop assistant with a task-safe backend AI layer, an interactive avatar shell, local task planning, text chat, and voice I/O.
-- Product focus: task manager first, avatar as interface layer, and AI as a guarded orchestration layer around real task data.
-- Current implementation stack: Unity client + Python local backend + SQLite + Groq or Gemini routing + faster-whisper or whisper.cpp + Piper or ChatTTS
-- Deferred local-only LLM path: Ollama remains in config, but is disabled in the current phase
+- Purpose: a Windows-first assistant for local task management, guarded AI chat, reminders, and voice I/O
+- Runtime shape: Unity client + Python local backend + SQLite
+- Active LLM path: Groq fast responses, Gemini deep planning, and hybrid routing
+- Speech path: faster-whisper or whisper.cpp for STT, Piper or ChatTTS for TTS
+- Optional adjacent subsystem: `agent-platform/`
+
+## Current Implementation
+
+- The backend is implemented in `local-backend/` and owns task logic, orchestration, routing, memory, reminders, settings, and persistence.
+- The Unity client is implemented in `unity-client/` as a UI Toolkit shell loaded from `Assets/Resources/UI/MainUI.uxml`.
+- Current top-level client screens are Home, Schedule, and Settings.
+- Current task views exposed through the client are Today, Week, Inbox, and Completed.
+- Current voice flow supports microphone capture, STT, streamed or compatibility chat, TTS playback, subtitle overlay, and reminder overlay.
+- Avatar presentation is only partially production-ready. The app has placeholder avatar-state UI plus optional integration points for `Assets/AvatarSystem/`.
 
 ## Current Phase
 
-- Phase: IMPLEMENTATION ACTIVE / M6 POLISH IN PROGRESS
+- Implementation is active.
+- Focus is on polish, validation, runtime hardening, documentation, and production-avatar integration planning.
 
-## Current Focus
+## Current Focus Areas
 
-- Harden the implemented Unity plus backend flows for Windows startup, settings, recovery UX, and packaging.
-- Keep the AI contract explainable: validated task actions, route logging, memory summaries, and graceful fallback.
-- Keep docs and task tracking aligned with the actual implementation state.
+- Keep backend contracts explainable and deterministic.
+- Keep Unity UI honest about partial, degraded, and error states.
+- Reduce stale documentation and stale queue items.
+- Preserve the assistant runtime as separate from optional adjacent tooling.
 
-## Target Product Outcomes
+## Target Outcomes
 
-- Show one assistant avatar in the desktop app, with a main window and a smaller quick-access mode.
-- Let the user review today, tomorrow, next 7 days, overdue, inbox, and completed work from local task data.
-- Support create, update, complete, and reschedule task flows by text and by voice.
-- Return text plus speech output with animation hints for the avatar.
-- Keep task logic authoritative in the backend, even when model providers are unavailable or degraded.
+These are product goals, not all of them are implemented in the current repo state:
 
-## Implemented Runtime Topology
+- A polished desktop assistant shell with a stronger avatar experience
+- Reliable local task CRUD, summaries, reminders, and chat-assisted planning
+- Clear degraded-mode behavior when optional runtimes are missing
+- Better packaging and repeatable Windows validation
+- Optional future directions such as a compact mini-assistant mode and a fuller avatar presentation layer
 
-- Unity client:
-  - avatar rendering, animation, subtitle, audio playback, task UI, chat UI
-- Python local backend:
-  - task service
-  - planner summaries
-  - assistant orchestration
-  - intent validation
-  - route selection
-  - memory
-  - scheduler
-  - speech adapters
-  - SQLite persistence
-- Configured AI and speech runtimes:
-  - Groq at `https://api.groq.com/openai/v1`
-  - Gemini at `https://generativelanguage.googleapis.com/v1beta/openai`
-  - faster-whisper as the default STT path
-  - whisper.cpp as the optional STT fallback path
-  - Piper or ChatTTS as the TTS runtime
-  - Ollama at `http://127.0.0.1:11434` as a future local path, not the active default
+## Risks And Constraints
 
-## Milestone Snapshot
+- The current default LLM path is not fully offline.
+- Speech runtime reliability depends on machine-local installs and models.
+- Unity client behavior still requires Unity Editor or built-client validation.
+- Some design docs describe target-state UI rather than implemented UI.
 
-- M0 Product reset and docs rewrite: DONE
-- M1 Foundation skeleton: DONE
-- M2 Task engine and calendar views: DONE
-- M3 Chat and task-aware reasoning: DONE
-- M4 Voice and avatar behavior: DONE
-- M5 Reminder and planner: DONE
-- M6 Polish and Windows packaging: DOING
+## Evidence Snapshot
 
-## Main Risks
-
-- The current default LLM path is not fully offline because it depends on Groq and Gemini.
-- The local voice stack on Windows can be fragile across different machines.
-- Natural-language task editing must go through structured actions, not direct free-form model writes.
-- The repo still contains legacy or adjacent subprojects that do not implement the assistant runtime.
-- Packaging multiple optional runtimes is harder than building the happy-path app.
-
-## Environments
-
-- Local backend API: `http://127.0.0.1:8096`
-- Configured Ollama base URL: `http://127.0.0.1:11434`
-- Optional agent-platform operator layer: `http://127.0.0.1:8088`
-- Unity client: Windows standalone app or local editor play mode
+- Backend automated tests were run on 2026-03-26 in `local-backend/` with `pytest -q`: `62 passed`.
+- Unity EditMode and PlayMode test files exist, but they were not run from this terminal session.

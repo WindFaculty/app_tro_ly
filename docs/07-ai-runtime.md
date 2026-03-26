@@ -1,54 +1,44 @@
-# AI Runtime - Local Desktop Assistant
+# AI Runtime - Current Backend Behavior
 
-Updated: 2026-03-14
+Updated: 2026-03-26
 
-This document describes the AI stack implemented in the repo today. It is intentionally grounded in the current backend code, not the long-term local-only ideal.
+This document describes the implemented AI stack in the repo today.
 
 ## Core Principles
 
 - The backend owns task state, session state, reminder state, and persistence.
-- LLMs help with phrasing and deeper planning, but they do not write directly to SQLite.
-- Every task mutation must go through validated backend actions.
-- The assistant should degrade gracefully when LLM, STT, or TTS runtimes are unavailable.
+- LLMs help phrase or plan, but they do not write directly to SQLite.
+- Every task mutation goes through validated backend actions.
+- The runtime should degrade cleanly when LLM, STT, or TTS providers are unavailable.
 
-## Implemented Execution Flow
+## Implemented Turn Flow
 
 1. The client sends a turn through `POST /v1/chat` or `WS /v1/assistant/stream`.
 2. `AssistantOrchestrator` creates or resumes the conversation and assistant session.
-3. `ActionValidator` classifies the request into a safe intent such as lookup, create, complete, reschedule, priority change, or planning.
-4. `RouterService` chooses a response path based on routing mode, message complexity, notes length, planning keywords, voice mode, and provider health.
-5. The backend composes the reply with:
-   - `FastResponseService` for short voice-friendly answers
-   - `PlanningService` for deeper structured reasoning
-   - deterministic planner summaries when a task summary is enough
-6. If task actions are required, `TaskService` applies them and emits task update events.
-7. `MemoryService` refreshes the rolling summary and optionally stores long-term memory items.
-8. The backend records route logs, task actions, and assistant state changes for the client.
+3. `ActionValidator` classifies the request into a validated intent.
+4. `RouterService` selects a route based on routing mode, complexity, notes length, planning signals, voice mode, and provider availability.
+5. The backend responds with one of three paths:
+   - `groq_fast`
+   - `gemini_deep`
+   - `hybrid_plan_then_groq`
+6. If a task action is required, `TaskService` applies it before the response is finalized.
+7. `MemoryService` refreshes rolling summary and optionally stores conservative long-term memory items.
+8. The backend records route logs and emits stream or event updates.
 
 ## Current Route Types
 
 - `groq_fast`
-  - best for short queries, quick voice turns, and degraded fallback when the deep path is unavailable
+  - short replies and low-latency voice turns
 - `gemini_deep`
-  - used for long-context, planning-heavy, or more complex requests
+  - deeper planning and longer-context requests
 - `hybrid_plan_then_groq`
-  - builds a deeper plan first, then rewrites delivery into a shorter final answer
-
-## Routing Inputs
-
-- `assistant_routing_mode`
-  - `auto`, `fast`, `deep`, or `hybrid`
-- message complexity
-- `notes_context` length
-- planning keywords such as planning, strategy, optimize, or schedule-like phrases
-- voice mode preference for low-latency answers
-- provider health and recent provider failures
+  - deeper plan first, then shorter delivery phrasing
 
 ## Task Safety Contract
 
-The current assistant is task-aware, not a general autonomous agent.
+The assistant is task-aware, not a general autonomous agent.
 
-Supported validated intents today:
+Current validated intents include:
 
 - day summary lookup
 - week summary lookup
@@ -58,83 +48,94 @@ Supported validated intents today:
 - create task
 - complete task
 - reschedule task
-- increase priority
+- change task priority
 - planning from current task context
 
-Important consequence:
+Important consequences:
 
-- Natural-language model output is never trusted as a direct database command.
-- The model can help explain or refine, but the backend decides what actually changes.
+- Model output is not trusted as a direct database command.
+- Backend validation and task services decide what actually changes.
 
 ## Deterministic Planning Layer
 
 `PlannerService` already provides deterministic summaries from real task data:
 
-- `daily_summary`
-- `weekly_summary`
-- `overdue_summary`
-- `urgency_summary`
-- `free_slots`
+- daily summary
+- weekly summary
+- overdue summary
+- urgency summary
+- free slots
 
-These summaries feed both normal chat responses and deeper planning prompts.
+These can answer a turn directly or feed deeper planning prompts.
 
 ## Memory Model
 
-Short-term memory:
+### Short-term memory
 
-- recent messages for the active conversation
-- rolling conversation summary persisted in SQLite
+- recent conversation messages
+- rolling conversation summary stored in SQLite
 
-Long-term memory:
+### Long-term memory
 
-- optional auto-extraction from explicit user preference, routine, project, and goal statements
+- optional auto-extraction from explicit user preference, routine, project, or goal statements
 - simple token-overlap retrieval against stored memory items
 
-Persistence tables used by the AI layer:
+Persistence tables used by the AI layer include:
 
-- `conversations`
-- `messages`
-- `assistant_sessions`
-- `conversation_summaries`
-- `memory_items`
-- `route_logs`
+- conversations
+- messages
+- assistant sessions
+- conversation summaries
+- memory items
+- route logs
 
-## Streaming Assistant Path
+## Streaming Behavior
 
 `WS /v1/assistant/stream` supports:
 
 - text turns
-- partial transcript updates from streamed voice chunks
-- final transcript confirmation on voice end
-- live assistant state events
+- partial and final transcripts from voice input
+- assistant state updates
 - chunked assistant text output
 - sentence-level TTS readiness events
-- final turn metadata including route, provider, token usage, and task actions
+- final route and latency metadata
 
-This path is the richest integration surface for the Unity client.
+This is the preferred assistant path for the Unity client.
 
-## Speech Runtime Notes
+## Current Runtime Providers
 
-- STT defaults to `faster_whisper`.
-- If `faster_whisper` is unavailable or fails, the backend can fall back to `whisper.cpp` when configured.
-- TTS can use Piper or ChatTTS and caches generated audio by provider, text, and voice hash.
+### LLM
 
-## LLM Runtime Notes
+- routed providers in current backend code:
+  - `groq`
+  - `gemini`
+- current top-level backend setting values:
+  - `hybrid`
+  - `groq`
+  - `gemini`
 
-- Default LLM mode is `hybrid`.
-- Default fast provider is `groq`.
-- Default deep provider is `gemini`.
-- Current LLM runtime is API-first and uses Groq or Gemini rather than Ollama.
+Important note:
+
+- Ollama settings still exist in config and Windows preflight helpers, but Ollama is not an active routed provider in the current backend implementation.
+
+### Speech
+
+- STT:
+  - `faster_whisper`
+  - `whisper_cpp`
+- TTS:
+  - `piper`
+  - `chattts`
 
 ## Current Limitations
 
-- The default LLM path is not fully offline because it depends on Groq and Gemini.
-- Intent parsing is still regex and keyword-driven rather than a full semantic parser.
+- The default LLM path is not fully offline.
+- Intent parsing is still keyword and regex driven.
 - Memory extraction is intentionally narrow and conservative.
-- Browser automation, desktop control, wake word, plugins, and cross-device sync are out of scope for the current implementation.
-- Voice quality and end-to-end validation still depend on machine-local runtime setup for STT and TTS.
+- Speech reliability depends on local machine setup.
+- Unity-side behavior still needs manual validation outside terminal-only inspection.
 
-## Related Source Files
+## Source Files
 
 - `local-backend/app/services/assistant_orchestrator.py`
 - `local-backend/app/services/action_validator.py`
@@ -143,4 +144,6 @@ This path is the richest integration surface for the Unity client.
 - `local-backend/app/services/fast_response.py`
 - `local-backend/app/services/memory.py`
 - `local-backend/app/services/tasks.py`
+- `local-backend/app/services/planner.py`
+- `local-backend/app/services/speech.py`
 - `local-backend/app/api/routes.py`

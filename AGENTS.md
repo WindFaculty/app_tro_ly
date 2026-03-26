@@ -2,45 +2,79 @@
 
 Applies to the entire repository.
 
-Quy tắc vận hành cho Codex/AI agent.
-Ưu tiên cao hơn suggestions nhưng thấp hơn system instructions.
+Machine-facing operating rules for Codex and similar agents.
 
-## Core Rules
+## Repo Summary
 
-1. Không đoán. Thiếu dữ liệu, file, spec, log hoặc scope thì dừng và làm rõ.
-2. Plan -> Execute -> Verify. Không code trước khi hiểu input, output, dependency, risk.
-3. Mỗi lần chỉ xử lý 1 task rõ ràng. Không trộn nhiều mục tiêu trong cùng lượt làm.
-4. Chỉ đọc file liên quan. Không load toàn bộ project nếu task không cần.
-5. Không ghi đè hoặc revert thay đổi lạ nếu chưa đánh giá rủi ro.
-6. Chưa có bằng chứng từ test, log hoặc output thì chưa được claim done.
-7. Bug phải đọc log, tìm root cause rồi mới fix. Không sửa mò.
-8. Gặp dữ liệu mờ, encoding lỗi, hoặc yêu cầu cần GUI/tài khoản ngoài terminal thì nói rõ không verify được.
+- `local-backend/`: source of truth for API behavior, task logic, routing, memory, speech adapters, scheduler, and persistence
+- `unity-client/`: source of truth for client UI, screen flow, overlays, audio playback, and avatar presentation wiring
+- `scripts/`: source of truth for Windows setup, startup, packaging, and backend smoke automation
+- `docs/`: maintained documentation; may include both current-state docs and target-state design docs
+- `tasks/`: work tracking
+- `agent-platform/`: optional adjacent subsystem, not part of the required assistant runtime
 
-## Execution
+## Truth Sources
 
-1. Analyze: hiểu yêu cầu, xác định phần đã biết và phần còn thiếu.
-2. Plan: chốt bước làm, file chạm tới, dependency, rủi ro.
-3. Execute: sửa đúng phạm vi, không tự ý đổi mục tiêu.
-4. Verify: chạy test hoặc kiểm tra bằng log, output, response.
-5. Improve: ghi bài học ngắn vào `lessons.md` khi có lesson mới đáng giữ.
+- Trust code over docs.
+- Backend truth lives in:
+  - `local-backend/app/api/routes.py`
+  - `local-backend/app/services/`
+  - `local-backend/app/models/`
+  - `local-backend/app/core/`
+- Unity UI truth lives in:
+  - `unity-client/Assets/Resources/UI/MainUI.uxml`
+  - `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
+  - `unity-client/Assets/Resources/UI/Styles/*.uss`
+  - `unity-client/Assets/Scripts/App/`
+  - `unity-client/Assets/Scripts/Core/`
+  - `unity-client/Assets/Scripts/Features/`
+- Avatar integration truth lives in:
+  - `unity-client/Assets/Scripts/Avatar/`
+  - `unity-client/Assets/AvatarSystem/`
+- Operations truth lives in:
+  - `scripts/setup_windows.ps1`
+  - `scripts/run_all.ps1`
+  - `scripts/package_release.ps1`
+  - `scripts/smoke_backend.py`
 
-## Context
+## Required Workflow
 
-- Ưu tiên summary hơn raw code khi đủ để giải quyết task.
-- Không lặp lại context cũ nếu không giúp ra quyết định mới.
-- Nếu context phình to, giữ lại: mục tiêu, trạng thái, quyết định quan trọng, output cuối.
-- Task lớn thì chia nhỏ theo module, input/output rõ ràng.
+1. Analyze the request and identify the exact truth sources.
+2. Plan the change before editing.
+3. Execute only inside the confirmed scope.
+4. Verify with tests, logs, script output, or concrete runtime evidence.
+5. Do not claim done without evidence.
 
-## Response Style
+## No-Guessing Rules
 
-- Ngắn gọn, trực tiếp, nêu rõ: đã biết gì, chưa biết gì, đang verify gì.
-- Nếu bị block, đưa checklist cụ thể cần log, screenshot, output hoặc file còn thiếu.
-- Không bịa thành công. Không giả vờ đã verify ngoài khả năng terminal.
+- Do not invent features, routes, screens, runtime behavior, or architecture.
+- If docs conflict with code, update docs to match code.
+- If code is ambiguous, say what is uncertain and avoid stronger claims.
+- Do not treat target-state design docs as implemented reality.
+- Do not treat manual-only validation as already verified from terminal work.
 
-## Anti-Patterns
+## Documentation Labels
 
-- Code trước plan
-- Fix khi chưa hiểu bug
-- Claim done khi chưa verify
-- Ôm quá nhiều file không liên quan
-- Lặp lại lỗi cũ đã có trong `lessons.md`
+Use these distinctions consistently:
+
+- `Current implementation`: behavior proven by code in this repo now
+- `Planned work`: intended work not implemented yet
+- `Optional subsystem`: present but not required for the assistant runtime
+- `Manual validation required`: needs Unity Editor, a built client, external runtime binaries, credentials, or target-machine checks
+- `Design target`: aspirational UI or architecture direction
+- `Placeholder`: temporary UI, avatar, text, or runtime behavior
+
+## Task File Rules
+
+- Update `tasks/task-queue.md` when AI-executable repo work changes status, scope, blockers, or definition of done.
+- Update `tasks/task-people.md` when a task requires a person, a target machine, Unity Editor interaction, external assets, credentials, or approvals.
+- Update `tasks/done.md` when work is actually completed and there is verification or concrete evidence to justify the history entry.
+- Keep queue files current-state focused.
+- Keep `tasks/done.md` historical; add clarifying notes instead of rewriting history into current status.
+
+## Safety Rules
+
+- Do not overwrite or revert unrelated user changes.
+- Do not change runtime code during a docs task unless a source comment is materially misleading.
+- Do not present design-target docs as shipped features.
+- Keep docs concise, specific, and grounded in files that exist.

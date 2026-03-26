@@ -1,153 +1,120 @@
 # Local Desktop Assistant
 
-Windows-first desktop assistant built around local task management, task-safe AI chat, voice I/O, reminders, and a Unity client shell.
+Windows-first local assistant built from a Unity client, a FastAPI backend, and SQLite task data.
 
-## Current Status
+## Current State
 
-- Product direction has been reset from the old Character Studio track to the local desktop assistant.
-- Milestones M0 through M5 are complete.
-- M6 polish and Windows packaging are in progress.
-- The backend-side AI orchestration is implemented today:
-  - `POST /v1/chat` and `WS /v1/assistant/stream` share one guarded task pipeline.
-  - Fast and deep routing currently uses Groq plus Gemini.
-  - Ollama remains in config as a future local path, but the current phase reports it as disabled.
-- The Unity shell is functional, but the main avatar area is still a placeholder for future production asset integration.
-
-## What Exists Today
-
-- `local-backend/`
-  - FastAPI backend
-  - SQLite persistence
-  - task, planner, reminder, chat, memory, routing, and speech services
-  - health endpoint, logs, route logs, and recovery guidance
-- `unity-client/`
-  - Unity client project
-  - runtime-generated assistant UI
-  - task planner, chat panel, settings panel, reminder display, subtitle flow
-- `docs/`
-  - product scope, architecture, AI runtime, API, UI notes, decisions, and test plan
-- `tasks/`
-  - milestone tracking, AI/manual work split, and done log
-- `agent-platform/`
-  - optional adjacent service code, not the core assistant runtime
-
-## AI Runtime Today
-
-- Backend validation owns every task mutation before SQLite writes.
-- Route selection can choose `groq_fast`, `gemini_deep`, or `hybrid_plan_then_groq`.
-- Session state, rolling summaries, long-term memory items, and route logs are stored in SQLite.
-- Voice sessions can stream transcript updates, assistant text chunks, and sentence-level TTS audio.
-- Health diagnostics expose `ready`, `partial`, or `error` plus recovery actions for missing runtimes.
-
-## Task Tracking
-
-- `tasks/task-queue.md`: repo work Codex or AI can execute directly.
-- `tasks/task-people.md`: manual or off-repo work that must be done by a person or target machine owner.
-- `tasks/done.md`: completed milestones and documentation updates.
-
-## MVP Focus
-
-- Local task CRUD, complete, and reschedule flows
-- Today, week, overdue, inbox, and completed task views
-- Text chat and assistant streaming with task-aware actions
-- Push-to-talk speech input
-- Local TTS and subtitles
-- Reminder events, planner summaries, and degraded-runtime guidance
-- Windows-first delivery, with a fully local LLM path still pending beyond the current Groq or Gemini default
+- The active product in this repo is the local desktop assistant.
+- The backend in `local-backend/` is implemented and tested.
+- The Unity client in `unity-client/` is implemented as a UI Toolkit shell with task, chat, settings, subtitle, reminder, and voice wiring.
+- `agent-platform/` exists next to the assistant repo but is optional and not required for the assistant runtime.
+- A production-ready avatar experience is not fully wired end-to-end yet. The repo contains avatar groundwork and prototype assets under `unity-client/Assets/AvatarSystem/`, but live behavior still depends on Unity scene setup and manual validation.
 
 ## Repo Layout
 
 ```text
 .
-|- local-backend/   FastAPI + SQLite backend
-|- unity-client/    Unity desktop client
-|- docs/            Product and technical documentation
-|- tasks/           Milestones and work tracking
-|- scripts/         Windows helper scripts for setup/startup/packaging
-`- agent-platform/  Optional adjacent tooling, not required for MVP
+|- local-backend/   FastAPI backend, SQLite persistence, AI orchestration, speech adapters
+|- unity-client/    Unity client project and UI Toolkit shell
+|- docs/            Product, architecture, API, runtime, test, and runbook docs
+|- tasks/           AI-executable queue, manual blockers, and historical done log
+|- scripts/         Windows setup, startup, packaging, and smoke helpers
+`- agent-platform/  Optional adjacent tooling, not part of the assistant runtime
 ```
+
+## Implemented Runtime
+
+### Local backend
+
+- FastAPI routes under `local-backend/app/api/routes.py`
+- SQLite-backed task, reminder, conversation, memory, route-log, and settings storage
+- One guarded assistant pipeline shared by `POST /v1/chat` and `WS /v1/assistant/stream`
+- Deterministic task validation before any database mutation
+- Routing between Groq fast responses, Gemini deep planning, and hybrid plan-then-fast delivery
+- Speech adapters for faster-whisper or whisper.cpp and Piper or ChatTTS
+- Health diagnostics with `ready`, `partial`, or `error` plus recovery actions
+
+### Unity client
+
+- UI Toolkit entrypoint at `unity-client/Assets/Resources/UI/MainUI.uxml`
+- Shell layout in `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
+- Screen controllers for Home, Schedule, Settings, and Chat
+- REST plus WebSocket clients for health, tasks, settings, reminders, chat, and streaming assistant turns
+- Subtitle overlay, reminder overlay, audio playback, transcript preview, and task summaries
+- Placeholder avatar-state presentation plus optional scene-level `AvatarConversationBridge` integration
+
+## Current Limitations
+
+- The default LLM path is API-backed through Groq and Gemini. A fully local LLM path is not implemented.
+- Unity visual behavior still requires Unity Editor or a built client for full verification.
+- Some UI areas are still placeholder-driven, especially the schedule center panel and the schedule-side assistant panel.
+- The mini-assistant window described in design docs is not implemented.
+- Speech quality and availability still depend on machine-local runtime setup.
 
 ## Quick Start
 
-### 1. Install backend dependencies
+### Windows helper flow
+
+From the repo root:
+
+```powershell
+.\scripts\setup_windows.ps1
+.\scripts\run_all.ps1
+python .\scripts\smoke_backend.py
+```
+
+This is the recommended path for setup, health validation, and smoke checks.
+
+### Manual backend start
 
 ```powershell
 cd local-backend
 python -m pip install -r requirements.txt
-```
-
-### 2. Run the local backend
-
-```powershell
-cd local-backend
 python run_local.py
 ```
 
-Backend default URL:
+Default backend URL:
 
-- API: `http://127.0.0.1:8096`
+- `http://127.0.0.1:8096`
 
-### 3. Open the Unity client
+### Unity client
 
-Open `unity-client/` in Unity and run the project from the editor, or create a Windows standalone build from that project.
+Open `unity-client/` in Unity and run from the Editor, or pass a built executable to:
 
-## Optional Runtime Configuration
+```powershell
+.\scripts\run_all.ps1 -UnityExecutablePath "D:\Builds\TroLy.exe"
+```
 
-The backend uses the `assistant_` environment variable prefix. Useful runtime variables include:
+## Key Runtime Configuration
+
+The backend reads `.env` in `local-backend/` and shell environment variables prefixed with `assistant_`.
+
+Common settings:
 
 - `assistant_llm_provider`
 - `assistant_routing_mode`
 - `assistant_fast_provider`
 - `assistant_deep_provider`
-- `assistant_gemini_api_key`
-- `assistant_gemini_base_url`
-- `assistant_gemini_model`
 - `assistant_groq_api_key`
-- `assistant_groq_base_url`
-- `assistant_groq_model`
+- `assistant_gemini_api_key`
 - `assistant_stt_provider`
 - `assistant_faster_whisper_model_path`
-- `assistant_faster_whisper_model_size`
-- `assistant_faster_whisper_device`
-- `assistant_faster_whisper_compute_type`
 - `assistant_whisper_command`
 - `assistant_whisper_model_path`
+- `assistant_tts_provider`
 - `assistant_piper_command`
 - `assistant_piper_model_path`
-- `assistant_tts_provider`
 - `assistant_chattts_compile`
 
-Configured LLM paths:
+Current backend-supported LLM providers are `hybrid`, `groq`, and `gemini`.
+Ollama-related settings still exist for preflight and future work, but Ollama is not an active routed provider in the current backend code.
 
-- Hybrid routing default: fast `groq`, deep `gemini`
-- Groq: `https://api.groq.com/openai/v1`
-- Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`
+## Verification Status
 
-Configured speech defaults:
+- Backend automated tests were verified locally on 2026-03-26 with `pytest -q`: `62 passed`.
+- Unity EditMode and PlayMode test files exist in `unity-client/Assets/Tests/`, but they were not executed from this terminal session.
 
-- Backend language: `vi`
-- STT provider: `faster_whisper` with optional `whisper.cpp` fallback
-- Default TTS provider: `piper`
-- Backend TTS voice: `vi-VN-default`
-
-ChatTTS notes:
-
-- Set `assistant_tts_provider=chattts` to use the Python ChatTTS backend instead of Piper.
-- `assistant_chattts_compile=false` is the safer Windows starting point.
-- ChatTTS model download and warmup happen lazily on first synthesis call.
-
-## Tests
-
-Backend tests:
-
-```powershell
-cd local-backend
-pytest -q
-```
-
-Unity validation still needs to be run from the Unity Editor for EditMode and PlayMode coverage.
-
-## Documentation
+## Documentation Index
 
 - `docs/00-context.md`
 - `docs/01-scope.md`
@@ -159,12 +126,8 @@ Unity validation still needs to be run from the Unity Editor for EditMode and Pl
 - `docs/08-architecture-as-is.md`
 - `docs/09-runbook.md`
 
-For step-by-step Windows setup, health validation, release packaging, and troubleshooting, use `docs/09-runbook.md`.
+## Task Tracking
 
-## Notes
-
-- The backend is implemented and tested in this workspace.
-- The current LLM path is API-backed via Groq and Gemini rather than Ollama.
-- The Unity shell is implemented, but live validation still depends on opening the Unity project locally.
-- Windows packaging helpers exist under `scripts/`, but final release-folder validation is still in progress.
-- A real avatar or model asset is not checked in yet.
+- `tasks/task-queue.md`: current AI-executable repo work
+- `tasks/task-people.md`: manual or off-repo work
+- `tasks/done.md`: historical completion log and doc refresh history

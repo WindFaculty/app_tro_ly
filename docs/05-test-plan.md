@@ -1,70 +1,101 @@
-# Test Plan - Local Desktop Assistant
+# Test Plan - Current Validation Strategy
 
-Updated: 2026-03-14
+Updated: 2026-03-26
 
-## Target Automated Commands
+## Automated Validation
 
-Backend:
+### Backend
+
+Run from `local-backend/`:
 
 ```powershell
-cd local-backend
 pytest -q
 ```
 
-Unity:
-- Run EditMode tests for data mapping, API client behavior, and view-model state.
-- Run PlayMode tests for avatar state transitions, startup health flow, and reminder presentation.
+Current evidence:
 
-## Smoke Tests
-- ST1: Backend `GET /v1/health` reports `ready`, `partial`, or `error` without crashing.
-- ST2: Task CRUD works against SQLite and survives app restart.
-- ST3: `today`, `week`, `overdue`, `inbox`, and `completed` views return correct task grouping.
-- ST4: Text chat can answer `What do I have today?` from real task data.
-- ST5: Text chat can create, complete, and reschedule tasks through validated backend actions.
-- ST6: Push-to-talk voice input returns a visible transcript and a correct routed action.
-- ST7: TTS playback returns an audio asset and drives avatar `talking` state plus subtitles.
-- ST8: Reminder polling emits a reminder event before a due task and the Unity client shows it.
-- ST9: The app starts on a clean machine and reports accurate health for the configured runtimes.
-- ST10: Missing STT, TTS, or configured LLM provider degrades features cleanly without taking down the app.
+- Verified on 2026-03-26
+- Result: `62 passed`
 
-## Functional Areas
-- Data validation:
-  - empty titles rejected
-  - invalid time ranges rejected
-  - contradictory schedule fields normalized or rejected
-- Aggregation:
-  - overdue logic
-  - next-7-days grouping
-  - due-soon detection
-  - conflict detection
-- Conversation:
-  - intent routing
-  - prompt context assembly
-  - structured action application
-  - conversation history persistence
-- Voice:
-  - STT transcription
-  - transcript confirmation
-  - TTS caching
-  - temporary audio cleanup
-- Unity:
-  - startup health banner
-  - avatar state transitions
-  - reminder popup rendering
-  - subtitle sync
+Coverage present in repo includes:
 
-## Manual Verification
-- MV1: Add a task in the UI, restart the app, and confirm it persists.
-- MV2: Ask for today's plan by text and confirm reply contents match the database.
-- MV3: Speak a reschedule command and confirm both the transcript and resulting task update.
-- MV4: Force TTS failure and confirm text replies still work.
-- MV5: Set a task due within 15 minutes and confirm a reminder event appears.
-- MV6: Launch with network disconnected or provider credentials missing and confirm degraded health plus recovery guidance is surfaced cleanly.
+- task APIs
+- chat APIs
+- assistant streaming APIs
+- scheduler and health behavior
+- STT and TTS services
+- smoke script behavior
+- Windows script preflight checks
+- prompt-context and token-compaction related tests
 
-## Packaging Checks
-- Windows standalone build launches from a clean release folder.
-- Startup script can bring up required local services in the right order.
-- Release build reports missing runtimes or provider configuration with actionable guidance.
+### Unity
 
-## Optional Secondary Checks
-- If `agent-platform` later gains assistant-specific wrappers, add contract tests for task, chat, and speech tool calls there.
+Unity test files exist under `unity-client/Assets/Tests/` for:
+
+- EditMode:
+  - view-model stores
+  - health mapping and normalization
+  - settings serialization
+- PlayMode:
+  - `AssistantApp`
+  - `UiDocumentLoader`
+  - `AppRouter`
+  - `AppShellController`
+  - screen controllers
+  - subtitle presenter
+  - reminder presenter
+  - avatar bridge and avatar state machine
+
+Manual note:
+
+- Presence of these files is verified.
+- Their pass status was not re-run from this terminal session.
+
+## Smoke Validation
+
+### Recommended Windows flow
+
+From repo root:
+
+```powershell
+.\scripts\setup_windows.ps1
+.\scripts\run_all.ps1
+python .\scripts\smoke_backend.py
+```
+
+The smoke script currently exercises:
+
+- `/v1/health`
+- task create, update, reschedule, and complete flows
+- `/v1/events`
+- `/v1/assistant/stream`
+- available and unavailable STT behavior
+- available and unavailable TTS behavior
+
+## Manual Validation Required
+
+These still require human-run verification:
+
+- Unity Editor visual behavior
+- built client behavior on a target machine
+- microphone capture and playback quality
+- speech runtime installs and model paths
+- production-avatar integration in a real scene
+
+## Regression Priorities
+
+Prioritize failures in these areas:
+
+- health and degraded-mode reporting
+- assistant stream completion
+- validated task mutation behavior
+- reminder event delivery
+- subtitle and talking-state sync
+- settings load or save behavior
+- packaged release startup
+
+## Acceptance Rules
+
+- Do not claim UI or runtime behavior is verified unless there is test, script, log, or manual evidence.
+- Treat machine-local speech runtime validation as separate from repo-code validation.
+- Treat design-target UI documents as out of scope for validation unless the code changed to implement them.
