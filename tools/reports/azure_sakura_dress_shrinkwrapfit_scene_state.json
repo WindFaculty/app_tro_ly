@@ -1,0 +1,136 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_shrinkwrapfit.blend",
+  "mode": "OBJECT",
+  "activeObject": null,
+  "selectedObjects": [],
+  "meshStates": [
+    {
+      "name": "Body_ArmUpperL",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_ArmUpperR",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_CalfL",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_CalfR",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_FootL",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_FootR",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_ForearmL",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_ForearmR",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_HandL",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_HandR",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_Head",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_ThighL",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_ThighR",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_TorsoLower",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "Body_TorsoUpper",
+      "hiddenViewport": true,
+      "hiddenRender": true,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    },
+    {
+      "name": "CHR_Dress_AzureSakura_v001",
+      "hiddenViewport": false,
+      "hiddenRender": false,
+      "selected": false,
+      "showInFront": false,
+      "displayType": "TEXTURED"
+    }
+  ]
+}

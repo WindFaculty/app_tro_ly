@@ -1,0 +1,76 @@
+{
+  "workflow": [
+    "Import base avatar scene",
+    "Import dress mesh",
+    "Shrinkwrap neckline/torso/sleeve-root to avatar body",
+    "Smooth fitted regions",
+    "Transfer vertex weights from avatar body",
+    "Bind dress to avatar armature",
+    "Hide body regions under dress"
+  ],
+  "baseBlend": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_split15_facial.blend",
+  "sourceBodyBlend": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_rigclean.blend",
+  "dressFbx": "D:\\Antigaravity_Code\\tro_ly\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+  "outputBlend": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_shoulderarmfit.blend",
+  "dressObject": "CHR_Dress_AzureSakura_v001",
+  "dressMesh": "CHR_Dress_AzureSakura_v001_Mesh",
+  "dressVertexCount": 610170,
+  "dressPolygonCount": 1220762,
+  "dressMaterial": "MAT_Dress_AzureSakura_v001",
+  "dressVertexGroupCount": 27,
+  "armatureTarget": "Armature",
+  "hiddenBodyRegions": [
+    "Body_TorsoUpper",
+    "Body_TorsoLower",
+    "Body_ThighL",
+    "Body_ThighR",
+    "Body_CalfL",
+    "Body_CalfR",
+    "Body_FootL",
+    "Body_FootR"
+  ],
+  "dressLocation": [
+    -0.007639,
+    0.21904,
+    0.709701
+  ],
+  "dressRotationEuler": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "dressScale": [
+    1.0,
+    1.0,
+    1.0
+  ],
+  "dressWorldBounds": {
+    "min": [
+      -0.759893,
+      -0.241985,
+      -0.041794
+    ],
+    "max": [
+      0.742725,
+      0.679897,
+      1.459866
+    ]
+  },
+  "fitGroups": {
+    "Fit_Neckline": {
+      "vertexCount": 36277
+    },
+    "Fit_ShoulderCap": {
+      "vertexCount": 20835
+    },
+    "Fit_TorsoUpper": {
+      "vertexCount": 80543
+    },
+    "Fit_UpperArm": {
+      "vertexCount": 43695
+    },
+    "Fit_SleeveRoot": {
+      "vertexCount": 82004
+    }
+  }
+}

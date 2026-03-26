@@ -1,0 +1,65 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_shoulderarmfit.blend",
+  "dressObject": "CHR_Dress_AzureSakura_v001",
+  "dressVertexCount": 610170,
+  "dressPolygonCount": 1220762,
+  "dressVertexGroupCount": 27,
+  "dressMaterialSlots": [
+    "MAT_Dress_AzureSakura_v001"
+  ],
+  "dressMaterialNodeSummary": [
+    {
+      "name": "MAT_Dress_AzureSakura_v001",
+      "usesNodes": true,
+      "nodes": [
+        "ShaderNodeOutputMaterial",
+        "ShaderNodeBsdfPrincipled",
+        "ShaderNodeTexImage",
+        "ShaderNodeTexImage",
+        "ShaderNodeTexImage",
+        "ShaderNodeTexImage",
+        "ShaderNodeNormalMap"
+      ]
+    }
+  ],
+  "armatureTarget": "Armature",
+  "armatureBoneCount": 24,
+  "hiddenRegions": [
+    "Body_CalfL",
+    "Body_CalfR",
+    "Body_FootL",
+    "Body_FootR",
+    "Body_ThighL",
+    "Body_ThighR",
+    "Body_TorsoLower",
+    "Body_TorsoUpper"
+  ],
+  "sampleVertexCount": 256,
+  "poseVerification": {
+    "testedBones": {
+      "LeftArm": [
+        0.0,
+        0.0,
+        0.35
+      ],
+      "RightArm": [
+        0.0,
+        0.0,
+        -0.35
+      ],
+      "LeftUpLeg": [
+        0.2,
+        0.0,
+        0.0
+      ],
+      "RightUpLeg": [
+        -0.15,
+        0.0,
+        0.0
+      ]
+    },
+    "maxVertexDelta": 0.369472,
+    "meanVertexDelta": 0.12075,
+    "deformationDetected": true
+  }
+}

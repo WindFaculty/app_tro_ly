@@ -10,6 +10,7 @@ from fastapi import APIRouter, File, HTTPException, Query, Request, UploadFile, 
 from fastapi.responses import FileResponse
 
 from app.container import AppContainer
+from app.core.ids import make_id
 from app.core.time import iso_date
 from app.core.health import build_logs_payload, build_recovery_actions
 from app.core.logging import get_logger
@@ -170,7 +171,8 @@ async def speech_stt(
     language: str | None = None,
 ) -> SpeechSttResponse:
     container = _container(request)
-    temp_path = container.settings.audio_dir / f"stt_{audio.filename or 'input.wav'}"
+    original_name = Path(audio.filename or "input.wav").name or "input.wav"
+    temp_path = container.settings.audio_dir / f"{make_id('stt')}_{original_name}"
     with temp_path.open("wb") as handle:
         shutil.copyfileobj(audio.file, handle)
     try:
@@ -179,6 +181,8 @@ async def speech_stt(
     except RuntimeError as exc:
         logger.warning("STT request failed: %s", exc)
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+    finally:
+        temp_path.unlink(missing_ok=True)
 
 
 @router.post("/speech/tts", response_model=SpeechTtsResponse)
@@ -190,7 +194,7 @@ async def speech_tts(request: Request, payload: SpeechTtsRequest) -> SpeechTtsRe
             duration_ms=result["duration_ms"],
             cached=result["cached"],
         )
-    except RuntimeError as exc:
+    except Exception as exc:
         logger.warning("TTS request failed: %s", exc)
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 

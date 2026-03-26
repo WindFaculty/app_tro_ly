@@ -17,7 +17,7 @@ Ownership: `Pxx` = human/manual/off-repo work | `Axx` = Codex/AI-executable repo
 - `P02 | TODO | Run manual smoke tests on the dev machine for task CRUD, chat, reminders, subtitles, and offline or degraded mode. | Done when: the main user flows have been exercised manually and the results are written down for follow-up. | Unblocks: A03 A04 A07 A09 A10 A11 A14 A15`
 - `P03 | TODO | Install and configure faster-whisper or whisper.cpp, Piper, and optional Ollama runtime settings on the demo machine. | Done when: the machine has working runtime paths, binaries, and models that the app can point at for end-to-end testing. | Unblocks: A03 A04 A07 A10 A11 A12 A13 A14 A15`
 - `P04 | TODO | Provide the real avatar asset, animator controller, and blendshape or lip-sync expectations. | Done when: the repo has the production avatar inputs needed to replace the current placeholder safely. | Unblocks: A03 A04 A07 A10 A11 A14 A15 A19`
-- `P05 | TODO | Build and test the release folder on a clean target Windows machine, then record any startup or runtime issues. | Done when: release-folder behavior has been validated outside the dev environment and any failures are available for follow-up. | Unblocks: A01 A02 A03 A04 A06 A07 A10 A11 A14 A15`
+- `P05 | DONE | Build and test the release folder on a clean target Windows machine, then record any startup or runtime issues. | Done when: release-folder behavior has been validated outside the dev environment and any failures are available for follow-up. | Evidence: Tested release folder successfully. Found expected ChatTTS failure (tracked in A12). | Unblocks: A01 A02 A03 A04 A06 A07 A10 A11 A14 A15`
 
 ## Future Manual Prerequisites
 
@@ -37,7 +37,7 @@ Quy ước: `Pxx` = công việc người dùng phải làm thủ công hoặc n
 - `P02 | TODO | Chạy manual smoke test trên máy dev cho task CRUD, chat, reminder, subtitle, và chế độ offline hoặc degraded. | Done when: các luồng chính đã được kiểm tra thủ công và kết quả đã được ghi lại để theo dõi. | Unblocks: A03 A04 A07 A09 A10 A11 A14 A15`
 - `P03 | TODO | Cài đặt và cấu hình faster-whisper hoặc whisper.cpp, Piper, và các thiết lập Ollama tùy chọn trên máy demo. | Done when: máy đã có runtime, binary, model, và đường dẫn cấu hình đúng để app có thể chạy end-to-end. | Unblocks: A03 A04 A07 A10 A11 A12 A13 A14 A15`
 - `P04 | TODO | Cung cấp avatar asset thật, animator controller, và kỳ vọng về blendshape hoặc lip-sync. | Done when: repo đã có đầu vào avatar production cần thiết để thay thế placeholder một cách an toàn. | Unblocks: A03 A04 A07 A10 A11 A14 A15 A19`
-- `P05 | TODO | Build và kiểm tra release folder trên một máy Windows đích sạch, sau đó ghi lại lỗi startup hoặc runtime nếu có. | Done when: hành vi của release folder đã được xác minh bên ngoài môi trường dev và mọi lỗi gặp phải đã được ghi lại để xử lý tiếp. | Unblocks: A01 A02 A03 A04 A06 A07 A10 A11 A14 A15`
+- `P05 | DONE | Build và kiểm tra release folder trên một máy Windows đích sạch, sau đó ghi lại lỗi startup hoặc runtime nếu có. | Done when: hành vi của release folder đã được xác minh bên ngoài môi trường dev và mọi lỗi gặp phải đã được ghi lại để xử lý tiếp. | Evidence: Tested release folder successfully. Found expected ChatTTS failure (tracked in A12). | Unblocks: A01 A02 A03 A04 A06 A07 A10 A11 A14 A15`
 
 ## Điều Kiện Thủ Công Trong Tương Lai
 

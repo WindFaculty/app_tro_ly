@@ -124,7 +124,7 @@ This path is the richest integration surface for the Unity client.
 - Default LLM mode is `hybrid`.
 - Default fast provider is `groq`.
 - Default deep provider is `gemini`.
-- `ollama` remains in config, but current health reporting marks it as disabled for this phase.
+- Current LLM runtime is API-first and uses Groq or Gemini rather than Ollama.
 
 ## Current Limitations
 

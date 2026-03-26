@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     routing_mode: str = "auto"
     fast_provider: str = "groq"
     deep_provider: str = "gemini"
-    enable_ollama: bool = True
+    enable_ollama: bool = False
     ollama_base_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "llama3.1:8b"
     ollama_timeout_sec: float = 8.0
@@ -60,6 +60,7 @@ class Settings(BaseSettings):
     piper_model_path: str | None = None
     piper_timeout_sec: float = 30.0
     tts_provider: str = "piper"
+    tts_retry_attempts: int = 2
     chattts_compile: bool = False
     chattts_sample_rate: int = 24000
 
@@ -69,6 +70,11 @@ class Settings(BaseSettings):
     occurrence_horizon_days: int = 60
     speech_cache_enabled: bool = True
     short_term_turn_limit: int = 12
+    fast_context_task_limit: int = 3
+    deep_context_task_limit: int = 5
+    notes_context_word_limit: int = 120
+    rolling_summary_line_limit: int = 4
+    long_term_memory_limit: int = 3
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -79,8 +85,8 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def finalize_paths(self) -> "Settings":
         self.llm_provider = self.llm_provider.strip().lower()
-        if self.llm_provider not in {"hybrid", "gemini", "groq", "ollama"}:
-            raise ValueError("assistant_llm_provider must be one of 'hybrid', 'gemini', 'groq', or 'ollama'")
+        if self.llm_provider not in {"hybrid", "gemini", "groq"}:
+            raise ValueError("assistant_llm_provider must be one of 'hybrid', 'gemini', or 'groq'")
         self.routing_mode = self.routing_mode.strip().lower()
         if self.routing_mode not in {"auto", "fast", "deep", "hybrid"}:
             raise ValueError("assistant_routing_mode must be one of 'auto', 'fast', 'deep', or 'hybrid'")
@@ -96,6 +102,18 @@ class Settings(BaseSettings):
         self.tts_provider = self.tts_provider.strip().lower()
         if self.tts_provider not in {"piper", "chattts"}:
             raise ValueError("assistant_tts_provider must be either 'piper' or 'chattts'")
+        if self.fast_context_task_limit < 1:
+            raise ValueError("assistant_fast_context_task_limit must be >= 1")
+        if self.deep_context_task_limit < 1:
+            raise ValueError("assistant_deep_context_task_limit must be >= 1")
+        if self.notes_context_word_limit < 1:
+            raise ValueError("assistant_notes_context_word_limit must be >= 1")
+        if self.rolling_summary_line_limit < 1:
+            raise ValueError("assistant_rolling_summary_line_limit must be >= 1")
+        if self.long_term_memory_limit < 1:
+            raise ValueError("assistant_long_term_memory_limit must be >= 1")
+        if self.tts_retry_attempts < 1:
+            raise ValueError("assistant_tts_retry_attempts must be >= 1")
         self.ollama_base_url = self.ollama_base_url.rstrip("/")
         self.groq_base_url = self.groq_base_url.rstrip("/")
         self.gemini_base_url = self.gemini_base_url.rstrip("/")
@@ -124,7 +142,7 @@ class Settings(BaseSettings):
             return self.gemini_model
         if self.llm_provider == "groq":
             return self.groq_model
-        return self.ollama_model
+        return f"{self.groq_model} | {self.gemini_model}"
 
     @property
     def active_llm_provider_label(self) -> str:

@@ -81,16 +81,23 @@ class SttService:
 
     def _whisper_cpp_health(self) -> dict[str, Any]:
         command = self._resolve_command(self._settings.whisper_command)
+        model_path = self._resolve_model_path(self._settings.whisper_model_path)
+        issues: list[str] = []
+        if command is None:
+            issues.append("command_not_configured_or_not_found")
+        if model_path is None:
+            issues.append("model_path_not_configured_or_not_found")
         payload: dict[str, Any] = {
-            "available": command is not None,
+            "available": len(issues) == 0,
             "provider": "whisper.cpp",
         }
         if self._settings.whisper_command:
             payload["command"] = self._settings.whisper_command
         if self._settings.whisper_model_path:
             payload["model_path"] = self._settings.whisper_model_path
-        if command is None:
-            payload["reason"] = "command not configured or not found"
+        if issues:
+            payload["reason"] = issues[0]
+            payload["issues"] = issues
         return payload
 
     def _transcribe_with_whisper_cpp(self, audio_path: Path, language: str | None = None) -> dict[str, Any]:
@@ -98,12 +105,16 @@ class SttService:
         if command is None:
             logger.warning("STT requested but whisper.cpp runtime is not configured")
             raise RuntimeError("whisper.cpp runtime is not configured")
+        model_path = self._resolve_model_path(self._settings.whisper_model_path)
+        if model_path is None:
+            logger.warning("STT requested but whisper.cpp model path is not configured")
+            raise RuntimeError("whisper.cpp model path is not configured")
         output_base = audio_path.with_suffix("")
         process = subprocess.run(
             [
                 command,
                 "-m",
-                self._settings.whisper_model_path or "",
+                model_path,
                 "-f",
                 str(audio_path),
                 "-otxt",
@@ -131,5 +142,13 @@ class SttService:
             return None
         path = Path(value)
         if path.exists():
-            return str(path)
+            return str(path) if path.is_file() else None
         return shutil.which(value)
+
+    def _resolve_model_path(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        path = Path(value)
+        if not path.exists() or not path.is_file():
+            return None
+        return str(path)

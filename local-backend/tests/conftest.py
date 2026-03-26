@@ -17,16 +17,18 @@ from app.main import create_app
 @pytest.fixture()
 def settings(tmp_path: Path) -> Settings:
     return Settings(
+        _env_file=None,
         base_dir=tmp_path,
         data_dir=tmp_path / "data",
         db_path=tmp_path / "data" / "app.db",
         audio_dir=tmp_path / "data" / "audio",
         cache_dir=tmp_path / "data" / "cache",
         log_dir=tmp_path / "data" / "logs",
-        llm_provider="ollama",
-        enable_ollama=False,
+        llm_provider="hybrid",
+        stt_provider="whisper_cpp",
         whisper_command=None,
         piper_command=None,
+        tts_provider="piper",
         reminder_poll_seconds=1,
     )
 

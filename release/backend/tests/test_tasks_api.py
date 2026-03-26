@@ -22,6 +22,45 @@ def test_health_reports_partial_when_runtimes_missing(client) -> None:
     assert any("assistant_piper_command" in action for action in payload["recovery_actions"])
 
 
+def test_health_reports_ready_when_database_and_runtimes_are_available(client) -> None:
+    container = client.app.state.container
+    container.llm_service.health = lambda: {
+        "available": True,
+        "provider": "groq",
+        "base_url": "https://api.groq.com/openai/v1",
+        "model": "stub",
+    }
+    container.speech_service.stt_health = lambda: {"available": True, "provider": "whisper.cpp"}
+    container.speech_service.tts_health = lambda: {"available": True, "provider": "piper"}
+
+    response = client.get("/v1/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ready"
+    assert payload["database"]["available"] is True
+    assert payload["runtimes"]["llm"]["provider"] == "groq"
+    assert payload["degraded_features"] == []
+    assert payload["recovery_actions"] == []
+
+
+def test_health_reports_error_when_database_is_unavailable(client) -> None:
+    container = client.app.state.container
+    container.repository.health_check = lambda: {
+        "available": False,
+        "path": str(container.settings.db_path),
+        "error": "database unavailable",
+    }
+
+    response = client.get("/v1/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "error"
+    assert payload["database"]["available"] is False
+    assert any("SQLite path" in action for action in payload["recovery_actions"])
+
+
 def test_task_crud_and_today_completed_views(client) -> None:
     day = now_local().date()
     create_response = client.post(

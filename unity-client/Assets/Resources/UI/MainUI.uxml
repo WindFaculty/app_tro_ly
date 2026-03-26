@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:editor="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd"
+>
+    <ui:Style src="MainStyle.uss" />
+
+    <ui:VisualElement class="layout-container">
+        
+        <!-- TOP BAR -->
+        <ui:VisualElement class="top-bar">
+            <ui:VisualElement class="brand-container">
+                <ui:VisualElement class="brand-mark"><ui:Label text="AI" /></ui:VisualElement>
+                <ui:Label text="Trợ Lý Ảo" class="brand-title" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement class="top-tabs">
+                <ui:Button name="TodayTab" text="Trang chủ" class="tab-button active" />
+                <ui:Button name="WeekTab" text="Lịch trình" class="tab-button" />
+                <ui:Button name="SettingsTab" text="Cài đặt" class="tab-button" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement class="top-actions">
+                <ui:Button name="TopNotifBtn" text="🔔" class="notif-btn" />
+                <ui:VisualElement class="user-avatar"><ui:Label text="U" /></ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        
+        <!-- MAIN CONTENT (3 Columns) -->
+        <ui:VisualElement class="main-content">
+            
+            <!-- LEFT SIDEBAR -->
+            <ui:VisualElement class="sidebar left-sidebar">
+                <ui:VisualElement class="sidebar-identity">
+                    <ui:Label text="The Luminal" class="sidebar-identity-title" />
+                    <ui:Label text="● Active Presence" class="sidebar-identity-subtitle" />
+                </ui:VisualElement>
+                
+                <ui:VisualElement class="health-banner">
+                    <ui:Label text="SYSTEM HEALTH" class="health-title" />
+                    <ui:Label name="HealthBanner" text="98.4% Optimal" class="health-value" style="white-space: normal;" />
+                    <ui:Label name="StageStatusText" text="..." class="health-desc" />
+                </ui:VisualElement>
+                
+                <ui:Button name="SidebarStateBtn" class="sidebar-menu-btn active">
+                    <ui:Label text="Trạng thái" />
+                    <ui:Label name="AvatarStateText" text="Idle" style="color: #06B6D4; font-size: 11px;" />
+                </ui:Button>
+                <ui:Button text="Tự do" class="sidebar-menu-btn" />
+                <ui:Button text="Thiết bị" class="sidebar-menu-btn" />
+                <ui:Button text="Thông báo" class="sidebar-menu-btn" />
+                
+                <ui:VisualElement class="sidebar-footer">
+                    <ui:Button name="RefreshButton" text="Refresh System" class="btn-secondary" style="margin-bottom: 16px;" />
+                    <ui:Label text="? Help" style="margin-bottom: 8px; color: #94A3B8;" />
+                    <ui:Label text="→ Logout" style="color: #94A3B8;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            
+            <!-- CENTER STAGE -->
+            <ui:VisualElement class="center-stage">
+                
+                <!-- HOME VIEW (Avatar) -->
+                <ui:VisualElement name="HomeViewContainer" class="view-container" style="flex-direction: column;">
+                    <ui:VisualElement class="avatar-card">
+                        <ui:Label name="StagePlaceholderText" text="KHUNG AVATAR\n\nAssistant dang chay theo kieu hybrid stream." class="hidden" />
+                        <ui:VisualElement class="avatar-face">
+                            <ui:Label text="o   o" />
+                            <ui:Label text="LISTENING" class="avatar-badge" />
+                        </ui:VisualElement>
+                        
+                        <ui:VisualElement name="SubtitleCard" class="subtitle-box hidden">
+                            <ui:Label name="SubtitleText" text="Chào buổi sáng! Tôi đã sẵn sàng hỗ trợ bạn..." />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    
+                    <ui:VisualElement class="mini-task-sheet">
+                        <ui:Label text="Lịch trình &amp; Công việc" style="font-size: 18px; -unity-font-style: bold; margin-bottom: 12px; color: white;" />
+                        <ui:TextField name="QuickAddInput" text="" placeholder-text="Thêm việc nhanh..." style="margin-bottom: 12px; height: 32px;" />
+                        <ui:Button name="QuickAddButton" text="TẠO MỚI" class="btn-primary hidden" style="margin-bottom: 12px;" />
+                        
+                        <ui:Label name="TaskSummaryText" text="Hôm nay: Không có task" style="font-size: 14px; margin-bottom: 8px; color: #94A3B8;" />
+                        <ui:Label name="TaskContentText" text="..." style="white-space: normal; color: white;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- SCHEDULE VIEW (Full Task / Calendar) -->
+                <ui:VisualElement name="ScheduleViewContainer" class="view-container hidden" style="flex-direction: column;">
+                    <ui:Label text="QUẢN LÝ THỜI GIAN" style="font-size: 12px; color: #06B6D4; -unity-font-style: bold; margin-bottom: 4px;" />
+                    <ui:Label name="TaskSheetHeaderTitle" text="Lịch trình AI" style="font-size: 32px; color: white; -unity-font-style: bold; margin-bottom: 24px;" />
+                    
+                    <ui:VisualElement style="flex-direction: row; margin-bottom: 20px; align-items: center;">
+                        <ui:Label name="TaskSheetMonthLabel" text="Tháng 10, 2024" style="font-size: 20px; color: white; -unity-font-style: bold; flex-grow: 1;" />
+                        <ui:Button name="InboxButton" text="Inbox" class="btn-secondary" style="margin-right: 8px;" />
+                        <ui:Button name="DoneButton" text="Đã xong" class="btn-secondary" />
+                    </ui:VisualElement>
+                    
+                    <ui:VisualElement name="CalendarArea" style="flex-grow: 1; background-color: #121822; border-radius: 16px; padding: 16px; border-width: 1px; border-color: rgba(255, 255, 255, 0.05); justify-content: center;">
+                         <!-- Calendar grid placeholder -->
+                         <ui:Label text="[ Lưới Calendar Grid hiển thị ở đây ]" style="align-self: center; color: #94A3B8;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- SETTINGS VIEW -->
+                <ui:VisualElement name="SettingsPanel" class="view-container hidden settings-panel" style="flex-direction: column;">
+                    <ui:Label text="Cấu hình Hệ thống" class="settings-header" />
+                    <ui:Label text="Điều chỉnh trải nghiệm tương tác với Trợ lý Ảo để phù hợp nhất với phong cách làm việc của bạn." class="settings-desc" />
+                    
+                    <ui:VisualElement class="settings-card">
+                        <ui:VisualElement class="settings-card-header">
+                            <ui:Label text="Tùy chọn Tương tác" class="settings-card-title" />
+                            <ui:Label name="SettingsStatusText" text="Đã lưu" style="background-color: rgba(6, 182, 212, 0.2); color: #06B6D4; padding: 4px 12px; border-radius: 12px; font-size: 12px; -unity-font-style: bold;" />
+                        </ui:VisualElement>
+                        
+                        <ui:Label name="SettingsSummaryText" text="Status Summary" style="margin-bottom: 16px; color: #94A3B8;" />
+                        
+                        <ui:Toggle name="SpeakRepliesToggle" label="Phát giọng nói (AI trả lời bằng giọng thực tế)" />
+                        <ui:Toggle name="TranscriptPreviewToggle" label="Xem trước transcript (Hiển thị preview văn bản)" />
+                        <ui:Toggle name="MiniAssistantToggle" label="Chế độ mini assistant (Popup Assistant thu nhỏ)" />
+                        <ui:Toggle name="ReminderSpeechToggle" label="Đọc nhắc nhở bằng tiếng (Thông báo quá lịch trực tiếp)" />
+                        
+                        <ui:VisualElement class="settings-action-row">
+                            <ui:Button name="ReloadButton" text="⟳ Tải lại cài đặt" class="btn-secondary" style="margin-right: 12px;" />
+                            <ui:Button name="SaveButton" text="💾 Lưu thay đổi" class="btn-primary" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+            </ui:VisualElement>
+            
+            <!-- RIGHT PANEL -->
+            <ui:VisualElement class="right-panel">
+                
+                <!-- CHAT PANEL VIEW -->
+                <ui:VisualElement name="ChatPanelView" class="view-container" style="flex-direction: column;">
+                    <ui:VisualElement class="chat-header">
+                        <ui:VisualElement>
+                            <ui:Label text="Luminal Assistant" class="chat-title" style="color: white; margin-bottom: 4px;" />
+                            <ui:Label text="SYSTEM CORE ONLINE" style="color: #94A3B8; font-size: 10px;" />
+                        </ui:VisualElement>
+                        <ui:Label text="GPT-4.0" class="chat-model-badge" />
+                    </ui:VisualElement>
+                    
+                    <ui:ScrollView class="chat-log-scroll">
+                        <ui:Label name="ChatLogText" text="AI: Mọi hệ thống hoạt động ổn định." class="chat-log-text" />
+                    </ui:ScrollView>
+                    
+                    <ui:VisualElement class="chat-input-area">
+                        <ui:TextField name="ChatInput" text="" placeholder-text="Hỏi tôi bất cứ điều gì..." class="chat-input-field" />
+                        <ui:Button name="MicButton" text="🎤" class="chat-btn" style="margin-right: 8px;" />
+                        <ui:Button name="SendButton" text="➤" class="chat-btn primary" />
+                    </ui:VisualElement>
+                    
+                    <ui:VisualElement name="ReminderCard" class="hidden" style="position: absolute; bottom: 100px; left: 16px; right: 16px; background-color: #121822; padding: 16px; border-radius: 16px; border-width: 1px; border-color: #06B6D4;">
+                        <ui:Label text="⏰ Nhắc nhở" style="-unity-font-style: bold; color: white; margin-bottom: 8px;" />
+                        <ui:Label name="ReminderText" text="..." style="color: #94A3B8; white-space: normal;" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+                <!-- SCHEDULE SIDE VIEW (Upcoming/Advise) -->
+                <ui:VisualElement name="ScheduleSideView" class="view-container hidden" style="flex-direction: column; padding: 24px;">
+                    <ui:VisualElement style="background-color: #0A0D14; border-radius: 16px; padding: 20px; border-left-width: 4px; border-left-color: #06B6D4; margin-bottom: 32px;">
+                        <ui:Label text="TƯ VẤN TỪ AETHERIS" style="color: white; -unity-font-style: bold; margin-bottom: 12px; font-size: 12px;" />
+                        <ui:Label text="&quot;Thứ 5 của bạn đang có 3 cuộc họp liên tiếp. Tôi đề xuất dời 'Review Code' sang sáng Thứ 6 để đảm bảo sự tập trung cao nhất.&quot;" style="color: #94A3B8; font-style: italic; white-space: normal; line-height: 20px; margin-bottom: 16px;" />
+                        <ui:Label text="TỐI ƯU NGAY →" style="color: #06B6D4; -unity-font-style: bold; font-size: 12px;" />
+                    </ui:VisualElement>
+                    
+                    <ui:Label text="SẮP TỚI" style="color: #94A3B8; -unity-font-style: bold; font-size: 12px; margin-bottom: 16px; letter-spacing: 1px;" />
+                    
+                    <ui:VisualElement style="flex-direction: row; background-color: #0A0D14; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                        <ui:VisualElement style="background-color: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; margin-right: 12px; align-items: center; justify-content: center; width: 40px;">
+                            <ui:Label text="T5" style="color: #94A3B8; font-size: 11px;" />
+                            <ui:Label text="03" style="color: white; -unity-font-style: bold; font-size: 16px;" />
+                        </ui:VisualElement>
+                        <ui:VisualElement style="justify-content: center;">
+                            <ui:Label text="14:00 - 15:30" style="color: #06B6D4; font-size: 12px; margin-bottom: 4px;" />
+                            <ui:Label text="Review Code Dự án" style="color: white; -unity-font-style: bold; font-size: 14px;" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                
+            </ui:VisualElement>
+            
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

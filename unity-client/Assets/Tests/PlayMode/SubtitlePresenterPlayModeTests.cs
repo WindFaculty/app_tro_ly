@@ -3,7 +3,7 @@ using LocalAssistant.Chat;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace LocalAssistant.Tests.PlayMode
 {
@@ -13,18 +13,17 @@ namespace LocalAssistant.Tests.PlayMode
         public IEnumerator SubtitlePresenterTogglesVisibility()
         {
             var go = new GameObject("SubtitlePresenter");
-            var textGo = new GameObject("SubtitleText", typeof(Text));
-            textGo.transform.SetParent(go.transform);
-            var text = textGo.GetComponent<Text>();
             var presenter = go.AddComponent<SubtitlePresenter>();
-            presenter.Bind(text);
+            var text = new Label();
+            var card = new VisualElement();
+            presenter.Bind(text, card);
+            
             presenter.Show("Xin chao");
-
             yield return null;
 
-            Assert.IsTrue(text.gameObject.activeSelf);
+            Assert.IsFalse(card.ClassListContains("hidden"));
             presenter.Hide();
-            Assert.IsFalse(text.gameObject.activeSelf);
+            Assert.IsTrue(card.ClassListContains("hidden"));
             Object.Destroy(go);
         }
 
@@ -32,20 +31,19 @@ namespace LocalAssistant.Tests.PlayMode
         public IEnumerator SubtitlePresenterReplacesTextAndClearsOnHide()
         {
             var go = new GameObject("SubtitlePresenter");
-            var textGo = new GameObject("SubtitleText", typeof(Text));
-            textGo.transform.SetParent(go.transform);
-            var text = textGo.GetComponent<Text>();
             var presenter = go.AddComponent<SubtitlePresenter>();
-            presenter.Bind(text);
+            var text = new Label();
+            var card = new VisualElement();
+            presenter.Bind(text, card);
+            
             presenter.Show("Ban dau");
             presenter.Show("Da cap nhat");
-
             yield return null;
 
             Assert.AreEqual("Da cap nhat", text.text);
             presenter.Hide();
             Assert.AreEqual(string.Empty, text.text);
-            Assert.IsFalse(text.gameObject.activeSelf);
+            Assert.IsTrue(card.ClassListContains("hidden"));
             Object.Destroy(go);
         }
     }

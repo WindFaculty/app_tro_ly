@@ -1,18 +1,20 @@
 using System.Collections.Generic;
 using LocalAssistant.Core;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace LocalAssistant.Notifications
 {
     public sealed class ReminderPresenter : MonoBehaviour
     {
-        [SerializeField] private Text reminderText;
+        private Label reminderText;
+        private VisualElement cardElement;
         private readonly Queue<string> pendingMessages = new();
 
-        public void Bind(Text value)
+        public void Bind(Label textElement, VisualElement card)
         {
-            reminderText = value;
+            reminderText = textElement;
+            cardElement = card;
             Clear();
         }
 
@@ -47,21 +49,17 @@ namespace LocalAssistant.Notifications
 
             var hasMessage = pendingMessages.Count > 0;
             reminderText.text = hasMessage ? pendingMessages.Peek() : string.Empty;
-            reminderText.gameObject.SetActive(hasMessage);
             SetCardVisibility(hasMessage);
         }
 
         private void SetCardVisibility(bool visible)
         {
-            if (reminderText.transform.parent == null)
+            if (cardElement != null)
             {
-                return;
-            }
-
-            var card = reminderText.transform.parent.gameObject;
-            if (card.name.EndsWith("Card"))
-            {
-                card.SetActive(visible);
+                if (visible)
+                    cardElement.RemoveFromClassList("hidden");
+                else
+                    cardElement.AddToClassList("hidden");
             }
         }
     }

@@ -1,0 +1,59 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+  "sceneObjectCount": 1,
+  "meshCount": 1,
+  "armatureCount": 0,
+  "meshes": [
+    {
+      "name": "Mesh_0",
+      "dataName": "Mesh_0",
+      "vertexCount": 610170,
+      "polygonCount": 1220762,
+      "materialSlots": [
+        "Material.001"
+      ],
+      "vertexGroupCount": 0,
+      "vertexGroupsSample": [],
+      "modifiers": [],
+      "armatureTargets": [],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotationEuler": [
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        1.898887,
+        1.165465,
+        1.897675
+      ],
+      "boundBoxMin": [
+        -0.950638,
+        -0.582607,
+        -0.949678
+      ],
+      "boundBoxMax": [
+        0.948249,
+        0.582858,
+        0.947997
+      ]
+    }
+  ],
+  "armatures": [],
+  "materials": [
+    "Material.001"
+  ],
+  "images": [
+    "Image_0",
+    "Image_2"
+  ]
+}

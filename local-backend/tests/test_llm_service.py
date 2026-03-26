@@ -21,6 +21,7 @@ class _FakeResponse:
 def test_groq_health_requires_api_key(tmp_path) -> None:
     service = LlmService(
         Settings(
+            _env_file=None,
             base_dir=tmp_path,
             llm_provider="groq",
             groq_api_key=None,
@@ -57,6 +58,7 @@ def test_groq_refine_reply_uses_chat_completions(monkeypatch, tmp_path) -> None:
 
     service = LlmService(
         Settings(
+            _env_file=None,
             base_dir=tmp_path,
             llm_provider="groq",
             groq_api_key="test-key",
@@ -79,6 +81,7 @@ def test_groq_refine_reply_uses_chat_completions(monkeypatch, tmp_path) -> None:
 def test_gemini_health_requires_api_key(tmp_path) -> None:
     service = LlmService(
         Settings(
+            _env_file=None,
             base_dir=tmp_path,
             llm_provider="gemini",
             gemini_api_key=None,
@@ -115,6 +118,7 @@ def test_gemini_refine_reply_uses_chat_completions(monkeypatch, tmp_path) -> Non
 
     service = LlmService(
         Settings(
+            _env_file=None,
             base_dir=tmp_path,
             llm_provider="gemini",
             gemini_api_key="test-key",

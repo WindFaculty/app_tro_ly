@@ -1,0 +1,56 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\Clothy3D_Studio\\HDataGenerated\\L\\base\\BodyHelperItem4.fbx",
+  "sceneObjectCount": 1,
+  "meshCount": 1,
+  "armatureCount": 0,
+  "meshes": [
+    {
+      "name": "body_outside_tight_loose",
+      "dataName": "body_outside_tight_loose",
+      "vertexCount": 8481,
+      "polygonCount": 8378,
+      "materialSlots": [
+        "body_0"
+      ],
+      "vertexGroupCount": 0,
+      "vertexGroupsSample": [],
+      "modifiers": [],
+      "armatureTargets": [],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.8727,
+        1.587799,
+        0.25052
+      ],
+      "boundBoxMin": [
+        -0.43635,
+        0.079081,
+        -0.08666
+      ],
+      "boundBoxMax": [
+        0.43635,
+        1.66688,
+        0.16386
+      ]
+    }
+  ],
+  "armatures": [],
+  "materials": [
+    "body_0"
+  ],
+  "images": []
+}

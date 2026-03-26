@@ -1,15 +1,17 @@
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace LocalAssistant.Chat
 {
     public sealed class SubtitlePresenter : MonoBehaviour
     {
-        [SerializeField] private Text subtitleText;
+        private Label subtitleText;
+        private VisualElement cardElement;
 
-        public void Bind(Text value)
+        public void Bind(Label textElement, VisualElement card)
         {
-            subtitleText = value;
+            subtitleText = textElement;
+            cardElement = card;
             Hide();
         }
 
@@ -22,7 +24,6 @@ namespace LocalAssistant.Chat
 
             subtitleText.text = value;
             SetCardVisibility(true);
-            subtitleText.gameObject.SetActive(true);
         }
 
         public void Hide()
@@ -33,21 +34,17 @@ namespace LocalAssistant.Chat
             }
 
             subtitleText.text = string.Empty;
-            subtitleText.gameObject.SetActive(false);
             SetCardVisibility(false);
         }
 
         private void SetCardVisibility(bool visible)
         {
-            if (subtitleText.transform.parent == null)
+            if (cardElement != null)
             {
-                return;
-            }
-
-            var card = subtitleText.transform.parent.gameObject;
-            if (card.name.EndsWith("Card"))
-            {
-                card.SetActive(visible);
+                if (visible)
+                    cardElement.RemoveFromClassList("hidden");
+                else
+                    cardElement.AddToClassList("hidden");
             }
         }
     }

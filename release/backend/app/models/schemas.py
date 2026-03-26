@@ -99,9 +99,12 @@ class ChatRequest(BaseModel):
 
     message: str = Field(min_length=1)
     conversation_id: str | None = None
+    session_id: str | None = None
     mode: str = "text"
     selected_date: str | None = None
     include_voice: bool = True
+    voice_mode: bool = False
+    notes_context: str | None = None
 
 
 class ChatResponse(BaseModel):
@@ -115,6 +118,12 @@ class ChatResponse(BaseModel):
     audio_url: str | None = None
     task_actions: list[TaskActionReport] = Field(default_factory=list)
     cards: list[ChatCard] = Field(default_factory=list)
+    route: str | None = None
+    provider: str | None = None
+    latency_ms: int | None = None
+    token_usage: dict[str, Any] = Field(default_factory=dict)
+    fallback_used: bool = False
+    plan_id: str | None = None
 
 
 class SpeechSttResponse(BaseModel):
@@ -150,6 +159,7 @@ class SettingsPayload(BaseModel):
     avatar: dict[str, Any] = Field(default_factory=dict)
     reminder: dict[str, Any] = Field(default_factory=dict)
     startup: dict[str, Any] = Field(default_factory=dict)
+    memory: dict[str, Any] = Field(default_factory=dict)
 
 
 class HealthResponse(BaseModel):
@@ -162,3 +172,26 @@ class HealthResponse(BaseModel):
     degraded_features: list[str]
     logs: dict[str, Any] = Field(default_factory=dict)
     recovery_actions: list[str] = Field(default_factory=list)
+
+
+class AssistantStreamMessage(BaseModel):
+    type: str
+    session_id: str | None = None
+    conversation_id: str | None = None
+    message: str | None = None
+    selected_date: str | None = None
+    voice_mode: bool = False
+    notes_context: str | None = None
+    audio_base64: str | None = None
+    language: str | None = None
+
+
+class AssistantPlanPayload(BaseModel):
+    intent: str
+    task_type: str
+    reasoning_summary: str
+    actionable_plan: list[str] = Field(default_factory=list)
+    task_actions: list[dict[str, Any]] = Field(default_factory=list)
+    spoken_brief: str
+    ui_cards: list[dict[str, Any]] = Field(default_factory=list)
+    memory_candidates: list[dict[str, Any]] = Field(default_factory=list)

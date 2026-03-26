@@ -1,0 +1,134 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_rigclean.blend",
+  "sceneObjectCount": 2,
+  "meshCount": 1,
+  "armatureCount": 1,
+  "meshes": [
+    {
+      "name": "Body_Base",
+      "dataName": "Body_Base_Mesh",
+      "vertexCount": 61630,
+      "polygonCount": 123272,
+      "materialSlots": [],
+      "vertexGroupCount": 22,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "Neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -3e-06
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        1.167575,
+        1.7,
+        0.275529
+      ],
+      "boundBoxMin": [
+        -58.378716,
+        3.6e-05,
+        -13.776498
+      ],
+      "boundBoxMax": [
+        58.378746,
+        170.0,
+        13.776445
+      ]
+    }
+  ],
+  "armatures": [
+    {
+      "name": "Armature",
+      "dataName": "Armature",
+      "boneCount": 24,
+      "deformBoneCount": 22,
+      "bonesSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "Neck",
+        "Head"
+      ],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotationEuler": [
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "dimensions": [
+        1.245117,
+        0.336883,
+        1.848989
+      ]
+    }
+  ],
+  "materials": [],
+  "images": []
+}

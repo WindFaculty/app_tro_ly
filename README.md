@@ -116,15 +116,12 @@ The backend uses the `assistant_` environment variable prefix. Useful runtime va
 - `assistant_piper_model_path`
 - `assistant_tts_provider`
 - `assistant_chattts_compile`
-- `assistant_ollama_base_url`
-- `assistant_ollama_model`
 
 Configured LLM paths:
 
 - Hybrid routing default: fast `groq`, deep `gemini`
 - Groq: `https://api.groq.com/openai/v1`
 - Gemini: `https://generativelanguage.googleapis.com/v1beta/openai`
-- Ollama adapter: `http://127.0.0.1:11434` in config, but currently disabled in health checks for this phase
 
 Configured speech defaults:
 
@@ -160,11 +157,14 @@ Unity validation still needs to be run from the Unity Editor for EditMode and Pl
 - `docs/05-test-plan.md`
 - `docs/07-ai-runtime.md`
 - `docs/08-architecture-as-is.md`
+- `docs/09-runbook.md`
+
+For step-by-step Windows setup, health validation, release packaging, and troubleshooting, use `docs/09-runbook.md`.
 
 ## Notes
 
 - The backend is implemented and tested in this workspace.
-- The current default LLM path is not fully offline because it routes through Groq and Gemini.
+- The current LLM path is API-backed via Groq and Gemini rather than Ollama.
 - The Unity shell is implemented, but live validation still depends on opening the Unity project locally.
 - Windows packaging helpers exist under `scripts/`, but final release-folder validation is still in progress.
 - A real avatar or model asset is not checked in yet.

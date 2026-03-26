@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using LocalAssistant.Audio;
 using LocalAssistant.Avatar;
 using LocalAssistant.Core;
 using LocalAssistant.Network;
@@ -140,12 +141,107 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.IsTrue(api.LastChatRequest.include_voice);
         }
 
-        private static AssistantApp CreateApp(FakeApiClient api, FakeEventsClient eventsClient)
+        [UnityTest]
+        public IEnumerator AssistantAppStreamVoiceLoopDrivesAvatarStates()
+        {
+            var api = new FakeApiClient
+            {
+                Health = CreateHealth(
+                    status: "ready",
+                    databaseAvailable: true,
+                    sttAvailable: true,
+                    ttsAvailable: true,
+                    llmAvailable: true,
+                    recoveryActions: Array.Empty<string>()),
+            };
+            var streamClient = new FakeStreamClient { ConnectedAfterConnect = true };
+            CreateApp(api, new FakeEventsClient(), streamClient);
+
+            yield return null;
+            yield return null;
+
+            var avatar = FindAvatarStateMachine();
+            var observedStates = new List<AvatarState>();
+            avatar.StateChanged += observedStates.Add;
+
+            streamClient.EnqueueMessage(UnityJson.Serialize(new AssistantStateChangedEvent
+            {
+                type = "assistant_state_changed",
+                state = "listening",
+                animation_hint = "listen",
+            }));
+            yield return null;
+            Assert.AreEqual(AvatarState.Listening, avatar.CurrentState);
+
+            streamClient.EnqueueMessage(UnityJson.Serialize(new AssistantStateChangedEvent
+            {
+                type = "assistant_state_changed",
+                state = "thinking",
+                animation_hint = "think",
+            }));
+            yield return null;
+            Assert.AreEqual(AvatarState.Thinking, avatar.CurrentState);
+
+            streamClient.EnqueueMessage(UnityJson.Serialize(new TtsSentenceReadyEvent
+            {
+                type = "tts_sentence_ready",
+                text = "Voice loop reply",
+                audio_url = "/speech/cache/test.wav",
+            }));
+            yield return WaitForAvatarState(avatar, AvatarState.Talking, 20);
+            Assert.AreEqual(AvatarState.Talking, avatar.CurrentState);
+
+            FindAudioPlaybackController().Output.Stop();
+            yield return WaitForAvatarState(avatar, AvatarState.Idle, 60);
+            Assert.AreEqual(AvatarState.Idle, avatar.CurrentState);
+
+            streamClient.EnqueueMessage(UnityJson.Serialize(new AssistantStateChangedEvent
+            {
+                type = "assistant_state_changed",
+                state = "reacting",
+                animation_hint = "react",
+            }));
+            yield return null;
+            Assert.AreEqual(AvatarState.Reacting, avatar.CurrentState);
+
+            streamClient.EnqueueMessage(UnityJson.Serialize(new AssistantStateChangedEvent
+            {
+                type = "assistant_state_changed",
+                state = "idle",
+                animation_hint = "idle",
+            }));
+            yield return null;
+            Assert.AreEqual(AvatarState.Idle, avatar.CurrentState);
+
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    AvatarState.Listening,
+                    AvatarState.Thinking,
+                    AvatarState.Talking,
+                    AvatarState.Idle,
+                    AvatarState.Reacting,
+                    AvatarState.Idle,
+                },
+                observedStates);
+        }
+
+        private static AssistantApp CreateApp(FakeApiClient api, FakeEventsClient eventsClient, FakeStreamClient streamClient = null)
         {
             var root = new GameObject("AssistantAppTestRoot");
             var app = root.AddComponent<AssistantApp>();
-            app.ConfigureClientsForTests(api, eventsClient, new FakeStreamClient());
+            app.ConfigureClientsForTests(api, eventsClient, streamClient ?? new FakeStreamClient());
             return app;
+        }
+
+        private static IEnumerator WaitForAvatarState(AvatarStateMachine avatar, AvatarState expectedState, int maxFrames)
+        {
+            for (var frame = 0; frame < maxFrames && avatar.CurrentState != expectedState; frame++)
+            {
+                yield return null;
+            }
+
+            Assert.AreEqual(expectedState, avatar.CurrentState);
         }
 
         private static HealthResponse CreateHealth(
@@ -190,6 +286,11 @@ namespace LocalAssistant.Tests.PlayMode
         private static AvatarStateMachine FindAvatarStateMachine()
         {
             return FindGameObject("AssistantRuntime").GetComponent<AvatarStateMachine>();
+        }
+
+        private static AudioPlaybackController FindAudioPlaybackController()
+        {
+            return FindGameObject("AssistantRuntime").GetComponent<AudioPlaybackController>();
         }
 
         private static GameObject FindGameObject(string name)
@@ -267,7 +368,17 @@ namespace LocalAssistant.Tests.PlayMode
 
             public Task<AudioClip> DownloadAudioClipAsync(string url)
             {
-                throw new InvalidOperationException("Audio download should not be used in text-only fallback tests.");
+                const int sampleRate = 16000;
+                var lengthSamples = sampleRate / 10;
+                var data = new float[lengthSamples];
+                for (var i = 0; i < data.Length; i++)
+                {
+                    data[i] = Mathf.Sin(2f * Mathf.PI * 440f * i / sampleRate) * 0.1f;
+                }
+
+                var clip = AudioClip.Create("TestVoiceLoopClip", data.Length, 1, sampleRate, false);
+                clip.SetData(data, 0);
+                return Task.FromResult(clip);
             }
         }
 
@@ -294,11 +405,14 @@ namespace LocalAssistant.Tests.PlayMode
 
         private sealed class FakeStreamClient : IAssistantStreamClient
         {
+            private readonly Queue<string> messages = new();
+
+            public bool ConnectedAfterConnect { get; set; }
             public bool IsConnected { get; private set; }
 
             public Task ConnectAsync(CancellationToken cancellationToken)
             {
-                IsConnected = false;
+                IsConnected = ConnectedAfterConnect;
                 return Task.CompletedTask;
             }
 
@@ -309,9 +423,17 @@ namespace LocalAssistant.Tests.PlayMode
 
             public bool TryDequeue(out string message)
             {
+                if (messages.Count > 0)
+                {
+                    message = messages.Dequeue();
+                    return true;
+                }
+
                 message = string.Empty;
                 return false;
             }
+
+            public void EnqueueMessage(string message) => messages.Enqueue(message);
 
             public void Dispose()
             {

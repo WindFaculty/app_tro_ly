@@ -95,6 +95,59 @@ class SQLiteRepository:
                     key TEXT PRIMARY KEY,
                     value_json TEXT NOT NULL
                 );
+
+                CREATE TABLE IF NOT EXISTS assistant_sessions (
+                    id TEXT PRIMARY KEY,
+                    conversation_id TEXT,
+                    mode TEXT NOT NULL,
+                    voice_state TEXT NOT NULL,
+                    active_route TEXT,
+                    active_plan_id TEXT,
+                    metadata_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE SET NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS conversation_summaries (
+                    conversation_id TEXT PRIMARY KEY,
+                    summary_text TEXT NOT NULL,
+                    turn_count INTEGER NOT NULL DEFAULT 0,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS memory_items (
+                    id TEXT PRIMARY KEY,
+                    category TEXT NOT NULL,
+                    normalized_key TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    confidence REAL NOT NULL,
+                    status TEXT NOT NULL,
+                    metadata_json TEXT NOT NULL DEFAULT '{}',
+                    source_conversation_id TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(source_conversation_id) REFERENCES conversations(id) ON DELETE SET NULL
+                );
+
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_memory_items_key
+                ON memory_items(category, normalized_key);
+
+                CREATE TABLE IF NOT EXISTS route_logs (
+                    id TEXT PRIMARY KEY,
+                    conversation_id TEXT,
+                    session_id TEXT,
+                    route TEXT NOT NULL,
+                    provider TEXT NOT NULL,
+                    model_name TEXT,
+                    latency_ms INTEGER,
+                    token_usage_json TEXT NOT NULL DEFAULT '{}',
+                    fallback_used INTEGER NOT NULL DEFAULT 0,
+                    error_text TEXT,
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(conversation_id) REFERENCES conversations(id) ON DELETE SET NULL
+                );
                 """
             )
 
@@ -313,6 +366,137 @@ class SQLiteRepository:
                 """,
                 (key, json.dumps(value)),
             )
+
+    def upsert_assistant_session(self, payload: dict[str, Any]) -> None:
+        serialized = dict(payload)
+        serialized["metadata_json"] = json.dumps(serialized.get("metadata_json") or {})
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO assistant_sessions (
+                    id, conversation_id, mode, voice_state, active_route, active_plan_id,
+                    metadata_json, created_at, updated_at
+                ) VALUES (
+                    :id, :conversation_id, :mode, :voice_state, :active_route, :active_plan_id,
+                    :metadata_json, :created_at, :updated_at
+                )
+                ON CONFLICT(id) DO UPDATE SET
+                    conversation_id = excluded.conversation_id,
+                    mode = excluded.mode,
+                    voice_state = excluded.voice_state,
+                    active_route = excluded.active_route,
+                    active_plan_id = excluded.active_plan_id,
+                    metadata_json = excluded.metadata_json,
+                    updated_at = excluded.updated_at
+                """,
+                serialized,
+            )
+
+    def get_assistant_session(self, session_id: str) -> dict[str, Any] | None:
+        row = self._fetchone("SELECT * FROM assistant_sessions WHERE id = ?", (session_id,))
+        if row is None:
+            return None
+        payload = dict(row)
+        payload["metadata"] = json.loads(payload.pop("metadata_json") or "{}")
+        return payload
+
+    def delete_assistant_session(self, session_id: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute("DELETE FROM assistant_sessions WHERE id = ?", (session_id,))
+
+    def get_conversation_summary(self, conversation_id: str) -> dict[str, Any] | None:
+        row = self._fetchone("SELECT * FROM conversation_summaries WHERE conversation_id = ?", (conversation_id,))
+        return dict(row) if row else None
+
+    def upsert_conversation_summary(
+        self,
+        conversation_id: str,
+        summary_text: str,
+        turn_count: int,
+        updated_at: str,
+    ) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO conversation_summaries (conversation_id, summary_text, turn_count, updated_at)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(conversation_id) DO UPDATE SET
+                    summary_text = excluded.summary_text,
+                    turn_count = excluded.turn_count,
+                    updated_at = excluded.updated_at
+                """,
+                (conversation_id, summary_text, turn_count, updated_at),
+            )
+
+    def list_memory_items(self, status: str = "active") -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            "SELECT * FROM memory_items WHERE status = ? ORDER BY confidence DESC, updated_at DESC",
+            (status,),
+        )
+        items = []
+        for row in rows:
+            payload = dict(row)
+            payload["metadata"] = json.loads(payload.pop("metadata_json") or "{}")
+            items.append(payload)
+        return items
+
+    def upsert_memory_item(self, payload: dict[str, Any]) -> None:
+        serialized = dict(payload)
+        serialized["metadata_json"] = json.dumps(serialized.get("metadata_json") or {})
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO memory_items (
+                    id, category, normalized_key, content, confidence, status,
+                    metadata_json, source_conversation_id, created_at, updated_at
+                ) VALUES (
+                    :id, :category, :normalized_key, :content, :confidence, :status,
+                    :metadata_json, :source_conversation_id, :created_at, :updated_at
+                )
+                ON CONFLICT(category, normalized_key) DO UPDATE SET
+                    content = excluded.content,
+                    confidence = CASE
+                        WHEN excluded.confidence > memory_items.confidence THEN excluded.confidence
+                        ELSE memory_items.confidence
+                    END,
+                    status = excluded.status,
+                    metadata_json = excluded.metadata_json,
+                    source_conversation_id = COALESCE(excluded.source_conversation_id, memory_items.source_conversation_id),
+                    updated_at = excluded.updated_at
+                """,
+                serialized,
+            )
+
+    def add_route_log(self, payload: dict[str, Any]) -> None:
+        serialized = dict(payload)
+        serialized["token_usage_json"] = json.dumps(serialized.get("token_usage_json") or {})
+        serialized["fallback_used"] = 1 if serialized.get("fallback_used") else 0
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO route_logs (
+                    id, conversation_id, session_id, route, provider, model_name,
+                    latency_ms, token_usage_json, fallback_used, error_text, created_at
+                ) VALUES (
+                    :id, :conversation_id, :session_id, :route, :provider, :model_name,
+                    :latency_ms, :token_usage_json, :fallback_used, :error_text, :created_at
+                )
+                """,
+                serialized,
+            )
+
+    def list_route_logs(self, limit: int = 50) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            "SELECT * FROM route_logs ORDER BY created_at DESC LIMIT ?",
+            (limit,),
+        )
+        items = []
+        for row in rows:
+            payload = dict(row)
+            payload["token_usage"] = json.loads(payload.pop("token_usage_json") or "{}")
+            payload["fallback_used"] = bool(payload["fallback_used"])
+            items.append(payload)
+        return items
 
     def _serialize_task(
         self,

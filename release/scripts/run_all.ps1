@@ -5,31 +5,21 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$commonPath = Join-Path $PSScriptRoot "assistant_common.ps1"
+. $commonPath
+
 $root = Split-Path -Parent $PSScriptRoot
 $healthUrl = "http://127.0.0.1:8096/v1/health"
-
-function Resolve-BackendDirectory {
-    param([string]$Root)
-
-    $candidates = @(
-        (Join-Path $Root "local-backend"),
-        (Join-Path $Root "backend"),
-        (Join-Path $Root "backend\local-backend")
-    )
-
-    foreach ($candidate in $candidates) {
-        if ((Test-Path (Join-Path $candidate "run_local.py")) -and (Test-Path (Join-Path $candidate "requirements.txt"))) {
-            return $candidate
-        }
-    }
-
-    throw "Backend folder not found. Checked: $($candidates -join ', ')"
-}
+$backendPort = 8096
+$exitCode = 1
+$resolvedBackendPython = $null
+$backendStdoutLog = $null
+$backendStderrLog = $null
 
 function Test-PortReady {
     param([string]$Url)
     try {
-        Invoke-RestMethod -Uri $Url -TimeoutSec 2 | Out-Null
+        Invoke-RestMethod -Uri $Url -TimeoutSec 5 | Out-Null
         return $true
     }
     catch {
@@ -40,7 +30,8 @@ function Test-PortReady {
 function Wait-PortReady {
     param(
         [string]$Url,
-        [int]$TimeoutSeconds = 15
+        [System.Diagnostics.Process]$Process,
+        [int]$TimeoutSeconds = 45
     )
 
     $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
@@ -49,76 +40,116 @@ function Wait-PortReady {
             return $true
         }
 
+        if ($null -ne $Process) {
+            try {
+                if ($Process.HasExited) {
+                    throw ("Backend process exited before health became ready. Exit code: " + $Process.ExitCode)
+                }
+            }
+            catch {
+                throw
+            }
+        }
+
         Start-Sleep -Milliseconds 500
     }
 
     return $false
 }
 
-function Resolve-ClientExecutable {
-    param(
-        [string]$Root,
-        [string]$ExplicitPath
-    )
+$backendProcess = $null
+try {
+    $backend = Resolve-BackendDirectory -Root $root
+    $clientExecutable = Resolve-ClientExecutable -Root $root -ExplicitPath $UnityExecutablePath
 
-    if ($ExplicitPath) {
-        if (-not (Test-Path $ExplicitPath)) {
-            throw "Unity executable not found: $ExplicitPath"
+    Write-AssistantInfo ("Resolved backend path: " + $backend)
+    $exitCode = 20
+    Invoke-AssistantStep -Name "Resolve backend Python runtime" -Action {
+        $script:resolvedBackendPython = Assert-CommandAvailable -Command $BackendPython -Label "Backend Python command"
+        Write-AssistantInfo ("Using Python at: " + $script:resolvedBackendPython)
+    }
+    $exitCode = 21
+    Invoke-AssistantStep -Name "Verify backend Python dependencies" -Action {
+        Assert-BackendPythonReady -PythonCommand $resolvedBackendPython
+    }
+    $exitCode = 22
+    Invoke-AssistantStep -Name "Run runtime preflight diagnostics" -Action {
+        $diagnostics = Get-RuntimeDiagnostics -BackendDirectory $backend -PythonCommand $resolvedBackendPython
+        Write-RuntimeDiagnostics -Diagnostics $diagnostics
+        Assert-RuntimeDiagnosticsHealthy -Diagnostics $diagnostics
+    }
+
+    $exitCode = 23
+    Invoke-AssistantStep -Name ("Verify backend port " + $backendPort + " is available") -Action {
+        $owningProcessId = Get-ListeningTcpProcessId -Port $backendPort
+        if ($null -ne $owningProcessId) {
+            throw ("Port " + $backendPort + " is already in use by " + (Get-ProcessSummary -ProcessId $owningProcessId) + ". Stop that process or change the backend port before running startup.")
         }
-
-        return (Resolve-Path $ExplicitPath).Path
     }
 
-    $clientDir = Join-Path $Root "client"
-    if (-not (Test-Path $clientDir)) {
-        return $null
+    $backendStdoutLog = [System.IO.Path]::GetTempFileName()
+    $backendStderrLog = [System.IO.Path]::GetTempFileName()
+    $exitCode = 24
+    Invoke-AssistantStep -Name "Start local backend process" -Action {
+        $script:backendProcess = Start-Process -FilePath $resolvedBackendPython -PassThru -WorkingDirectory $backend -ArgumentList @("run_local.py") -RedirectStandardOutput $backendStdoutLog -RedirectStandardError $backendStderrLog
+        Write-AssistantInfo ("Backend process PID: " + $script:backendProcess.Id)
+        Write-AssistantInfo ("Backend stdout log: " + $backendStdoutLog)
+        Write-AssistantInfo ("Backend stderr log: " + $backendStderrLog)
     }
 
-    $candidates = Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse |
-        Where-Object { $_.Name -ne "UnityCrashHandler64.exe" } |
-        Sort-Object FullName
-
-    if ($candidates.Count -eq 0) {
-        return $null
+    $exitCode = 25
+    Invoke-AssistantStep -Name ("Wait for backend health at " + $healthUrl) -Action {
+        if (-not (Wait-PortReady -Url $healthUrl -Process $backendProcess)) {
+            throw ("Backend health endpoint did not become ready yet. Check logs: " + $backendStdoutLog + " and " + $backendStderrLog)
+        }
     }
 
-    if ($candidates.Count -gt 1) {
-        Write-Warning ("Multiple client executables found. Starting the first one: " + $candidates[0].FullName)
-    }
-
-    return $candidates[0].FullName
-}
-
-$backend = Resolve-BackendDirectory -Root $root
-$clientExecutable = Resolve-ClientExecutable -Root $root -ExplicitPath $UnityExecutablePath
-
-Write-Host ("Resolved backend path: " + $backend)
-Write-Host "Starting local backend..."
-$backendProcess = Start-Process powershell -PassThru -WorkingDirectory $backend -ArgumentList @(
-    "-NoExit",
-    "-Command",
-    "$BackendPython run_local.py"
-)
-Write-Host ("Backend console PID: " + $backendProcess.Id)
-
-if (Wait-PortReady -Url $healthUrl) {
+    $exitCode = 26
     $health = Invoke-RestMethod -Uri $healthUrl
-    Write-Host ("Backend health: " + $health.status)
+    Write-AssistantInfo ("Backend health: " + $health.status)
     if ($null -ne $health.runtimes -and $null -ne $health.runtimes.llm) {
         $provider = if ([string]::IsNullOrWhiteSpace($health.runtimes.llm.provider)) { "llm" } else { $health.runtimes.llm.provider }
         $model = if ([string]::IsNullOrWhiteSpace($health.runtimes.llm.model)) { "n/a" } else { $health.runtimes.llm.model }
-        Write-Host ("LLM provider: " + $provider + " | model: " + $model + " | ready: " + $health.runtimes.llm.available)
+        Write-AssistantInfo ("LLM provider: " + $provider + " | model: " + $model + " | ready: " + $health.runtimes.llm.available)
     }
-}
-else {
-    throw "Backend health endpoint did not become ready yet."
-}
+    if ($health.status -eq "error") {
+        throw "Backend health reported error. Resolve the health diagnostics before continuing."
+    }
+    if ($health.status -eq "partial") {
+        Write-AssistantWarning "Backend started in partial mode. Some optional runtimes are degraded."
+        foreach ($action in @($health.recovery_actions)) {
+            Write-AssistantWarning $action
+        }
+    }
 
-if ($clientExecutable) {
-    Write-Host "Starting Unity client build..."
-    Write-Host ("Resolved client path: " + $clientExecutable)
-    Start-Process -FilePath $clientExecutable
+    if ($clientExecutable) {
+        $exitCode = 27
+        Invoke-AssistantStep -Name "Start Unity client build" -Action {
+            Write-AssistantInfo ("Resolved client path: " + $clientExecutable)
+            Start-Process -FilePath $clientExecutable | Out-Null
+        }
+    }
+    else {
+        Write-AssistantInfo "No packaged client executable found. Open the Unity project from 'unity-client/' or pass -UnityExecutablePath."
+    }
+
+    Write-AssistantSuccess "Startup flow completed."
+    exit 0
 }
-else {
-    Write-Host "No packaged client executable found. Open the Unity project from 'unity-client/' or pass -UnityExecutablePath."
+catch {
+    Stop-ProcessSafe -Process $backendProcess
+    if (-not [string]::IsNullOrWhiteSpace($backendStdoutLog)) {
+        $stdoutTail = Read-AssistantLogTail -Path $backendStdoutLog -LineCount 10
+        foreach ($line in $stdoutTail) {
+            Write-AssistantInfo ("backend stdout> " + $line)
+        }
+    }
+    if (-not [string]::IsNullOrWhiteSpace($backendStderrLog)) {
+        $stderrTail = Read-AssistantLogTail -Path $backendStderrLog -LineCount 10
+        foreach ($line in $stderrTail) {
+            Write-AssistantError ("backend stderr> " + $line)
+        }
+    }
+    Write-AssistantError $_.Exception.Message
+    exit $exitCode
 }

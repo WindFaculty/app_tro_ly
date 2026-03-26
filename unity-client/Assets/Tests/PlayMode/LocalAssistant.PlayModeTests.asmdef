@@ -1,7 +1,8 @@
 {
   "name": "LocalAssistant.PlayModeTests",
   "references": [
-    "AssistantRuntime"
+    "AssistantRuntime",
+    "AvatarSystem"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

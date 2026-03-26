@@ -4,7 +4,7 @@ using LocalAssistant.Notifications;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace LocalAssistant.Tests.PlayMode
 {
@@ -14,13 +14,12 @@ namespace LocalAssistant.Tests.PlayMode
         public IEnumerator ReminderPresenterShowsIncomingReminder()
         {
             var go = new GameObject("ReminderPresenter");
-            var textGo = new GameObject("ReminderText", typeof(Text));
-            textGo.transform.SetParent(go.transform);
-            var text = textGo.GetComponent<Text>();
             var presenter = go.AddComponent<ReminderPresenter>();
-            presenter.Bind(text);
+            var text = new Label();
+            var card = new VisualElement();
+            presenter.Bind(text, card);
+            
             presenter.Push(new ReminderDueEvent { title = "Hop team", minutes_until = 15 });
-
             yield return null;
 
             StringAssert.Contains("Hop team", text.text);
@@ -31,14 +30,13 @@ namespace LocalAssistant.Tests.PlayMode
         public IEnumerator ReminderPresenterDismissesQueuedRemindersAndCanClear()
         {
             var go = new GameObject("ReminderPresenter");
-            var textGo = new GameObject("ReminderText", typeof(Text));
-            textGo.transform.SetParent(go.transform);
-            var text = textGo.GetComponent<Text>();
             var presenter = go.AddComponent<ReminderPresenter>();
-            presenter.Bind(text);
+            var text = new Label();
+            var card = new VisualElement();
+            presenter.Bind(text, card);
+            
             presenter.Push(new ReminderDueEvent { title = "Hop team", minutes_until = 15 });
             presenter.Push(new ReminderDueEvent { title = "Gui mail", minutes_until = 5 });
-
             yield return null;
 
             StringAssert.Contains("Hop team", text.text);
@@ -46,7 +44,7 @@ namespace LocalAssistant.Tests.PlayMode
             StringAssert.Contains("Gui mail", text.text);
 
             presenter.Clear();
-            Assert.IsFalse(text.gameObject.activeSelf);
+            Assert.IsTrue(card.ClassListContains("hidden"));
             Assert.AreEqual(string.Empty, text.text);
             Object.Destroy(go);
         }

@@ -13,6 +13,7 @@ from app.services.llm import LlmService
 from app.services.memory import MemoryService
 from app.services.planning_engine import PlanningService
 from app.services.planner import PlannerService
+from app.services.prompt_context import PromptContextBuilderService
 from app.services.router import RouterService
 from app.services.scheduler import SchedulerService
 from app.services.settings import SettingsService
@@ -53,8 +54,9 @@ def build_container(settings: Settings) -> AppContainer:
     action_validator = ActionValidator(task_service, planner_service)
     router_service = RouterService(settings, llm_service)
     memory_service = MemoryService(repository, short_term_turn_limit=settings.short_term_turn_limit)
-    deep_planning_service = PlanningService(llm_service)
-    fast_response_service = FastResponseService(llm_service)
+    prompt_context_builder = PromptContextBuilderService(settings)
+    deep_planning_service = PlanningService(llm_service, prompt_context_builder)
+    fast_response_service = FastResponseService(llm_service, prompt_context_builder)
     assistant_orchestrator = AssistantOrchestrator(
         repository=repository,
         event_bus=event_bus,
@@ -68,7 +70,7 @@ def build_container(settings: Settings) -> AppContainer:
         llm_service=llm_service,
     )
     conversation_service = ConversationService(assistant_orchestrator)
-    scheduler_service = SchedulerService(repository, event_bus, settings)
+    scheduler_service = SchedulerService(repository, event_bus, settings, speech_service)
     return AppContainer(
         settings=settings,
         repository=repository,

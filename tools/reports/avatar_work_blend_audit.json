@@ -1,0 +1,362 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_work.blend",
+  "sceneObjectCount": 6,
+  "meshCount": 5,
+  "armatureCount": 1,
+  "meshes": [
+    {
+      "name": "char1",
+      "dataName": "char1",
+      "vertexCount": 61630,
+      "polygonCount": 123272,
+      "materialSlots": [],
+      "vertexGroupCount": 22,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        0.0,
+        -0.0,
+        -0.0
+      ],
+      "rotationEuler": [
+        1.570796,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "dimensions": [
+        0.011676,
+        0.017,
+        0.002755
+      ],
+      "boundBoxMin": [
+        -58.377758,
+        -0.000323,
+        -13.779189
+      ],
+      "boundBoxMax": [
+        58.378132,
+        170.00029,
+        13.77383
+      ]
+    },
+    {
+      "name": "Meshy_Mesh_0.001",
+      "dataName": "Mesh_0.001",
+      "vertexCount": 189299,
+      "polygonCount": 378739,
+      "materialSlots": [
+        "Material_0.001"
+      ],
+      "vertexGroupCount": 22,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.008219,
+        0.006099,
+        0.013774
+      ],
+      "boundBoxMin": [
+        -0.41079,
+        -0.113494,
+        0.380106
+      ],
+      "boundBoxMax": [
+        0.41108,
+        0.496384,
+        1.757486
+      ]
+    },
+    {
+      "name": "Meshy_Mesh_0.002",
+      "dataName": "Mesh_0.002",
+      "vertexCount": 224003,
+      "polygonCount": 448128,
+      "materialSlots": [
+        "Material_0.002"
+      ],
+      "vertexGroupCount": 0,
+      "vertexGroupsSample": [],
+      "modifiers": [],
+      "armatureTargets": [],
+      "location": [
+        2.221466,
+        0.078844,
+        1.499124
+      ],
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.908224,
+        0.811411,
+        0.660306
+      ],
+      "boundBoxMin": [
+        0.040301,
+        -0.40477,
+        -0.73799
+      ],
+      "boundBoxMax": [
+        0.948525,
+        0.406641,
+        -0.077684
+      ]
+    },
+    {
+      "name": "Meshy_Mesh_0.003",
+      "dataName": "Mesh_0.003",
+      "vertexCount": 222473,
+      "polygonCount": 445086,
+      "materialSlots": [
+        "Material_0.002"
+      ],
+      "vertexGroupCount": 0,
+      "vertexGroupsSample": [],
+      "modifiers": [],
+      "armatureTargets": [],
+      "location": [
+        2.221466,
+        0.078844,
+        1.499124
+      ],
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        1.166588,
+        0.479625,
+        0.963946
+      ],
+      "boundBoxMin": [
+        -0.950284,
+        -0.211718,
+        -0.228712
+      ],
+      "boundBoxMax": [
+        0.216304,
+        0.267907,
+        0.735234
+      ]
+    },
+    {
+      "name": "Meshy_Mesh_0.016",
+      "dataName": "Mesh_0.016",
+      "vertexCount": 610170,
+      "polygonCount": 1220762,
+      "materialSlots": [
+        "Material_0.003"
+      ],
+      "vertexGroupCount": 0,
+      "vertexGroupsSample": [],
+      "modifiers": [
+        {
+          "name": "Shrinkwrap",
+          "type": "SHRINKWRAP",
+          "target": null
+        }
+      ],
+      "armatureTargets": [],
+      "location": [
+        -0.007639,
+        0.21904,
+        0.709701
+      ],
+      "rotationEuler": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.791315,
+        0.791315,
+        0.791315
+      ],
+      "dimensions": [
+        1.502618,
+        0.92225,
+        1.501659
+      ],
+      "boundBoxMin": [
+        -0.950638,
+        -0.582607,
+        -0.949678
+      ],
+      "boundBoxMax": [
+        0.948249,
+        0.582858,
+        0.947997
+      ]
+    }
+  ],
+  "armatures": [
+    {
+      "name": "Armature",
+      "dataName": "Armature",
+      "boneCount": 24,
+      "deformBoneCount": 24,
+      "bonesSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine02",
+        "Spine01",
+        "Spine",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "neck",
+        "Head",
+        "head_end",
+        "headfront"
+      ],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotationEuler": [
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "dimensions": [
+        0.012451,
+        0.003369,
+        0.018491
+      ]
+    }
+  ],
+  "materials": [
+    "Material_0.001",
+    "Material_0.002",
+    "Material_0.003"
+  ],
+  "images": [
+    "Image_0",
+    "Image_0.001",
+    "Image_0.002",
+    "Image_0.003",
+    "Image_1",
+    "Image_1.001",
+    "Image_1.002",
+    "Image_1.003",
+    "Image_2",
+    "Image_2.001",
+    "Image_2.002",
+    "Image_2.003"
+  ]
+}

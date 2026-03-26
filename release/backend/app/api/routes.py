@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import shutil
 from datetime import date
 from pathlib import Path
@@ -13,6 +14,7 @@ from app.core.time import iso_date
 from app.core.health import build_logs_payload, build_recovery_actions
 from app.core.logging import get_logger
 from app.models.schemas import (
+    AssistantStreamMessage,
     ChatRequest,
     ChatResponse,
     CompleteTaskRequest,
@@ -225,3 +227,155 @@ async def events_socket(websocket: WebSocket) -> None:
         logger.info("Event socket disconnected")
     finally:
         await container.event_bus.unsubscribe(queue)
+
+
+@router.websocket("/assistant/stream")
+async def assistant_stream_socket(websocket: WebSocket) -> None:
+    await websocket.accept()
+    container: AppContainer = websocket.app.state.container
+    session_context: dict[str, dict[str, Any]] = {}
+    transcript_parts: dict[str, list[str]] = {}
+
+    async def send_event(payload: dict[str, Any]) -> None:
+        await websocket.send_json(payload)
+
+    try:
+        while True:
+            payload = AssistantStreamMessage.model_validate(await websocket.receive_json())
+            session_id = payload.session_id or "default"
+            session_meta = session_context.setdefault(
+                session_id,
+                {
+                    "conversation_id": payload.conversation_id,
+                    "selected_date": payload.selected_date,
+                    "notes_context": payload.notes_context,
+                },
+            )
+            if payload.conversation_id:
+                session_meta["conversation_id"] = payload.conversation_id
+            if payload.selected_date is not None:
+                session_meta["selected_date"] = payload.selected_date
+            if payload.notes_context is not None:
+                session_meta["notes_context"] = payload.notes_context
+
+            if payload.type == "session_start":
+                await send_event(
+                    {
+                        "type": "assistant_state_changed",
+                        "state": "waiting",
+                        "emotion": "neutral",
+                        "animation_hint": "idle",
+                        "session_id": session_id,
+                    }
+                )
+                continue
+
+            if payload.type == "context_update":
+                await send_event(
+                    {
+                        "type": "assistant_state_changed",
+                        "state": "listening" if payload.voice_mode else "waiting",
+                        "emotion": "neutral",
+                        "animation_hint": "listen" if payload.voice_mode else "idle",
+                        "session_id": session_id,
+                    }
+                )
+                continue
+
+            if payload.type == "cancel_response":
+                await send_event(
+                    {
+                        "type": "assistant_state_changed",
+                        "state": "waiting",
+                        "emotion": "neutral",
+                        "animation_hint": "idle",
+                        "session_id": session_id,
+                    }
+                )
+                continue
+
+            if payload.type == "session_stop":
+                transcript_parts.pop(session_id, None)
+                session_context.pop(session_id, None)
+                container.repository.delete_assistant_session(session_id)
+                await send_event(
+                    {
+                        "type": "assistant_state_changed",
+                        "state": "idle",
+                        "emotion": "neutral",
+                        "animation_hint": "idle",
+                        "session_id": session_id,
+                    }
+                )
+                continue
+
+            if payload.type == "text_turn":
+                response = await container.assistant_orchestrator.stream_turn(
+                    message=payload.message or "",
+                    conversation_id=session_meta.get("conversation_id"),
+                    session_id=session_id,
+                    selected_date=session_meta.get("selected_date"),
+                    voice_mode=payload.voice_mode,
+                    notes_context=session_meta.get("notes_context"),
+                    stream_emitter=send_event,
+                )
+                session_meta["conversation_id"] = response.conversation_id
+                continue
+
+            if payload.type == "voice_chunk":
+                if not payload.audio_base64:
+                    continue
+                try:
+                    transcript = container.speech_service.transcribe_bytes(
+                        base64.b64decode(payload.audio_base64),
+                        language=payload.language,
+                    )
+                    text = (transcript.get("text") or "").strip()
+                    if text:
+                        transcript_parts.setdefault(session_id, []).append(text)
+                        await send_event(
+                            {
+                                "type": "transcript_partial",
+                                "session_id": session_id,
+                                "text": " ".join(transcript_parts.get(session_id, [])),
+                            }
+                        )
+                except Exception as exc:
+                    await send_event({"type": "error", "session_id": session_id, "detail": str(exc)})
+                continue
+
+            if payload.type == "voice_end":
+                if payload.audio_base64:
+                    try:
+                        transcript = container.speech_service.transcribe_bytes(
+                            base64.b64decode(payload.audio_base64),
+                            language=payload.language,
+                        )
+                        text = (transcript.get("text") or "").strip()
+                        if text:
+                            transcript_parts.setdefault(session_id, []).append(text)
+                    except Exception as exc:
+                        await send_event({"type": "error", "session_id": session_id, "detail": str(exc)})
+                        continue
+                final_text = " ".join(transcript_parts.pop(session_id, [])).strip()
+                await send_event(
+                    {
+                        "type": "transcript_final",
+                        "session_id": session_id,
+                        "text": final_text,
+                    }
+                )
+                if final_text:
+                    response = await container.assistant_orchestrator.stream_turn(
+                        message=final_text,
+                        conversation_id=session_meta.get("conversation_id"),
+                        session_id=session_id,
+                        selected_date=session_meta.get("selected_date"),
+                        voice_mode=True,
+                        notes_context=session_meta.get("notes_context"),
+                        stream_emitter=send_event,
+                    )
+                    session_meta["conversation_id"] = response.conversation_id
+                continue
+    except WebSocketDisconnect:
+        logger.info("Assistant stream socket disconnected")

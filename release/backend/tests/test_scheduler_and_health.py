@@ -70,6 +70,124 @@ def test_settings_update_roundtrip(client) -> None:
     assert payload["voice"]["speak_replies"] is False
 
 
+def test_settings_partial_updates_preserve_other_groups(client) -> None:
+    defaults = client.get("/v1/settings")
+    assert defaults.status_code == 200
+    default_payload = defaults.json()
+
+    first = client.put(
+        "/v1/settings",
+        json={
+            "startup": {"launch_backend": False},
+            "reminder": {"lead_minutes": 30},
+        },
+    )
+    assert first.status_code == 200
+    first_payload = first.json()
+    assert first_payload["startup"]["launch_backend"] is False
+    assert first_payload["startup"]["launch_main_app"] is True
+    assert first_payload["reminder"]["lead_minutes"] == 30
+    assert first_payload["voice"]["speak_replies"] == default_payload["voice"]["speak_replies"]
+    assert first_payload["model"]["name"] == default_payload["model"]["name"]
+
+    second = client.put("/v1/settings", json={"reminder": {"speech_enabled": False}})
+    assert second.status_code == 200
+    second_payload = second.json()
+    assert second_payload["startup"]["launch_backend"] is False
+    assert second_payload["startup"]["launch_main_app"] is True
+    assert second_payload["reminder"]["lead_minutes"] == 30
+    assert second_payload["reminder"]["speech_enabled"] is False
+    assert second_payload["voice"]["tts_voice"] == default_payload["voice"]["tts_voice"]
+
+
+def test_stt_endpoint_returns_503_when_runtime_is_missing(client) -> None:
+    response = client.post(
+        "/v1/speech/stt?language=vi",
+        files={"audio": ("speech.wav", b"stub-wav", "audio/wav")},
+    )
+
+    assert response.status_code == 503
+    assert "whisper.cpp runtime is not configured" in response.json()["detail"]
+
+
+def test_tts_endpoint_returns_503_when_runtime_is_missing(client) -> None:
+    response = client.post("/v1/speech/tts", json={"text": "Xin chao", "cache": True})
+
+    assert response.status_code == 503
+    assert "Piper runtime is not configured" in response.json()["detail"]
+
+
+def test_reschedule_replaces_pending_reminder(client) -> None:
+    container = client.app.state.container
+    start_at = now_local().replace(second=0, microsecond=0) + timedelta(minutes=20)
+    end_at = start_at + timedelta(minutes=30)
+    create = client.post(
+        "/v1/tasks",
+        json={
+            "title": "Demo reminder",
+            "status": "planned",
+            "priority": "medium",
+            "scheduled_date": iso_date(start_at.date()),
+            "start_at": iso_datetime(start_at),
+            "end_at": iso_datetime(end_at),
+            "repeat_rule": "none",
+            "tags": [],
+        },
+    )
+    assert create.status_code == 200
+    task_id = create.json()["id"]
+
+    original_due_at = start_at - timedelta(minutes=14)
+    original_due = container.repository.list_due_reminders(iso_datetime(original_due_at))
+    assert [item["task_id"] for item in original_due] == [task_id]
+
+    rescheduled_start = start_at + timedelta(days=1)
+    rescheduled_end = end_at + timedelta(days=1)
+    reschedule = client.post(
+        f"/v1/tasks/{task_id}/reschedule",
+        json={
+            "scheduled_date": iso_date(rescheduled_start.date()),
+            "start_at": iso_datetime(rescheduled_start),
+            "end_at": iso_datetime(rescheduled_end),
+        },
+    )
+    assert reschedule.status_code == 200
+
+    stale_due = container.repository.list_due_reminders(iso_datetime(original_due_at))
+    assert stale_due == []
+
+    rescheduled_due_at = rescheduled_start - timedelta(minutes=14)
+    refreshed_due = container.repository.list_due_reminders(iso_datetime(rescheduled_due_at))
+    assert [item["task_id"] for item in refreshed_due] == [task_id]
+
+
+def test_complete_task_clears_pending_reminders(client) -> None:
+    container = client.app.state.container
+    start_at = now_local().replace(second=0, microsecond=0) + timedelta(minutes=20)
+    end_at = start_at + timedelta(minutes=30)
+    create = client.post(
+        "/v1/tasks",
+        json={
+            "title": "Complete reminder cleanup",
+            "status": "planned",
+            "priority": "medium",
+            "scheduled_date": iso_date(start_at.date()),
+            "start_at": iso_datetime(start_at),
+            "end_at": iso_datetime(end_at),
+            "repeat_rule": "none",
+            "tags": [],
+        },
+    )
+    assert create.status_code == 200
+    task_id = create.json()["id"]
+
+    complete = client.post(f"/v1/tasks/{task_id}/complete", json={})
+    assert complete.status_code == 200
+
+    due_after_completion = container.repository.list_due_reminders(iso_datetime(start_at + timedelta(days=1)))
+    assert due_after_completion == []
+
+
 def test_scheduler_run_recovers_after_tick_failure(client) -> None:
     scheduler = client.app.state.container.scheduler_service
     scheduler._settings.reminder_poll_seconds = 0

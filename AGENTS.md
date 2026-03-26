@@ -2,65 +2,45 @@
 
 Applies to the entire repository.
 
-Quy tắc vận hành cho Codex/AI agent. Có ưu tiên cao hơn suggestions nhưng thấp hơn system instructions.
+Quy tắc vận hành cho Codex/AI agent.
+Ưu tiên cao hơn suggestions nhưng thấp hơn system instructions.
 
-## RULES
+## Core Rules
 
-**Không đoán** — Thiếu dữ liệu/file/spec → hỏi lại, không điền vào.
+1. Không đoán. Thiếu dữ liệu, file, spec, log hoặc scope thì dừng và làm rõ.
+2. Plan -> Execute -> Verify. Không code trước khi hiểu input, output, dependency, risk.
+3. Mỗi lần chỉ xử lý 1 task rõ ràng. Không trộn nhiều mục tiêu trong cùng lượt làm.
+4. Chỉ đọc file liên quan. Không load toàn bộ project nếu task không cần.
+5. Không ghi đè hoặc revert thay đổi lạ nếu chưa đánh giá rủi ro.
+6. Chưa có bằng chứng từ test, log hoặc output thì chưa được claim done.
+7. Bug phải đọc log, tìm root cause rồi mới fix. Không sửa mò.
+8. Gặp dữ liệu mờ, encoding lỗi, hoặc yêu cầu cần GUI/tài khoản ngoài terminal thì nói rõ không verify được.
 
-**Không bịa kết quả** — Không claim success nếu chưa verify (test, log, output).
+## Execution
 
-**Xác minh vs Giả định** — Dữ liệu từ file/log/test là xác minh; chưa có bằng chứng là giả định.
+1. Analyze: hiểu yêu cầu, xác định phần đã biết và phần còn thiếu.
+2. Plan: chốt bước làm, file chạm tới, dependency, rủi ro.
+3. Execute: sửa đúng phạm vi, không tự ý đổi mục tiêu.
+4. Verify: chạy test hoặc kiểm tra bằng log, output, response.
+5. Improve: ghi bài học ngắn vào `lessons.md` khi có lesson mới đáng giữ.
 
-**Không giả vờ ngoài khả năng** — Bước cần Unity Editor/Blender GUI/tài khoản phải nói rõ không thể verify từ terminal.
+## Context
 
-**Hỏi lại khi mục tiêu mơ hồ** — Chưa rõ file/phạm vi → hỏi trước khi sửa (không self-fill, không đoán).
+- Ưu tiên summary hơn raw code khi đủ để giải quyết task.
+- Không lặp lại context cũ nếu không giúp ra quyết định mới.
+- Nếu context phình to, giữ lại: mục tiêu, trạng thái, quyết định quan trọng, output cuối.
+- Task lớn thì chia nhỏ theo module, input/output rõ ràng.
 
-**Không ghi đè thay đổi lạ** — Repo có change chưa rõ nguồn → không revert nếu chưa đánh giá rủi ro.
+## Response Style
 
-**Done = có bằng chứng** — Task hoàn thành khi code/doc đã update AND đã test hoặc giải thích rõ vì sao chưa test.
+- Ngắn gọn, trực tiếp, nêu rõ: đã biết gì, chưa biết gì, đang verify gì.
+- Nếu bị block, đưa checklist cụ thể cần log, screenshot, output hoặc file còn thiếu.
+- Không bịa thành công. Không giả vờ đã verify ngoài khả năng terminal.
 
-**Encoding/dữ liệu mờ → dừng** — Yêu cầu dữ liệu chuẩn, không suy diễn.
+## Anti-Patterns
 
-**Anti-patterns:** Code trước plan • Fix khi chưa hiểu bug • Claim done chưa verify • Mục tiêu mơ hồ • Context bloat • Lặp lỗi cũ
-
-## EXECUTION
-
-**Plan trước, code sau** — Mọi task: input/output/dependency/risk rõ ràng trước khi execute.
-
-**Phát hiện sai → dừng, plan lại** — Không cố làm tiếp khi phát hiện hướng sai.
-
-**Dùng compute, không manual** — Tool/sub-agent/script > viết tay tự động.
-
-### Workflow tiêu chuẩn
-1. **Analyze** — Hiểu yêu cầu, xác định thiếu gì
-2. **Plan** — Chia bước, xác định dependency & risk
-3. **Execute** — Theo plan, không tự ý đổi hướng
-4. **Verify** — Test/log/output check
-5. **Improve** — Ghi lessons, tối ưu nếu cần
-
-## DEBUGGING
-
-Khi gặp bug:
-1. Mở log
-2. Xác định root cause
-3. Fix trực tiếp
-4. Verify bằng test/log
-
-**→ Chưa hiểu root cause = chưa được fix bừa**
-
-## SUB-AGENT & CONTEXT
-
-**Việc lớn → chia module, giao sub-agent.** Mỗi module: input/output rõ ràng, chạy độc lập. Main agent chỉ orchestration.
-
-**Context chính ngắn:** mục tiêu • trạng thái • quyết định quan trọng. Task nặng/chi tiết → sub-agent.
-
-## RESPONSE STYLE
-
-- Ngắn gọn, trực tiếp, không lan man
-- Nêu rõ: đã biết gì, chưa biết gì, cần gì để tiếp tục
-- Block → đưa checklist chi tiết cho user, yêu cầu kết quả (log/screenshot/output)
-
-## QUALITY
-
-**Self-improvement:** Sau mỗi task ghi bài học vào lessons.md, lần sau đọc lại → không lặp lỗi cũ.
+- Code trước plan
+- Fix khi chưa hiểu bug
+- Claim done khi chưa verify
+- Ôm quá nhiều file không liên quan
+- Lặp lại lỗi cũ đã có trong `lessons.md`

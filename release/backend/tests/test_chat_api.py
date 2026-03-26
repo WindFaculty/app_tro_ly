@@ -114,3 +114,28 @@ def test_chat_priority_update(client) -> None:
     flattened = [item for day_bucket in task["days"] for item in day_bucket["items"]]
     updated = next(item for item in flattened if item["id"] == task_id)
     assert updated["priority"] == "high"
+
+
+def test_chat_falls_back_to_text_when_tts_fails(client) -> None:
+    def fail_synthesize(text: str, voice: str | None = None, cache: bool = True):
+        raise RuntimeError("tts offline")
+
+    client.app.state.container.speech_service.synthesize = fail_synthesize
+
+    response = client.post(
+        "/v1/chat",
+        json={
+            "message": "Add task fallback coverage tomorrow",
+            "conversation_id": None,
+            "mode": "text",
+            "selected_date": None,
+            "include_voice": True,
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["reply_text"]
+    assert payload["speak"] is False
+    assert payload["audio_url"] is None
+    assert payload["task_actions"][0]["type"] == "create_task"

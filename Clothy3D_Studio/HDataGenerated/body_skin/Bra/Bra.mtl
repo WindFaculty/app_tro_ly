@@ -1,0 +1,9 @@
+#
+# Wavefront material file
+# Materials: 1
+#
+
+newmtl Bra
+map_Kd Bra.images/Bra.png
+
+# End of File

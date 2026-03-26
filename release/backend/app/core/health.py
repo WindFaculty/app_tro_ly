@@ -26,6 +26,13 @@ def build_recovery_actions(
     if not llm.get("available", False):
         provider = str(llm.get("provider") or settings.llm_provider).lower()
         reason = str(llm.get("reason", "")).lower()
+        if provider == "hybrid":
+            fast_provider = settings.fast_provider
+            deep_provider = settings.deep_provider
+            actions.append(
+                f"Check API keys and connectivity for fast provider {fast_provider} and deep provider {deep_provider}."
+            )
+            return actions
         if provider == "groq":
             if reason == "missing_api_key":
                 actions.append("Set assistant_llm_provider=groq and configure assistant_groq_api_key for Groq replies.")
@@ -40,7 +47,7 @@ def build_recovery_actions(
                 actions.append(
                     f"Check Gemini connectivity at {settings.gemini_base_url} and ensure model {settings.gemini_model} is available."
                 )
-        elif reason == "disabled":
+        elif reason in {"disabled", "disabled_for_this_phase"}:
             actions.append(
                 "Set assistant_enable_ollama=true or switch assistant_llm_provider to groq or gemini to enable reply refinement."
             )
@@ -49,7 +56,22 @@ def build_recovery_actions(
                 f"Start Ollama at {settings.ollama_base_url} and ensure model {settings.ollama_model} is available."
             )
     if not stt.get("available", False):
-        actions.append("Configure assistant_whisper_command and assistant_whisper_model_path for speech-to-text.")
+        if stt.get("provider") == "faster-whisper":
+            actions.append(
+                "Install faster-whisper or switch assistant_stt_provider=whisper_cpp and configure assistant_whisper_command."
+            )
+        else:
+            actions.append("Configure assistant_whisper_command and assistant_whisper_model_path for speech-to-text.")
     if not tts.get("available", False):
-        actions.append("Configure assistant_piper_command and assistant_piper_model_path for speech output.")
+        if str(tts.get("provider") or settings.tts_provider).lower() == "chattts":
+            if str(tts.get("reason") or "").lower() == "import_failed":
+                actions.append(
+                    "Fix ChatTTS Python dependency compatibility, or switch assistant_tts_provider=piper and configure assistant_piper_command plus assistant_piper_model_path for speech output."
+                )
+            else:
+                actions.append(
+                    "Install ChatTTS and its torch runtime, or switch assistant_tts_provider=piper and configure assistant_piper_command plus assistant_piper_model_path for speech output."
+                )
+        else:
+            actions.append("Configure assistant_piper_command and assistant_piper_model_path for speech output.")
     return actions

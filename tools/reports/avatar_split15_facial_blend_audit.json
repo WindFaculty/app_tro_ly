@@ -1,0 +1,890 @@
+{
+  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_split15_facial.blend",
+  "sceneObjectCount": 16,
+  "meshCount": 15,
+  "armatureCount": 1,
+  "meshes": [
+    {
+      "name": "Body_ArmUpperL",
+      "dataName": "Body_ArmUpperL_Mesh",
+      "vertexCount": 2456,
+      "polygonCount": 4679,
+      "materialSlots": [],
+      "vertexGroupCount": 9,
+      "vertexGroupsSample": [
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "RightShoulder",
+        "Neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.302751,
+        0.246088,
+        0.127268
+      ],
+      "boundBoxMin": [
+        -0.173645,
+        116.240997,
+        -10.584957
+      ],
+      "boundBoxMax": [
+        30.101414,
+        140.849777,
+        2.141856
+      ]
+    },
+    {
+      "name": "Body_ArmUpperR",
+      "dataName": "Body_ArmUpperR_Mesh",
+      "vertexCount": 3016,
+      "polygonCount": 5789,
+      "materialSlots": [],
+      "vertexGroupCount": 10,
+      "vertexGroupsSample": [
+        "Hips",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "Neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.304767,
+        0.245853,
+        0.133008
+      ],
+      "boundBoxMin": [
+        -30.201225,
+        116.171692,
+        -10.582608
+      ],
+      "boundBoxMax": [
+        0.275435,
+        140.756943,
+        2.718148
+      ]
+    },
+    {
+      "name": "Body_CalfL",
+      "dataName": "Body_CalfL_Mesh",
+      "vertexCount": 3126,
+      "polygonCount": 6067,
+      "materialSlots": [],
+      "vertexGroupCount": 3,
+      "vertexGroupsSample": [
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.110105,
+        0.453728,
+        0.143265
+      ],
+      "boundBoxMin": [
+        2.488737,
+        10.798468,
+        -13.776527
+      ],
+      "boundBoxMax": [
+        13.499196,
+        56.171261,
+        0.549977
+      ]
+    },
+    {
+      "name": "Body_CalfR",
+      "dataName": "Body_CalfR_Mesh",
+      "vertexCount": 3104,
+      "polygonCount": 6016,
+      "materialSlots": [],
+      "vertexGroupCount": 3,
+      "vertexGroupsSample": [
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.109106,
+        0.444604,
+        0.144169
+      ],
+      "boundBoxMin": [
+        -13.494001,
+        11.347543,
+        -13.765603
+      ],
+      "boundBoxMax": [
+        -2.583443,
+        55.80793,
+        0.651272
+      ]
+    },
+    {
+      "name": "Body_FootL",
+      "dataName": "Body_FootL_Mesh",
+      "vertexCount": 3487,
+      "polygonCount": 6892,
+      "materialSlots": [],
+      "vertexGroupCount": 3,
+      "vertexGroupsSample": [
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.087055,
+        0.129858,
+        0.220258
+      ],
+      "boundBoxMin": [
+        1.745564,
+        0.002477,
+        -12.091397
+      ],
+      "boundBoxMax": [
+        10.451084,
+        12.988262,
+        9.934387
+      ]
+    },
+    {
+      "name": "Body_FootR",
+      "dataName": "Body_FootR_Mesh",
+      "vertexCount": 3567,
+      "polygonCount": 7047,
+      "materialSlots": [],
+      "vertexGroupCount": 3,
+      "vertexGroupsSample": [
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.086941,
+        0.131462,
+        0.220272
+      ],
+      "boundBoxMin": [
+        -10.43082,
+        2.4e-05,
+        -12.092745
+      ],
+      "boundBoxMax": [
+        -1.736669,
+        13.146224,
+        9.934475
+      ]
+    },
+    {
+      "name": "Body_ForearmL",
+      "dataName": "Body_ForearmL_Mesh",
+      "vertexCount": 1719,
+      "polygonCount": 3300,
+      "materialSlots": [],
+      "vertexGroupCount": 3,
+      "vertexGroupsSample": [
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.21705,
+        0.198988,
+        0.066776
+      ],
+      "boundBoxMin": [
+        26.157528,
+        100.62722,
+        -8.8326
+      ],
+      "boundBoxMax": [
+        47.862537,
+        120.526047,
+        -2.154973
+      ]
+    },
+    {
+      "name": "Body_ForearmR",
+      "dataName": "Body_ForearmR_Mesh",
+      "vertexCount": 1668,
+      "polygonCount": 3210,
+      "materialSlots": [],
+      "vertexGroupCount": 3,
+      "vertexGroupsSample": [
+        "RightArm",
+        "RightForeArm",
+        "RightHand"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.214258,
+        0.192062,
+        0.064863
+      ],
+      "boundBoxMin": [
+        -47.541153,
+        101.059616,
+        -8.814664
+      ],
+      "boundBoxMax": [
+        -26.115356,
+        120.265785,
+        -2.328326
+      ]
+    },
+    {
+      "name": "Body_HandL",
+      "dataName": "Body_HandL_Mesh",
+      "vertexCount": 3649,
+      "polygonCount": 7237,
+      "materialSlots": [],
+      "vertexGroupCount": 2,
+      "vertexGroupsSample": [
+        "LeftForeArm",
+        "LeftHand"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.132001,
+        0.155506,
+        0.109715
+      ],
+      "boundBoxMin": [
+        45.178669,
+        87.772888,
+        -9.443162
+      ],
+      "boundBoxMax": [
+        58.378746,
+        103.323486,
+        1.528353
+      ]
+    },
+    {
+      "name": "Body_HandR",
+      "dataName": "Body_HandR_Mesh",
+      "vertexCount": 3735,
+      "polygonCount": 7410,
+      "materialSlots": [],
+      "vertexGroupCount": 2,
+      "vertexGroupsSample": [
+        "RightForeArm",
+        "RightHand"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.13711,
+        0.160517,
+        0.109845
+      ],
+      "boundBoxMin": [
+        -58.3787,
+        87.761986,
+        -9.451313
+      ],
+      "boundBoxMax": [
+        -44.667709,
+        103.813675,
+        1.533178
+      ]
+    },
+    {
+      "name": "Body_Head",
+      "dataName": "Body_Head_Mesh",
+      "vertexCount": 10072,
+      "polygonCount": 20054,
+      "materialSlots": [],
+      "vertexGroupCount": 8,
+      "vertexGroupsSample": [
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "RightShoulder",
+        "RightArm",
+        "Neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.217185,
+        0.326894,
+        0.229974
+      ],
+      "boundBoxMin": [
+        -10.840683,
+        137.310669,
+        -13.59438
+      ],
+      "boundBoxMax": [
+        10.877771,
+        170.000092,
+        9.403063
+      ]
+    },
+    {
+      "name": "Body_ThighL",
+      "dataName": "Body_ThighL_Mesh",
+      "vertexCount": 4677,
+      "polygonCount": 9116,
+      "materialSlots": [],
+      "vertexGroupCount": 4,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "RightUpLeg"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.173328,
+        0.421381,
+        0.190869
+      ],
+      "boundBoxMin": [
+        -1.057467,
+        52.442951,
+        -12.559256
+      ],
+      "boundBoxMax": [
+        16.275364,
+        94.581047,
+        6.527675
+      ]
+    },
+    {
+      "name": "Body_ThighR",
+      "dataName": "Body_ThighR_Mesh",
+      "vertexCount": 4689,
+      "polygonCount": 9133,
+      "materialSlots": [],
+      "vertexGroupCount": 4,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "RightUpLeg",
+        "RightLeg"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.168484,
+        0.413362,
+        0.188924
+      ],
+      "boundBoxMin": [
+        -16.273232,
+        52.455097,
+        -12.349701
+      ],
+      "boundBoxMax": [
+        0.575191,
+        93.791283,
+        6.542688
+      ]
+    },
+    {
+      "name": "Body_TorsoLower",
+      "dataName": "Body_TorsoLower_Mesh",
+      "vertexCount": 5259,
+      "polygonCount": 10119,
+      "materialSlots": [],
+      "vertexGroupCount": 7,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "RightUpLeg",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "RightShoulder"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.312223,
+        0.240472,
+        0.224218
+      ],
+      "boundBoxMin": [
+        -15.718629,
+        87.095001,
+        -12.743786
+      ],
+      "boundBoxMax": [
+        15.503686,
+        111.142227,
+        9.678012
+      ]
+    },
+    {
+      "name": "Body_TorsoUpper",
+      "dataName": "Body_TorsoUpper_Mesh",
+      "vertexCount": 8792,
+      "polygonCount": 17203,
+      "materialSlots": [],
+      "vertexGroupCount": 12,
+      "vertexGroupsSample": [
+        "Hips",
+        "LeftUpLeg",
+        "RightUpLeg",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "RightShoulder",
+        "RightArm",
+        "Neck",
+        "Head"
+      ],
+      "modifiers": [
+        {
+          "name": "Armature",
+          "type": "ARMATURE",
+          "target": "Armature"
+        }
+      ],
+      "armatureTargets": [
+        "Armature"
+      ],
+      "location": [
+        3e-06,
+        -3e-06,
+        -1.7e-05
+      ],
+      "rotationEuler": [
+        1.570796,
+        -0.0,
+        -0.0
+      ],
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "dimensions": [
+        0.269172,
+        0.28658,
+        0.241842
+      ],
+      "boundBoxMin": [
+        -12.21093,
+        109.103096,
+        -10.407838
+      ],
+      "boundBoxMax": [
+        14.706315,
+        137.761078,
+        13.776403
+      ]
+    }
+  ],
+  "armatures": [
+    {
+      "name": "Armature",
+      "dataName": "Armature",
+      "boneCount": 24,
+      "deformBoneCount": 24,
+      "bonesSample": [
+        "Hips",
+        "LeftUpLeg",
+        "LeftLeg",
+        "LeftFoot",
+        "LeftToeBase",
+        "RightUpLeg",
+        "RightLeg",
+        "RightFoot",
+        "RightToeBase",
+        "Spine",
+        "Spine01",
+        "Spine02",
+        "LeftShoulder",
+        "LeftArm",
+        "LeftForeArm",
+        "LeftHand",
+        "RightShoulder",
+        "RightArm",
+        "RightForeArm",
+        "RightHand",
+        "Neck",
+        "Head",
+        "head_end",
+        "headfront"
+      ],
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "rotationEuler": [
+        -0.0,
+        0.0,
+        0.0
+      ],
+      "scale": [
+        0.01,
+        0.01,
+        0.01
+      ],
+      "dimensions": [
+        1.245119,
+        0.336883,
+        1.84899
+      ]
+    }
+  ],
+  "materials": [],
+  "images": []
+}

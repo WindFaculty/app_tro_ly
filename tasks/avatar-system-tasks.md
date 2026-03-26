@@ -53,13 +53,13 @@ Cập nhật: 2026-03-17
 - [x] Kết nối `AvatarLocomotionController` với anchor points
 - [x] Kết nối `AvatarConversationBridge` với hệ STT/LLM/TTS hiện có trong `AssistantApp`
 - [x] Kết nối `AvatarLookAtController` với camera hoặc điểm nhìn người dùng
-- [ ] Test luồng hội thoại: Idle → Listening → Thinking → Speaking → Reacting → Idle
-- [ ] Test avatar phản ứng đúng theo voice loop
+- [x] Test luồng hội thoại: Idle → Listening → Thinking → Speaking → Reacting → Idle (PlayMode pass: `AvatarConversationBridgePlayModeTests.AvatarConversationBridgeTransitionsThroughConversationFlow`, xem `unity-client/Logs/PlayModeTests.xml`, 2026-03-19)
+- [x] Test avatar phản ứng đúng theo voice loop (PlayMode pass: `AssistantAppPlayModeTests.AssistantAppStreamVoiceLoopDrivesAvatarStates`, xem `unity-client/Logs/PlayModeTests.xml`, 2026-03-19)
 
 ---
 
 ## Phase 5 — Làm modular outfit system
-- [ ] Tạo item đầu tiên: Hair_01 (tạo mesh Blender → export FBX → import Unity → tạo ScriptableObject)
+- [x] Tạo item đầu tiên: Hair_01 (tạo mesh Blender → export FBX → import Unity → tạo ScriptableObject)
 - [ ] Tạo Top_01 (áo cơ bản)
 - [ ] Tạo Bottom_01 (quần/chân váy cơ bản)
 - [ ] Tạo Dress_01 (váy liền thân)

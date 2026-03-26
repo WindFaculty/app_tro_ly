@@ -20,8 +20,10 @@ from app.services.planning_engine import PlanningService
 from app.services.settings import SettingsService
 from app.services.speech import SpeechService
 from app.services.router import RouterService
+from app.core.logging import get_logger
 
 StreamEmitter = Callable[[dict[str, Any]], Awaitable[None]]
+logger = get_logger("assistant_orchestrator")
 
 
 class AssistantOrchestrator:
@@ -149,6 +151,7 @@ class AssistantOrchestrator:
                 final_text, usage = self._fast_response_service.compose(
                     provider=self._settings_service.get()["model"].get("fast_provider", route.provider),
                     user_message=message,
+                    intent=validated.kind,
                     factual_context=validated.factual_context,
                     spoken_brief=validated.reply_text,
                 )
@@ -161,6 +164,7 @@ class AssistantOrchestrator:
                     final_text, usage = self._fast_response_service.compose(
                         provider="gemini" if active_provider == "groq" else "groq",
                         user_message=message,
+                        intent=validated.kind,
                         factual_context=validated.factual_context,
                         spoken_brief=validated.reply_text,
                     )
@@ -178,6 +182,7 @@ class AssistantOrchestrator:
                 plan, usage = self._planning_service.build_plan(
                     provider=self._settings_service.get()["model"].get("deep_provider", route.provider),
                     user_message=message,
+                    intent=validated.kind,
                     selected_date=selected_date,
                     notes_context=notes_context,
                     factual_context=validated.factual_context,
@@ -195,6 +200,7 @@ class AssistantOrchestrator:
                         final_text, usage = self._fast_response_service.compose(
                             provider="groq",
                             user_message=message,
+                            intent=validated.kind,
                             factual_context=validated.factual_context,
                             spoken_brief=validated.reply_text,
                         )
@@ -211,6 +217,7 @@ class AssistantOrchestrator:
                 plan, usage = self._planning_service.build_plan(
                     provider=self._settings_service.get()["model"].get("deep_provider", route.provider),
                     user_message=message,
+                    intent=validated.kind,
                     selected_date=selected_date,
                     notes_context=notes_context,
                     factual_context=validated.factual_context,
@@ -232,6 +239,7 @@ class AssistantOrchestrator:
                 final_text, usage = self._fast_response_service.compose(
                     provider=self._settings_service.get()["model"].get("fast_provider", "groq"),
                     user_message=message,
+                    intent=validated.kind,
                     factual_context=validated.factual_context,
                     spoken_brief=plan.spoken_brief if plan else validated.reply_text,
                 )
@@ -322,7 +330,8 @@ class AssistantOrchestrator:
                                 "duration_ms": item["duration_ms"],
                             }
                         )
-                except RuntimeError:
+                except Exception as exc:
+                    logger.warning("Assistant stream TTS fallback triggered: %s", exc)
                     speak = False
                 await stream_emitter({"type": "speech_finished", "utterance_id": utterance_id})
             await stream_emitter(
@@ -349,7 +358,8 @@ class AssistantOrchestrator:
                     self._settings_service.get()["voice"].get("tts_voice"),
                 )
                 audio_url = speech["audio_url"]
-            except RuntimeError:
+            except Exception as exc:
+                logger.warning("Assistant reply TTS fallback triggered: %s", exc)
                 speak = False
 
         await self._publish_state("idle", validated.emotion.value, validated.animation_hint.value, stream_emitter)

@@ -1,0 +1,17 @@
+#
+# Wavefront material file
+# Materials: 1
+#
+
+newmtl body_0
+Ka 0 0 0 
+Kd 0.85 0.85 0.85 
+Ks 0.02745 0.02745 0.02745 
+Ns 0
+d 1
+illum 0
+# map_Kd body_helper.images/body.png
+tiling 1 1
+tiling_offset 0 0
+
+# End of File
