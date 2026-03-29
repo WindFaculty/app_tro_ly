@@ -11,13 +11,14 @@ def test_health_reports_partial_when_runtimes_missing(client) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["status"] == "partial"
-    assert payload["runtimes"]["llm"]["provider"] == "ollama"
+    assert payload["runtimes"]["llm"]["provider"] == "hybrid"
+    assert payload["runtimes"]["llm"]["reason"] == "no_provider_available"
     assert "llm" in payload["degraded_features"]
     assert "stt" in payload["degraded_features"]
     assert "tts" in payload["degraded_features"]
     assert payload["logs"]["app_log"].endswith("assistant.log")
     assert Path(payload["logs"]["app_log"]).exists()
-    assert any("assistant_enable_ollama=true" in action for action in payload["recovery_actions"])
+    assert any("fast provider groq and deep provider gemini" in action for action in payload["recovery_actions"])
     assert any("assistant_whisper_command" in action for action in payload["recovery_actions"])
     assert any("assistant_piper_command" in action for action in payload["recovery_actions"])
 
@@ -42,6 +43,41 @@ def test_health_reports_ready_when_database_and_runtimes_are_available(client) -
     assert payload["runtimes"]["llm"]["provider"] == "groq"
     assert payload["degraded_features"] == []
     assert payload["recovery_actions"] == []
+
+
+def test_health_reports_partial_when_runtime_model_paths_are_missing(client) -> None:
+    container = client.app.state.container
+    container.llm_service.health = lambda: {
+        "available": True,
+        "provider": "groq",
+        "base_url": "https://api.groq.com/openai/v1",
+        "model": "stub",
+    }
+    container.speech_service.stt_health = lambda: {
+        "available": False,
+        "provider": "whisper.cpp",
+        "command": "C:\\runtime\\whisper-cli.exe",
+        "model_path": "C:\\runtime\\models",
+        "reason": "model_path_not_configured_or_not_found",
+        "issues": ["model_path_not_configured_or_not_found"],
+    }
+    container.speech_service.tts_health = lambda: {
+        "available": False,
+        "provider": "piper",
+        "command": "C:\\runtime\\piper.exe",
+        "model_path": "C:\\runtime\\voices",
+        "reason": "model_path_not_configured_or_not_found",
+        "issues": ["model_path_not_configured_or_not_found"],
+    }
+
+    response = client.get("/v1/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "partial"
+    assert payload["degraded_features"] == ["stt", "tts"]
+    assert any("assistant_whisper_command" in action for action in payload["recovery_actions"])
+    assert any("assistant_piper_command" in action for action in payload["recovery_actions"])
 
 
 def test_health_reports_error_when_database_is_unavailable(client) -> None:

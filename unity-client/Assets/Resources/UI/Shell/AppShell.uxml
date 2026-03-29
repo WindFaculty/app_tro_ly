@@ -19,54 +19,82 @@
     <ui:Template name="SubtitleOverlayTemplate" src="../Overlays/SubtitleOverlay.uxml" />
     <ui:Template name="ReminderOverlayTemplate" src="../Overlays/ReminderOverlay.uxml" />
 
-    <ui:VisualElement class="layout-container">
-        <ui:VisualElement class="top-bar">
+    <ui:VisualElement class="layout-container shell-root">
+        <ui:VisualElement class="top-bar shell-surface">
             <ui:VisualElement class="brand-container">
-                <ui:VisualElement class="brand-mark"><ui:Label text="AI" /></ui:VisualElement>
-                <ui:Label text="Trá»£ LÃ½ áº¢o" class="brand-title" />
+                <ui:VisualElement class="brand-mark"><ui:Label text="TL" /></ui:VisualElement>
+                <ui:VisualElement class="brand-copy">
+                    <ui:Label text="Tro Ly Local" class="brand-title" />
+                    <ui:Label text="Desktop assistant shell" class="brand-subtitle" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement class="top-tabs">
-                <ui:Button name="TodayTab" text="Trang chá»§" class="tab-button active" />
-                <ui:Button name="WeekTab" text="Lá»‹ch trÃ¬nh" class="tab-button" />
-                <ui:Button name="SettingsTab" text="CÃ i Ä‘áº·t" class="tab-button" />
+                <ui:Button name="TodayTab" text="Home" class="tab-button active" />
+                <ui:Button name="WeekTab" text="Schedule" class="tab-button" />
+                <ui:Button name="SettingsTab" text="Settings" class="tab-button" />
             </ui:VisualElement>
 
             <ui:VisualElement class="top-actions">
-                <ui:Button name="TopNotifBtn" text="ðŸ””" class="notif-btn" />
-                <ui:VisualElement class="user-avatar"><ui:Label text="U" /></ui:VisualElement>
+                <ui:VisualElement class="top-status-chip">
+                    <ui:Label name="TopStatusChipLabel" text="Loading runtime" class="top-status-chip-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="top-status-chip top-status-chip-secondary">
+                    <ui:Label text="Runtime shell" class="top-status-chip-label" />
+                </ui:VisualElement>
+                <ui:VisualElement class="user-avatar"><ui:Label text="TL" /></ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <ui:VisualElement class="main-content">
             <ui:VisualElement class="sidebar left-sidebar">
-                <ui:VisualElement class="sidebar-identity">
-                    <ui:Label text="The Luminal" class="sidebar-identity-title" />
-                    <ui:Label text="â— Active Presence" class="sidebar-identity-subtitle" />
+                <ui:VisualElement class="shell-card sidebar-identity sidebar-hero">
+                    <ui:Label text="Current implementation" class="health-title" />
+                    <ui:Label text="Three-panel shell with backend-aware recovery guidance." class="sidebar-identity-title" />
+                    <ui:Label text="Manual avatar and packaged-client validation stay tracked in P02 and P04." class="sidebar-identity-subtitle shell-muted-label" />
                 </ui:VisualElement>
 
-                <ui:VisualElement class="health-banner">
-                    <ui:Label text="SYSTEM HEALTH" class="health-title" />
-                    <ui:Label name="HealthBanner" text="98.4% Optimal" class="health-value" style="white-space: normal;" />
-                    <ui:Label name="StageStatusText" text="..." class="health-desc" />
+                <ui:VisualElement class="shell-card health-banner">
+                    <ui:Label text="System health" class="health-title" />
+                    <ui:Label name="HealthBanner" text="Ready runtime" class="health-value" />
+                    <ui:Label name="StageStatusText" text="Loading runtime status..." class="health-desc" />
                 </ui:VisualElement>
 
-                <ui:Button name="SidebarStateBtn" class="sidebar-menu-btn active">
-                    <ui:Label text="Tráº¡ng thÃ¡i" />
-                    <ui:Label name="AvatarStateText" text="Idle" style="color: #06B6D4; font-size: 11px;" />
-                </ui:Button>
-                <ui:Button text="Tá»± do" class="sidebar-menu-btn" />
-                <ui:Button text="Thiáº¿t bá»‹" class="sidebar-menu-btn" />
-                <ui:Button text="ThÃ´ng bÃ¡o" class="sidebar-menu-btn" />
+                <ui:VisualElement class="sidebar-section">
+                    <ui:Label text="Workspace" class="sidebar-section-title" />
+                    <ui:VisualElement class="sidebar-status-row">
+                        <ui:VisualElement class="sidebar-status-copy">
+                            <ui:Label text="Assistant state" class="sidebar-status-label" />
+                            <ui:Label text="Avatar runtime and chat state stay visible here." class="sidebar-status-help" />
+                        </ui:VisualElement>
+                        <ui:Label name="AvatarStateText" text="Idle" class="sidebar-status-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="sidebar-status-row">
+                        <ui:VisualElement class="sidebar-status-copy">
+                            <ui:Label text="Recovery mode" class="sidebar-status-label" />
+                            <ui:Label text="When health degrades, only safe controls remain enabled." class="sidebar-status-help" />
+                        </ui:VisualElement>
+                        <ui:Label text="Auto" class="sidebar-status-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="sidebar-status-row">
+                        <ui:VisualElement class="sidebar-status-copy">
+                            <ui:Label text="Notification queue" class="sidebar-status-label" />
+                            <ui:Label text="Reminder overlay and speech events continue to surface here." class="sidebar-status-help" />
+                        </ui:VisualElement>
+                        <ui:Label text="Live" class="sidebar-status-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
 
-                <ui:VisualElement class="sidebar-footer">
-                    <ui:Button name="RefreshButton" text="Refresh System" class="btn-secondary" style="margin-bottom: 16px;" />
-                    <ui:Label text="? Help" style="margin-bottom: 8px; color: #94A3B8;" />
-                    <ui:Label text="â†’ Logout" style="color: #94A3B8;" />
+                <ui:VisualElement class="shell-spacer" />
+
+                <ui:VisualElement class="shell-card shell-help-card">
+                    <ui:Label text="Operator actions" class="sidebar-section-title" />
+                    <ui:Label text="Use refresh after backend restarts or runtime changes. Packaged-client behavior still needs manual validation." class="shell-help-text" />
+                    <ui:Button name="RefreshButton" text="Refresh workspace" class="btn-secondary" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement class="center-stage">
+            <ui:VisualElement class="center-stage stage-shell">
                 <ui:Instance template="HomeScreenTemplate" />
                 <ui:Instance template="ScheduleScreenTemplate" />
                 <ui:Instance template="SettingsScreenTemplate" />
@@ -74,28 +102,41 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="right-panel">
-                <ui:Instance template="ChatPanelTemplate" />
+                <ui:Instance template="ChatPanelTemplate" class="view-container" />
 
-                <ui:VisualElement name="ScheduleSideView" class="view-container hidden" style="flex-direction: column; padding: 24px;">
-                    <ui:VisualElement style="background-color: #0A0D14; border-radius: 16px; padding: 20px; border-left-width: 4px; border-left-color: #06B6D4; margin-bottom: 32px;">
-                        <ui:Label text="TÆ¯ Váº¤N Tá»ª AETHERIS" style="color: white; -unity-font-style: bold; margin-bottom: 12px; font-size: 12px;" />
-                        <ui:Label text="&quot;Thá»© 5 cá»§a báº¡n Ä‘ang cÃ³ 3 cuá»™c há»p liÃªn tiáº¿p. TÃ´i Ä‘á» xuáº¥t dá»i 'Review Code' sang sÃ¡ng Thá»© 6 Ä‘á»ƒ Ä‘áº£m báº£o sá»± táº­p trung cao nháº¥t.&quot;" style="color: #94A3B8; font-style: italic; white-space: normal; line-height: 20px; margin-bottom: 16px;" />
-                        <ui:Label text="Tá»I Æ¯U NGAY â†’" style="color: #06B6D4; -unity-font-style: bold; font-size: 12px;" />
+                <ui:VisualElement name="ScheduleSideView" class="view-container hidden schedule-side-panel">
+                    <ui:VisualElement class="panel-section-heading">
+                        <ui:Label text="Schedule focus" class="panel-kicker" />
+                        <ui:Label name="ScheduleInsightTitle" text="Week overview" class="panel-title" />
+                        <ui:Label name="ScheduleInsightSummary" text="Keep the week visible while the assistant collects routing and reminder updates in the background." class="panel-body" />
                     </ui:VisualElement>
 
-                    <ui:Label text="Sáº®P Tá»šI" style="color: #94A3B8; -unity-font-style: bold; font-size: 12px; margin-bottom: 16px; letter-spacing: 1px;" />
+                    <ui:VisualElement class="shell-card accent-card">
+                        <ui:Label text="Live routing" class="panel-kicker" />
+                        <ui:Label name="ScheduleInsightMeta" text="Date auto&#10;Route planner | Provider local&#10;Voice Off | Transcript Off | Fallbacks 0" class="panel-meta" />
+                    </ui:VisualElement>
 
-                    <ui:VisualElement style="flex-direction: row; background-color: #0A0D14; border-radius: 12px; padding: 12px; margin-bottom: 12px;">
-                        <ui:VisualElement style="background-color: rgba(255,255,255,0.05); padding: 8px; border-radius: 8px; margin-right: 12px; align-items: center; justify-content: center; width: 40px;">
-                            <ui:Label text="T5" style="color: #94A3B8; font-size: 11px;" />
-                            <ui:Label text="03" style="color: white; -unity-font-style: bold; font-size: 16px;" />
+                    <ui:VisualElement class="stack-card-list">
+                        <ui:VisualElement class="shell-card assistant-mini-card">
+                            <ui:Label text="Next pass" class="assistant-mini-time" />
+                            <ui:Label text="Review calendar friction" class="assistant-mini-title" />
+                            <ui:Label text="Use this slot to spot crowded days, long meeting runs, or tasks that still live only as placeholder copy." class="assistant-mini-copy" />
                         </ui:VisualElement>
-                        <ui:VisualElement style="justify-content: center;">
-                            <ui:Label text="14:00 - 15:30" style="color: #06B6D4; font-size: 12px; margin-bottom: 4px;" />
-                            <ui:Label text="Review Code Dá»± Ã¡n" style="color: white; -unity-font-style: bold; font-size: 14px;" />
+
+                        <ui:VisualElement class="shell-card assistant-mini-card">
+                            <ui:Label text="Recovery check" class="assistant-mini-time" />
+                            <ui:Label text="Keep degraded mode readable" class="assistant-mini-title" />
+                            <ui:Label text="When health is partial or error, the shell should still explain what can continue and what needs manual follow-up." class="assistant-mini-copy" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="shell-card assistant-mini-card">
+                            <ui:Label text="Manual follow-up" class="assistant-mini-time" />
+                            <ui:Label text="Package and avatar sign-off" class="assistant-mini-title" />
+                            <ui:Label text="Final behavior for packaged client and production avatar remains tracked in the manual queue before closure." class="assistant-mini-copy" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
+
                 <ui:Instance template="ReminderOverlayTemplate" />
             </ui:VisualElement>
         </ui:VisualElement>

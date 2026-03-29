@@ -5,6 +5,7 @@ import importlib
 import re
 import shutil
 import subprocess
+import time
 import typing
 import wave
 from pathlib import Path
@@ -24,20 +25,46 @@ def _apply_chattts_torch_compat() -> None:
     if not hasattr(torch.serialization, "FILE_LIKE"):
         torch.serialization.FILE_LIKE = typing.Any
 
+    # Fix for PyTorch 2.6+ blocking object loading (e.g. BertTokenizerFast, GPT models)
+    if not getattr(torch, "_chattts_patched", False):
+        _original_load = torch.load
+
+        def _patched_load(*args: Any, **kwargs: Any) -> Any:
+            if "weights_only" not in kwargs:
+                kwargs["weights_only"] = False
+            return _original_load(*args, **kwargs)
+
+        torch.load = _patched_load
+        torch._chattts_patched = True
+
 
 class TtsService:
+    _HEALTH_CACHE_TTL_SECONDS = 60.0
+
     def __init__(self, settings: Settings) -> None:
         self._settings = settings
         self._chattts: Any | None = None
         self._chattts_module: Any | None = None
         self._chattts_speakers: dict[str, Any] = {}
+        self._health_cache: dict[str, Any] | None = None
+        self._health_checked_at = 0.0
 
     def health(self) -> dict[str, Any]:
-        if self._settings.tts_provider == "chattts":
-            return self._chattts_health()
-        return self._piper_health()
+        if self._health_cache is not None and (time.monotonic() - self._health_checked_at) < self._HEALTH_CACHE_TTL_SECONDS:
+            payload = dict(self._health_cache)
+            payload["probe_cached"] = True
+            return payload
 
-    def _piper_health(self) -> dict[str, Any]:
+        if self._settings.tts_provider == "chattts":
+            payload = self._chattts_health()
+        else:
+            payload = self._piper_health(probe_endpoint=True)
+        payload["probe_cached"] = False
+        self._health_cache = dict(payload)
+        self._health_checked_at = time.monotonic()
+        return payload
+
+    def _piper_health(self, *, probe_endpoint: bool) -> dict[str, Any]:
         command = self._resolve_command(self._settings.piper_command)
         model_path = self._resolve_model_path(self._settings.piper_model_path)
         issues: list[str] = []
@@ -56,6 +83,19 @@ class TtsService:
         if issues:
             payload["reason"] = issues[0]
             payload["issues"] = issues
+            return payload
+
+        if probe_endpoint:
+            try:
+                self._probe_piper()
+            except Exception as exc:
+                logger.warning("Piper health probe failed: %s", exc)
+                payload["available"] = False
+                payload["reason"] = "probe_failed"
+                payload["error"] = str(exc)
+                return payload
+
+        payload["effective_provider"] = "piper"
         return payload
 
     def _chattts_health(self) -> dict[str, Any]:
@@ -64,6 +104,7 @@ class TtsService:
         except ModuleNotFoundError:
             return {
                 "available": False,
+                "provider_available": False,
                 "provider": "chattts",
                 "reason": "module_not_installed",
                 "sample_rate": self._settings.chattts_sample_rate,
@@ -72,6 +113,7 @@ class TtsService:
             logger.warning("ChatTTS import failed during health check: %s", exc)
             return {
                 "available": False,
+                "provider_available": False,
                 "provider": "chattts",
                 "reason": "import_failed",
                 "error": str(exc),
@@ -83,16 +125,31 @@ class TtsService:
             logger.warning("ChatTTS load failed during health check: %s", exc)
             return {
                 "available": False,
+                "provider_available": False,
                 "provider": "chattts",
                 "reason": "load_failed",
                 "error": str(exc),
                 "sample_rate": self._settings.chattts_sample_rate,
             }
+        try:
+            self._probe_chattts()
+        except Exception as exc:
+            logger.warning("ChatTTS inference probe failed during health check: %s", exc)
+            return {
+                "available": False,
+                "provider_available": False,
+                "provider": "chattts",
+                "reason": "probe_failed",
+                "error": str(exc),
+                "sample_rate": self._settings.chattts_sample_rate,
+            }
         return {
             "available": True,
+            "provider_available": True,
             "provider": "chattts",
             "compile": self._settings.chattts_compile,
             "sample_rate": self._settings.chattts_sample_rate,
+            "effective_provider": "chattts",
         }
 
     def synthesize(self, text: str, voice: str | None = None, cache: bool = True) -> dict[str, Any]:
@@ -114,6 +171,7 @@ class TtsService:
                     last_error = None
                     break
                 except Exception as exc:
+                    self._invalidate_health_cache()
                     last_error = exc
                     temp_output_path.unlink(missing_ok=True)
                     logger.warning("Removed incomplete TTS audio artifact for %s", output_path.name)
@@ -242,7 +300,9 @@ class TtsService:
     def _load_chattts(self, chattts_module: Any) -> Any:
         if self._chattts is None:
             chat = chattts_module.Chat()
-            chat.load(compile=self._settings.chattts_compile)
+            success = chat.load(compile=self._settings.chattts_compile, source="huggingface")
+            if not success:
+                raise RuntimeError("ChatTTS model weights failed to load.")
             self._chattts = chat
         return self._chattts
 
@@ -292,3 +352,25 @@ class TtsService:
             frames = handle.getnframes()
             rate = handle.getframerate()
         return int((frames / rate) * 1000)
+
+    def _probe_piper(self) -> None:
+        output_path = self._settings.audio_dir / f"{make_id('ttsprobe')}.wav"
+        try:
+            self._synthesize_with_piper("health probe", output_path, None)
+            if not output_path.exists() or output_path.stat().st_size == 0:
+                raise RuntimeError("Piper probe did not produce audio output")
+        finally:
+            output_path.unlink(missing_ok=True)
+
+    def _probe_chattts(self) -> None:
+        output_path = self._settings.audio_dir / f"{make_id('ttsprobe')}.wav"
+        try:
+            self._synthesize_with_chattts("health probe", output_path, None)
+            if not output_path.exists() or output_path.stat().st_size == 0:
+                raise RuntimeError("ChatTTS probe did not produce audio output")
+        finally:
+            output_path.unlink(missing_ok=True)
+
+    def _invalidate_health_cache(self) -> None:
+        self._health_cache = None
+        self._health_checked_at = 0.0

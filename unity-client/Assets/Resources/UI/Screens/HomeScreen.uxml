@@ -5,22 +5,128 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <ui:VisualElement name="HomeViewContainer" class="view-container" style="flex-direction: column;">
-        <ui:VisualElement class="avatar-card">
-            <ui:Label name="StagePlaceholderText" text="KHUNG AVATAR&#10;&#10;Assistant dang chay theo kieu hybrid stream." class="hidden" />
-            <ui:VisualElement class="avatar-face">
-                <ui:Label text="o   o" />
-                <ui:Label text="LISTENING" class="avatar-badge" />
+    <ui:VisualElement name="HomeViewContainer" class="view-container home-screen">
+        <ui:VisualElement class="home-orbit-shell">
+            <ui:VisualElement class="shell-card home-float-card home-summary-card">
+                <ui:Label text="Today pulse" class="panel-kicker" />
+                <ui:Label text="Everything circles around the assistant." class="home-orbit-title" />
+                <ui:Label
+                    name="TaskSummaryText"
+                    text="Loading today's summary..."
+                    class="home-orbit-body" />
+
+                <ui:VisualElement class="home-stat-rail">
+                    <ui:VisualElement class="home-stat-pill">
+                        <ui:Label name="TodayCountText" text="0" class="home-stat-value" />
+                        <ui:Label text="Scheduled" class="home-stat-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="home-stat-pill">
+                        <ui:Label name="DueSoonCountText" text="0" class="home-stat-value" />
+                        <ui:Label text="Due soon" class="home-stat-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="home-stat-pill">
+                        <ui:Label name="OverdueCountText" text="0" class="home-stat-value" />
+                        <ui:Label text="Overdue" class="home-stat-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="home-stat-pill">
+                        <ui:Label name="InboxCountText" text="0" class="home-stat-value" />
+                        <ui:Label text="Inbox" class="home-stat-label" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="home-stat-pill">
+                        <ui:Label name="CompletedCountText" text="0" class="home-stat-value" />
+                        <ui:Label text="Done" class="home-stat-label" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
 
-        <ui:VisualElement class="mini-task-sheet">
-            <ui:Label text="Lá»‹ch trÃ¬nh &amp; CÃ´ng viá»‡c" style="font-size: 18px; -unity-font-style: bold; margin-bottom: 12px; color: white;" />
-            <ui:TextField name="QuickAddInput" text="" placeholder-text="ThÃªm viá»‡c nhanh..." style="margin-bottom: 12px; height: 32px;" />
-            <ui:Button name="QuickAddButton" text="Táº O Má»šI" class="btn-primary hidden" style="margin-bottom: 12px;" />
+            <ui:VisualElement class="shell-card home-float-card home-chat-card">
+                <ui:Label text="Assistant orbit" class="panel-kicker" />
+                <ui:Label name="HomeChatStatusBadge" text="READY" class="home-chat-badge" />
+                <ui:Label name="HomeChatStatusTitle" text="Ready for the next turn" class="home-orbit-title" />
+                <ui:Label
+                    name="HomeChatStatusDetail"
+                    text="Route diagnostics and transcript state will appear here."
+                    class="home-orbit-body" />
+            </ui:VisualElement>
 
-            <ui:Label name="TaskSummaryText" text="HÃ´m nay: KhÃ´ng cÃ³ task" style="font-size: 14px; margin-bottom: 8px; color: #94A3B8;" />
-            <ui:Label name="TaskContentText" text="..." style="white-space: normal; color: white;" />
+            <ui:VisualElement class="shell-card home-float-card home-focus-card">
+                <ui:Label text="Focus lanes" class="panel-kicker" />
+                <ui:VisualElement class="home-focus-list">
+                    <ui:VisualElement class="home-focus-item">
+                        <ui:Label text="Next focus" class="home-focus-label" />
+                        <ui:Label name="FocusText" text="No active focus yet." class="home-focus-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="home-focus-item">
+                        <ui:Label text="Due soon" class="home-focus-label" />
+                        <ui:Label name="DueSoonText" text="No due-soon tasks." class="home-focus-value" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="home-focus-item home-focus-item-final">
+                        <ui:Label text="Overdue" class="home-focus-label" />
+                        <ui:Label name="OverdueText" text="Nothing overdue." class="home-focus-value" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="shell-card home-float-card home-queue-card">
+                <ui:VisualElement class="home-card-header">
+                    <ui:Label text="Today queue" class="home-section-title" />
+                    <ui:Label name="TaskEmptyStateText" text="No tasks yet." class="home-empty-state hidden" />
+                </ui:VisualElement>
+                <ui:Label
+                    name="TaskContentText"
+                    text="Loading scheduled tasks..."
+                    class="home-list-text" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="shell-card home-float-card home-quick-add-card">
+                <ui:Label text="Quick add" class="panel-kicker" />
+                <ui:Label
+                    name="QuickAddHintText"
+                    text="Capture a short task now and schedule it later."
+                    class="home-orbit-body" />
+                <ui:VisualElement class="home-quick-add-row">
+                    <ui:TextField
+                        name="QuickAddInput"
+                        text=""
+                        placeholder-text="Add a task..."
+                        class="home-quick-add-input" />
+                    <ui:Button name="QuickAddButton" text="Add task" class="btn-primary" />
+                </ui:VisualElement>
+                <ui:Label
+                    name="QuickAddStatusText"
+                    text=""
+                    class="home-inline-status hidden" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="home-stage-card">
+                <ui:VisualElement class="home-stage-backdrop home-stage-backdrop-large" />
+                <ui:VisualElement class="home-stage-backdrop home-stage-backdrop-small" />
+                <ui:VisualElement class="home-stage-dust home-stage-dust-a" />
+                <ui:VisualElement class="home-stage-dust home-stage-dust-b" />
+                <ui:VisualElement class="home-stage-dust home-stage-dust-c" />
+
+                <ui:VisualElement class="home-stage-center">
+                    <ui:Label text="Avatar stage" class="panel-kicker home-stage-kicker" />
+                    <ui:VisualElement class="home-swing-stage">
+                        <ui:VisualElement class="home-swing-vine" />
+                        <ui:VisualElement class="home-swing-ropes">
+                            <ui:VisualElement class="home-swing-rope" />
+                            <ui:VisualElement class="home-swing-rope home-swing-rope-right" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="home-swing-seat">
+                            <ui:VisualElement class="home-avatar-figure">
+                                <ui:VisualElement class="home-avatar-head" />
+                                <ui:VisualElement class="home-avatar-body" />
+                                <ui:Label name="HomeAvatarStateBadge" text="IDLE" class="avatar-badge" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Label
+                        name="StagePlaceholderText"
+                        text="Avatar stage placeholder. Runtime and shell status stay visible here until UI-07 binds the production stage."
+                        class="home-stage-copy" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -15,6 +16,13 @@ class UnityMcpClient:
         self._client_ctx = None
 
     async def __aenter__(self) -> "UnityMcpClient":
+        await self.connect()
+        return self
+
+    async def connect(self) -> "UnityMcpClient":
+        if self._session is not None:
+            return self
+
         server = StdioServerParameters(
             command=r"C:\Users\tranx\AppData\Local\Programs\Python\Python314\Scripts\uvx.exe",
             args=["-p", "3.14", "--from", "mcpforunityserver", "mcp-for-unity", "--transport", "stdio"],
@@ -22,17 +30,37 @@ class UnityMcpClient:
             cwd=self._repo_root,
         )
         self._stdio_ctx = stdio_client(server)
-        read, write = await self._stdio_ctx.__aenter__()
-        self._client_ctx = ClientSession(read, write)
-        self._session = await self._client_ctx.__aenter__()
-        await self._session.initialize()
-        return self
+        try:
+            read, write = await self._stdio_ctx.__aenter__()
+            self._client_ctx = ClientSession(read, write)
+            self._session = await self._client_ctx.__aenter__()
+            await self._session.initialize()
+            return self
+        except Exception as exc:
+            await self.close(type(exc), exc, exc.__traceback__)
+            raise
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
-        if self._client_ctx is not None:
-            await self._client_ctx.__aexit__(exc_type, exc, tb)
-        if self._stdio_ctx is not None:
-            await self._stdio_ctx.__aexit__(exc_type, exc, tb)
+        await self.close(exc_type, exc, tb)
+
+    async def close(self, exc_type=None, exc=None, tb=None) -> None:
+        client_ctx = self._client_ctx
+        stdio_ctx = self._stdio_ctx
+
+        self._session = None
+        self._client_ctx = None
+        self._stdio_ctx = None
+
+        if client_ctx is not None:
+            with suppress(Exception):
+                await client_ctx.__aexit__(exc_type, exc, tb)
+        if stdio_ctx is not None:
+            with suppress(Exception):
+                await stdio_ctx.__aexit__(exc_type, exc, tb)
+
+    async def reconnect(self) -> "UnityMcpClient":
+        await self.close()
+        return await self.connect()
 
     @property
     def session(self) -> ClientSession:
@@ -106,10 +134,10 @@ class UnityMcpClient:
         )
 
     async def get_project_info(self) -> dict[str, Any]:
-        return await self.session.read_resource("unity://project/info")
+        return await self.session.read_resource("mcpforunity://project/info")
 
     async def get_editor_state(self) -> dict[str, Any]:
-        return await self.session.read_resource("unity://editor/state")
+        return await self.session.read_resource("mcpforunity://editor/state")
 
     async def find_gameobjects(self, search_term: str, search_method: str = "by_name") -> dict[str, Any]:
         return await self.call_tool("find_gameobjects", {"search_term": search_term, "search_method": search_method})

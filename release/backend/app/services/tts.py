@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from app.core.config import Settings
+from app.core.ids import make_id
 from app.core.logging import get_logger
 
 logger = get_logger("tts")
@@ -38,21 +39,28 @@ class TtsService:
 
     def _piper_health(self) -> dict[str, Any]:
         command = self._resolve_command(self._settings.piper_command)
+        model_path = self._resolve_model_path(self._settings.piper_model_path)
+        issues: list[str] = []
+        if command is None:
+            issues.append("command_not_configured_or_not_found")
+        if model_path is None:
+            issues.append("model_path_not_configured_or_not_found")
         payload: dict[str, Any] = {
-            "available": command is not None,
+            "available": len(issues) == 0,
             "provider": "piper",
         }
         if self._settings.piper_command:
             payload["command"] = self._settings.piper_command
         if self._settings.piper_model_path:
             payload["model_path"] = self._settings.piper_model_path
-        if command is None:
-            payload["reason"] = "command not configured or not found"
+        if issues:
+            payload["reason"] = issues[0]
+            payload["issues"] = issues
         return payload
 
     def _chattts_health(self) -> dict[str, Any]:
         try:
-            self._import_chattts()
+            chattts_module = self._import_chattts()
         except ModuleNotFoundError:
             return {
                 "available": False,
@@ -66,6 +74,17 @@ class TtsService:
                 "available": False,
                 "provider": "chattts",
                 "reason": "import_failed",
+                "error": str(exc),
+                "sample_rate": self._settings.chattts_sample_rate,
+            }
+        try:
+            self._load_chattts(chattts_module)
+        except Exception as exc:
+            logger.warning("ChatTTS load failed during health check: %s", exc)
+            return {
+                "available": False,
+                "provider": "chattts",
+                "reason": "load_failed",
                 "error": str(exc),
                 "sample_rate": self._settings.chattts_sample_rate,
             }
@@ -83,10 +102,32 @@ class TtsService:
         output_path = self._settings.audio_dir / f"{key}.wav"
         cached = cache and output_path.exists()
         if not cached:
-            if self._settings.tts_provider == "chattts":
-                self._synthesize_with_chattts(text, output_path, voice)
-            else:
-                self._synthesize_with_piper(text, output_path, voice)
+            last_error: Exception | None = None
+            for attempt in range(1, self._settings.tts_retry_attempts + 1):
+                temp_output_path = self._settings.audio_dir / f"{key}.{make_id('tts')}.tmp.wav"
+                try:
+                    if self._settings.tts_provider == "chattts":
+                        self._synthesize_with_chattts(text, temp_output_path, voice)
+                    else:
+                        self._synthesize_with_piper(text, temp_output_path, voice)
+                    temp_output_path.replace(output_path)
+                    last_error = None
+                    break
+                except Exception as exc:
+                    last_error = exc
+                    temp_output_path.unlink(missing_ok=True)
+                    logger.warning("Removed incomplete TTS audio artifact for %s", output_path.name)
+                    if attempt >= self._settings.tts_retry_attempts or not self._is_retryable_tts_error(exc):
+                        raise
+                    logger.warning(
+                        "Retrying TTS synthesis for %s after attempt %s/%s failed: %s",
+                        output_path.name,
+                        attempt,
+                        self._settings.tts_retry_attempts,
+                        exc,
+                    )
+            if last_error is not None:
+                raise last_error
 
         return {
             "audio_path": output_path,
@@ -107,25 +148,47 @@ class TtsService:
             results.append(synthesis)
         return results
 
+    def _is_retryable_tts_error(self, exc: Exception) -> bool:
+        message = str(exc).lower()
+        non_retryable_markers = (
+            "runtime is not configured",
+            "model path is not configured",
+            "is not installed",
+            "import failed",
+        )
+        return not any(marker in message for marker in non_retryable_markers)
+
     def _resolve_command(self, value: str | None) -> str | None:
         if not value:
             return None
         path = Path(value)
         if path.exists():
-            return str(path)
+            return str(path) if path.is_file() else None
         return shutil.which(value)
+
+    def _resolve_model_path(self, value: str | None) -> str | None:
+        if not value:
+            return None
+        path = Path(value)
+        if not path.exists() or not path.is_file():
+            return None
+        return str(path)
 
     def _synthesize_with_piper(self, text: str, output_path: Path, voice: str | None) -> None:
         command = self._resolve_command(self._settings.piper_command)
         if command is None:
             logger.warning("TTS requested but Piper runtime is not configured")
             raise RuntimeError("Piper runtime is not configured")
+        model_path = self._resolve_model_path(self._settings.piper_model_path)
+        if model_path is None:
+            logger.warning("TTS requested but Piper model path is not configured")
+            raise RuntimeError("Piper model path is not configured")
 
         process = subprocess.run(
             [
                 command,
                 "-m",
-                self._settings.piper_model_path or "",
+                model_path,
                 "-f",
                 str(output_path),
             ],

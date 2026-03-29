@@ -38,6 +38,8 @@ namespace LocalAssistant.Network
         public Task<TaskListResponse> GetInboxAsync() => GetAsync<TaskListResponse>("/v1/tasks/inbox");
         public Task<TaskListResponse> GetCompletedAsync() => GetAsync<TaskListResponse>("/v1/tasks/completed");
         public Task<SettingsPayload> GetSettingsAsync() => GetAsync<SettingsPayload>("/v1/settings");
+        public Task<TaskRecord> CompleteTaskAsync(string taskId, CompleteTaskRequestPayload payload = null) => SendJsonAsync<CompleteTaskRequestPayload, TaskRecord>($"/v1/tasks/{taskId}/complete", "POST", payload ?? new CompleteTaskRequestPayload());
+        public Task<TaskRecord> RescheduleTaskAsync(string taskId, RescheduleTaskRequestPayload payload) => SendJsonAsync<RescheduleTaskRequestPayload, TaskRecord>($"/v1/tasks/{taskId}/reschedule", "POST", payload ?? new RescheduleTaskRequestPayload());
 
         public Task<ChatResponsePayload> SendChatAsync(ChatRequestPayload payload) => SendJsonAsync<ChatRequestPayload, ChatResponsePayload>("/v1/chat", "POST", payload);
 

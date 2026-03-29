@@ -5,8 +5,9 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <ui:VisualElement name="ReminderCard" class="hidden" style="position: absolute; bottom: 100px; left: 16px; right: 16px; background-color: #121822; padding: 16px; border-radius: 16px; border-width: 1px; border-color: #06B6D4;">
-        <ui:Label text="â° Nháº¯c nhá»Ÿ" style="-unity-font-style: bold; color: white; margin-bottom: 8px;" />
-        <ui:Label name="ReminderText" text="..." style="color: #94A3B8; white-space: normal;" />
+    <Style src="project://database/Assets/Resources/UI/Styles/Overlays.uss" />
+    <ui:VisualElement name="ReminderCard" class="reminder-card hidden">
+        <ui:Label text="⏰ Nhắc nhở" class="reminder-header" />
+        <ui:Label name="ReminderText" text="..." class="reminder-text" />
     </ui:VisualElement>
 </ui:UXML>

@@ -44,5 +44,20 @@ namespace LocalAssistant.Tests.EditMode
             Assert.IsTrue(snapshot.window_mode.mini_assistant_enabled);
             Assert.IsFalse(snapshot.reminder.speech_enabled);
         }
+
+        [Test]
+        public void HasUnsavedChangesTracksBaselineAfterApply()
+        {
+            var store = new SettingsViewModelStore();
+            store.Apply(new SettingsPayload());
+
+            Assert.IsFalse(store.HasUnsavedChanges());
+
+            store.SetSpeakReplies(false);
+            Assert.IsTrue(store.HasUnsavedChanges());
+
+            store.MarkSaved();
+            Assert.IsFalse(store.HasUnsavedChanges());
+        }
     }
 }

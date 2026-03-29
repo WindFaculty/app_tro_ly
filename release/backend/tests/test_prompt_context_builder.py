@@ -13,7 +13,6 @@ def _settings(tmp_path, **overrides) -> Settings:
         audio_dir=tmp_path / "data" / "audio",
         cache_dir=tmp_path / "data" / "cache",
         log_dir=tmp_path / "data" / "logs",
-        enable_ollama=False,
         **overrides,
     )
 

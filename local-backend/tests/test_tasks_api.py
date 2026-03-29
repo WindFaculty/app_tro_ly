@@ -80,6 +80,34 @@ def test_health_reports_partial_when_runtime_model_paths_are_missing(client) -> 
     assert any("assistant_piper_command" in action for action in payload["recovery_actions"])
 
 
+def test_health_reports_partial_when_speech_endpoint_uses_fallback_provider(client) -> None:
+    container = client.app.state.container
+    container.llm_service.health = lambda: {
+        "available": True,
+        "provider": "groq",
+        "base_url": "https://api.groq.com/openai/v1",
+        "model": "stub",
+    }
+    container.speech_service.stt_health = lambda: {
+        "available": True,
+        "provider": "faster-whisper",
+        "provider_available": False,
+        "effective_provider": "whisper.cpp",
+        "fallback": {"available": True, "provider": "whisper.cpp"},
+        "reason": "probe_failed",
+        "error": "missing cublas64_12.dll",
+    }
+    container.speech_service.tts_health = lambda: {"available": True, "provider": "piper"}
+
+    response = client.get("/v1/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "partial"
+    assert "stt" in payload["degraded_features"]
+    assert any("assistant_whisper_command" in action for action in payload["recovery_actions"])
+
+
 def test_health_reports_error_when_database_is_unavailable(client) -> None:
     container = client.app.state.container
     container.repository.health_check = lambda: {

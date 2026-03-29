@@ -24,6 +24,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.container = container
         app.state.stop_event = stop_event
         app.state.log_path = log_path
+        app.state.audio_cleanup = container.speech_service.cleanup_audio_artifacts()
         logger.info("Starting backend with database at %s", container.repository.db_path)
         scheduler_task = asyncio.create_task(container.scheduler_service.run(stop_event))
         try:

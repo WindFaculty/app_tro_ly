@@ -5,15 +5,27 @@ namespace LocalAssistant.Core
     public sealed class SettingsViewModelStore
     {
         public SettingsPayload Current { get; private set; } = new();
+        private SettingsPayload baseline = new();
 
         public void Apply(SettingsPayload payload)
         {
             Current = Clone(payload ?? new SettingsPayload());
+            baseline = Clone(Current);
         }
 
         public SettingsPayload Snapshot()
         {
             return Clone(Current);
+        }
+
+        public bool HasUnsavedChanges()
+        {
+            return UnityJson.Serialize(Current) != UnityJson.Serialize(baseline);
+        }
+
+        public void MarkSaved()
+        {
+            baseline = Clone(Current);
         }
 
         public void SetSpeakReplies(bool value) => Current.voice.speak_replies = value;

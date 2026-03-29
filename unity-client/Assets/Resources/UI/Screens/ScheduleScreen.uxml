@@ -5,18 +5,37 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <ui:VisualElement name="ScheduleViewContainer" class="view-container hidden" style="flex-direction: column;">
-        <ui:Label text="QUáº¢N LÃ THá»œI GIAN" style="font-size: 12px; color: #06B6D4; -unity-font-style: bold; margin-bottom: 4px;" />
-        <ui:Label name="TaskSheetHeaderTitle" text="Lá»‹ch trÃ¬nh AI" style="font-size: 32px; color: white; -unity-font-style: bold; margin-bottom: 24px;" />
+    <ui:VisualElement name="ScheduleViewContainer" class="view-container hidden schedule-screen">
+        <ui:Label text="Schedule" class="panel-kicker" />
+        <ui:Label name="TaskSheetHeaderTitle" text="Week schedule" class="schedule-title" />
+        <ui:Label
+            name="ScheduleSummaryText"
+            text="Loading the current schedule..."
+            class="schedule-summary" />
 
-        <ui:VisualElement style="flex-direction: row; margin-bottom: 20px; align-items: center;">
-            <ui:Label name="TaskSheetMonthLabel" text="ThÃ¡ng 10, 2024" style="font-size: 20px; color: white; -unity-font-style: bold; flex-grow: 1;" />
-            <ui:Button name="InboxButton" text="Inbox" class="btn-secondary" style="margin-right: 8px;" />
-            <ui:Button name="DoneButton" text="ÄÃ£ xong" class="btn-secondary" />
+        <ui:VisualElement class="schedule-toolbar">
+            <ui:VisualElement class="schedule-toolbar-date-nav">
+                <ui:Button name="ScheduleTodayButton" text="Today" class="btn-secondary" />
+                <ui:Button name="SchedulePrevButton" text="Prev" class="btn-secondary" />
+                <ui:Button name="ScheduleNextButton" text="Next" class="btn-secondary" />
+            </ui:VisualElement>
+            <ui:Label name="TaskSheetMonthLabel" text="Auto date" class="schedule-month-label" />
+            <ui:VisualElement class="schedule-toolbar-actions">
+                <ui:Button name="InboxButton" text="Inbox" class="btn-secondary" />
+                <ui:Button name="DoneButton" text="Completed" class="btn-secondary" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
-        <ui:VisualElement name="CalendarArea" style="flex-grow: 1; background-color: #121822; border-radius: 16px; padding: 16px; border-width: 1px; border-color: rgba(255, 255, 255, 0.05); justify-content: center;">
-            <ui:Label text="[ LÆ°á»›i Calendar Grid hiá»ƒn thá»‹ á»Ÿ Ä‘Ã¢y ]" style="align-self: center; color: #94A3B8;" />
+        <ui:VisualElement name="CalendarArea" class="schedule-canvas">
+            <ui:Label
+                name="ScheduleMetaText"
+                text="Selected date, conflict count, and screen-specific guidance will render here."
+                class="schedule-meta" />
+            <ui:Label
+                name="ScheduleEmptyStateText"
+                text="No schedule data is available yet."
+                class="schedule-empty-state hidden" />
+            <ui:VisualElement name="ScheduleListContainer" class="schedule-list-container" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -14,9 +14,13 @@ namespace LocalAssistant.Tests.PlayMode
         {
             var refs = new AppShellRefs
             {
+                TopStatusChipLabel = new Label(),
                 HealthBanner = new Label(),
                 AvatarStateText = new Label(),
                 StageStatusText = new Label(),
+                ScheduleInsightTitle = new Label(),
+                ScheduleInsightSummary = new Label(),
+                ScheduleInsightMeta = new Label(),
                 RefreshButton = new Button(),
             };
             var controller = new AppShellController(refs);
@@ -40,8 +44,30 @@ namespace LocalAssistant.Tests.PlayMode
             controller.RenderStage(AvatarState.Listening, health, AppScreen.Week, "2026-03-26", settingsStore, chatStore);
 
             StringAssert.Contains("Partial", refs.HealthBanner.text);
+            StringAssert.Contains("Partial", refs.TopStatusChipLabel.text);
             Assert.AreEqual("Listening", refs.AvatarStateText.text);
             StringAssert.Contains("planner", refs.StageStatusText.text);
+            Assert.AreEqual("Week overview", refs.ScheduleInsightTitle.text);
+            StringAssert.Contains("degraded", refs.ScheduleInsightSummary.text);
+            StringAssert.Contains("2026-03-26", refs.ScheduleInsightMeta.text);
+        }
+
+        [Test]
+        public void RenderBootStateUpdatesBannerAndTopChip()
+        {
+            var refs = new AppShellRefs
+            {
+                TopStatusChipLabel = new Label(),
+                HealthBanner = new Label(),
+                StageStatusText = new Label(),
+            };
+            var controller = new AppShellController(refs);
+
+            controller.RenderBootState("Loading runtime", "Preparing shell", new UnityEngine.Color(0.24f, 0.78f, 0.91f));
+
+            Assert.AreEqual("Loading runtime", refs.TopStatusChipLabel.text);
+            Assert.AreEqual("Loading runtime", refs.HealthBanner.text);
+            Assert.AreEqual("Preparing shell", refs.StageStatusText.text);
         }
 
         [Test]

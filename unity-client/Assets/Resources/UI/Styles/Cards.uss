@@ -1,28 +1,66 @@
-.health-banner {
+.shell-card {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
     background-color: var(--color-panel-dark);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    margin-bottom: 24px;
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--color-border-soft);
+}
+
+.accent-card {
+    margin-bottom: var(--space-3);
+    background-color: var(--color-panel-mid);
+    border-color: var(--color-border-strong);
+}
+
+.assistant-mini-card {
+    margin-bottom: var(--space-3);
+    background-color: var(--color-panel-dark);
+}
+
+.assistant-mini-time {
+    color: var(--color-primary-cyan);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-1);
+}
+
+.assistant-mini-title {
+    color: var(--color-text-main);
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-bottom: var(--space-1);
+}
+
+.assistant-mini-copy {
+    color: var(--color-text-dim);
+    white-space: normal;
+    line-height: 18px;
+}
+
+.health-banner {
+    margin-bottom: var(--space-4);
 }
 
 .health-title {
     color: var(--color-primary-cyan);
-    font-size: 12px;
+    font-size: var(--font-size-kicker);
     -unity-font-style: bold;
-    margin-bottom: 8px;
+    margin-bottom: var(--space-2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .health-value {
-    font-size: 15px;
+    font-size: 17px;
     -unity-font-style: bold;
-    margin-bottom: 4px;
+    margin-bottom: var(--space-2);
 }
 
 .health-desc {
-    font-size: 11px;
+    font-size: var(--font-size-sm);
     color: var(--color-text-dim);
+    white-space: normal;
+    line-height: 18px;
 }
 
 .settings-panel {

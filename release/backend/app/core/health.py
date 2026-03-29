@@ -32,8 +32,7 @@ def build_recovery_actions(
             actions.append(
                 f"Check API keys and connectivity for fast provider {fast_provider} and deep provider {deep_provider}."
             )
-            return actions
-        if provider == "groq":
+        elif provider == "groq":
             if reason == "missing_api_key":
                 actions.append("Set assistant_llm_provider=groq and configure assistant_groq_api_key for Groq replies.")
             else:
@@ -47,13 +46,9 @@ def build_recovery_actions(
                 actions.append(
                     f"Check Gemini connectivity at {settings.gemini_base_url} and ensure model {settings.gemini_model} is available."
                 )
-        elif reason in {"disabled", "disabled_for_this_phase"}:
-            actions.append(
-                "Set assistant_enable_ollama=true or switch assistant_llm_provider to groq or gemini to enable reply refinement."
-            )
         else:
             actions.append(
-                f"Start Ollama at {settings.ollama_base_url} and ensure model {settings.ollama_model} is available."
+                "Configure assistant_llm_provider as hybrid, groq, or gemini and provide the matching API credentials."
             )
     if not stt.get("available", False):
         if stt.get("provider") == "faster-whisper":
@@ -64,7 +59,7 @@ def build_recovery_actions(
             actions.append("Configure assistant_whisper_command and assistant_whisper_model_path for speech-to-text.")
     if not tts.get("available", False):
         if str(tts.get("provider") or settings.tts_provider).lower() == "chattts":
-            if str(tts.get("reason") or "").lower() == "import_failed":
+            if str(tts.get("reason") or "").lower() in {"import_failed", "load_failed"}:
                 actions.append(
                     "Fix ChatTTS Python dependency compatibility, or switch assistant_tts_provider=piper and configure assistant_piper_command plus assistant_piper_model_path for speech output."
                 )

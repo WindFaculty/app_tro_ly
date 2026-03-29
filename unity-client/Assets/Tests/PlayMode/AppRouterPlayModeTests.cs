@@ -58,6 +58,21 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.IsTrue(shell.SettingsTab.ClassListContains("active"));
         }
 
+        [Test]
+        public void NavigateSettingsClearsScheduleToolbarActiveState()
+        {
+            CreateRefs(out var shell, out var schedule, out var settings, out var chat);
+            var router = new AppRouter(shell, schedule, settings, chat, null);
+
+            router.Navigate(AppScreen.Inbox);
+            router.Navigate(AppScreen.Settings);
+
+            Assert.IsFalse(schedule.InboxTab.ClassListContains("active"));
+            Assert.IsFalse(schedule.CompletedTab.ClassListContains("active"));
+            Assert.IsFalse(shell.WeekTab.ClassListContains("active"));
+            Assert.IsTrue(shell.SettingsTab.ClassListContains("active"));
+        }
+
         private static void CreateRefs(out AppShellRefs shell, out ScheduleScreenRefs schedule, out SettingsScreenRefs settings, out ChatPanelRefs chat)
         {
             shell = new AppShellRefs

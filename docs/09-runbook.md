@@ -145,6 +145,11 @@ Interpretation:
 - `partial`: app is usable, but one or more runtime groups are degraded
 - `error`: do not continue until the database or startup problem is fixed
 
+Current implementation note:
+
+- speech runtime health should reflect endpoint-style probe results, not only import or path checks
+- if a speech endpoint is still callable through a fallback path, keep the endpoint usable but treat the health state as degraded rather than clean `ready`
+
 ## 6. Smoke Validation
 
 After the backend is reachable:
@@ -169,6 +174,12 @@ The smoke script currently verifies:
 - `/v1/assistant/stream`
 - available versus unavailable STT responses
 - available versus unavailable TTS responses
+
+Evidence split for current validation:
+
+- repo regression evidence: automated backend or Unity test output
+- P02 live UI evidence: Unity Editor Game view and packaged-client captures
+- P03 speech evidence: target-machine STT or TTS runtime install and end-to-end voice validation
 
 Treat smoke failure as blocking when:
 
@@ -262,6 +273,7 @@ Actions:
 - inspect `recovery_actions`
 - decide whether degraded mode is acceptable for the current test
 - rerun startup and smoke after fixing the missing runtime if not acceptable
+- for manual smoke, keep P02 live UI evidence separate from any remaining P03 speech blocker
 
 ### Health reports `error`
 
@@ -306,6 +318,7 @@ When handing off or reporting status, keep:
 - startup script exit code
 - health JSON
 - smoke summary JSON
+- P02 checklist entries from `tasks/p02-manual-checklist.md` when the pass includes live UI or packaged-client evidence
 - release path if packaging was used
 - any runtime warnings or errors
 

@@ -124,9 +124,11 @@ function Resolve-ClientExecutable {
         return $null
     }
 
-    $candidates = Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse |
-        Where-Object { $_.Name -ne "UnityCrashHandler64.exe" } |
-        Sort-Object FullName
+    $candidates = @(
+        Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse |
+            Where-Object { $_.Name -ne "UnityCrashHandler64.exe" } |
+            Sort-Object FullName
+    )
 
     if ($candidates.Count -eq 0) {
         return $null
@@ -560,8 +562,10 @@ function Assert-ReleaseLayout {
             throw "Release package expected a client folder but none was copied."
         }
 
-        $clientExecutables = Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -ne "UnityCrashHandler64.exe" }
+        $clientExecutables = @(
+            Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -ne "UnityCrashHandler64.exe" }
+        )
         if ($clientExecutables.Count -eq 0) {
             throw "Release package expected at least one client executable under $clientDir."
         }

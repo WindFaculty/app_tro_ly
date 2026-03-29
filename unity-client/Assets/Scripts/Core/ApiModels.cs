@@ -134,6 +134,21 @@ namespace LocalAssistant.Core
     }
 
     [Serializable]
+    public sealed class CompleteTaskRequestPayload
+    {
+        public string completed_at = string.Empty;
+    }
+
+    [Serializable]
+    public sealed class RescheduleTaskRequestPayload
+    {
+        public string scheduled_date = string.Empty;
+        public string start_at = string.Empty;
+        public string end_at = string.Empty;
+        public string due_at = string.Empty;
+    }
+
+    [Serializable]
     public sealed class ChatRequestPayload
     {
         public string message = string.Empty;

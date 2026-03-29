@@ -72,6 +72,12 @@ The smoke script currently exercises:
 - available and unavailable STT behavior
 - available and unavailable TTS behavior
 
+Evidence should stay split between:
+
+- repo regression evidence
+- P02 live UI or packaged-client evidence
+- P03 target-machine speech evidence
+
 ## Manual Validation Required
 
 These still require human-run verification:

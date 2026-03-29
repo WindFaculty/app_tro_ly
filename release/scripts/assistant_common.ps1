@@ -53,6 +53,34 @@ function Resolve-BackendDirectory {
     throw "Backend folder not found. Checked: $($candidates -join ', ')"
 }
 
+function Assert-PathMatchesType {
+    param(
+        [string]$Path,
+        [ValidateSet("Any", "File", "Directory")]
+        [string]$ExpectedType = "Any",
+        [string]$Description = "Path"
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        throw ($Description + " cannot be empty.")
+    }
+
+    if (-not (Test-Path $Path)) {
+        throw ($Description + " does not exist: " + $Path)
+    }
+
+    $item = Get-Item $Path -ErrorAction Stop
+    if ($ExpectedType -eq "File" -and $item.PSIsContainer) {
+        throw ($Description + " must be a file, but got a directory: " + $Path)
+    }
+
+    if ($ExpectedType -eq "Directory" -and -not $item.PSIsContainer) {
+        throw ($Description + " must be a directory, but got a file: " + $Path)
+    }
+
+    return $item
+}
+
 function Assert-SafeOutputDirectory {
     param(
         [string]$Root,
@@ -87,11 +115,8 @@ function Resolve-ClientExecutable {
     )
 
     if ($ExplicitPath) {
-        if (-not (Test-Path $ExplicitPath)) {
-            throw "Unity executable not found: $ExplicitPath"
-        }
-
-        return (Resolve-Path $ExplicitPath).Path
+        $explicitItem = Assert-PathMatchesType -Path $ExplicitPath -ExpectedType File -Description "Unity executable"
+        return $explicitItem.FullName
     }
 
     $clientDir = Join-Path $Root "client"
@@ -99,9 +124,11 @@ function Resolve-ClientExecutable {
         return $null
     }
 
-    $candidates = Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse |
-        Where-Object { $_.Name -ne "UnityCrashHandler64.exe" } |
-        Sort-Object FullName
+    $candidates = @(
+        Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse |
+            Where-Object { $_.Name -ne "UnityCrashHandler64.exe" } |
+            Sort-Object FullName
+    )
 
     if ($candidates.Count -eq 0) {
         return $null
@@ -222,7 +249,12 @@ function Resolve-CommandPath {
     }
 
     if (Test-Path $Value) {
-        return (Resolve-Path $Value).Path
+        $item = Get-Item $Value -ErrorAction SilentlyContinue
+        if ($null -eq $item -or $item.PSIsContainer) {
+            return $null
+        }
+
+        return $item.FullName
     }
 
     return (Get-Command $Value -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -First 1)
@@ -318,7 +350,9 @@ function Get-RuntimeDiagnostics {
     $ttsProvider = (Get-AssistantConfigValue -Config $config -Key "assistant_tts_provider" -Default "piper").ToLowerInvariant()
     $sttProvider = (Get-AssistantConfigValue -Config $config -Key "assistant_stt_provider" -Default "faster_whisper").ToLowerInvariant()
     $llmProvider = (Get-AssistantConfigValue -Config $config -Key "assistant_llm_provider" -Default "hybrid").ToLowerInvariant()
-    $ollamaEnabledState = Get-ConfigBooleanState -Config $config -Key "assistant_enable_ollama" -Default $true
+    $ollamaEnabledState = Get-ConfigBooleanState -Config $config -Key "assistant_enable_ollama" -Default $false
+    $groqApiKey = Get-AssistantConfigValue -Config $config -Key "assistant_groq_api_key"
+    $geminiApiKey = Get-AssistantConfigValue -Config $config -Key "assistant_gemini_api_key"
     $resolvedPythonCommand = $null
 
     try {
@@ -343,13 +377,18 @@ function Get-RuntimeDiagnostics {
             $warnings.Add("TTS provider is piper but assistant_piper_command is not configured. The backend may start in partial mode without speech output.")
         }
         elseif (-not (Resolve-CommandPath $piperCommand)) {
-            $errors.Add("assistant_piper_command is configured but not found: $piperCommand")
+            $errors.Add("assistant_piper_command is configured but not found as an executable file: $piperCommand")
         }
         if ([string]::IsNullOrWhiteSpace($piperModelPath)) {
             $warnings.Add("TTS provider is piper but assistant_piper_model_path is not configured. The backend may start in partial mode without speech output.")
         }
-        elseif (-not (Test-Path $piperModelPath)) {
-            $errors.Add("assistant_piper_model_path does not exist: $piperModelPath")
+        else {
+            try {
+                Assert-PathMatchesType -Path $piperModelPath -ExpectedType File -Description "assistant_piper_model_path" | Out-Null
+            }
+            catch {
+                $errors.Add($_.Exception.Message)
+            }
         }
     }
     elseif ($ttsProvider -eq "chattts") {
@@ -372,13 +411,18 @@ function Get-RuntimeDiagnostics {
             $warnings.Add("STT provider is whisper_cpp but assistant_whisper_command is not configured. The backend may start in partial mode without local speech-to-text.")
         }
         elseif (-not (Resolve-CommandPath $whisperCommand)) {
-            $errors.Add("assistant_whisper_command is configured but not found: $whisperCommand")
+            $errors.Add("assistant_whisper_command is configured but not found as an executable file: $whisperCommand")
         }
         if ([string]::IsNullOrWhiteSpace($whisperModelPath)) {
             $warnings.Add("STT provider is whisper_cpp but assistant_whisper_model_path is not configured. The backend may start in partial mode without local speech-to-text.")
         }
-        elseif (-not (Test-Path $whisperModelPath)) {
-            $errors.Add("assistant_whisper_model_path does not exist: $whisperModelPath")
+        else {
+            try {
+                Assert-PathMatchesType -Path $whisperModelPath -ExpectedType File -Description "assistant_whisper_model_path" | Out-Null
+            }
+            catch {
+                $errors.Add($_.Exception.Message)
+            }
         }
     }
     elseif ($sttProvider -eq "faster_whisper") {
@@ -430,6 +474,21 @@ function Get-RuntimeDiagnostics {
         }
     }
 
+    if ($llmProvider -eq "groq" -and [string]::IsNullOrWhiteSpace($groqApiKey)) {
+        $warnings.Add("LLM provider is groq but assistant_groq_api_key is not configured. The backend will start in partial mode without API-backed replies.")
+    }
+    elseif ($llmProvider -eq "gemini" -and [string]::IsNullOrWhiteSpace($geminiApiKey)) {
+        $warnings.Add("LLM provider is gemini but assistant_gemini_api_key is not configured. The backend will start in partial mode without API-backed replies.")
+    }
+    elseif ($llmProvider -eq "hybrid") {
+        if ([string]::IsNullOrWhiteSpace($groqApiKey)) {
+            $warnings.Add("Hybrid routing expects assistant_groq_api_key for the fast path. The backend may start in partial mode without fast API replies.")
+        }
+        if ([string]::IsNullOrWhiteSpace($geminiApiKey)) {
+            $warnings.Add("Hybrid routing expects assistant_gemini_api_key for the deep path. The backend may start in partial mode without deep API replies.")
+        }
+    }
+
     return [PSCustomObject]@{
         Config = $config
         TtsProvider = $ttsProvider
@@ -468,10 +527,11 @@ function Assert-ReleaseLayout {
         [bool]$RequireClient = $false
     )
 
-    $required = @(
+    $requiredFiles = @(
         (Join-Path $OutputDir "backend\requirements.txt"),
         (Join-Path $OutputDir "backend\run_local.py"),
-        (Join-Path $OutputDir "backend\app"),
+        (Join-Path $OutputDir "backend\app\main.py"),
+        (Join-Path $OutputDir "backend\app\api\routes.py"),
         (Join-Path $OutputDir "scripts\run_all.ps1"),
         (Join-Path $OutputDir "scripts\setup_windows.ps1"),
         (Join-Path $OutputDir "scripts\assistant_common.ps1"),
@@ -481,10 +541,19 @@ function Assert-ReleaseLayout {
         (Join-Path $OutputDir "scripts\fake_piper_model.onnx")
     )
 
-    foreach ($path in $required) {
-        if (-not (Test-Path $path)) {
-            throw "Release package is missing required path: $path"
-        }
+    foreach ($path in $requiredFiles) {
+        Assert-PathMatchesType -Path $path -ExpectedType File -Description "Release package required file" | Out-Null
+    }
+
+    $requiredDirectories = @(
+        (Join-Path $OutputDir "backend"),
+        (Join-Path $OutputDir "backend\app"),
+        (Join-Path $OutputDir "backend\app\api"),
+        (Join-Path $OutputDir "scripts")
+    )
+
+    foreach ($path in $requiredDirectories) {
+        Assert-PathMatchesType -Path $path -ExpectedType Directory -Description "Release package required directory" | Out-Null
     }
 
     if ($RequireClient) {
@@ -493,8 +562,10 @@ function Assert-ReleaseLayout {
             throw "Release package expected a client folder but none was copied."
         }
 
-        $clientExecutables = Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -ne "UnityCrashHandler64.exe" }
+        $clientExecutables = @(
+            Get-ChildItem -Path $clientDir -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -ne "UnityCrashHandler64.exe" }
+        )
         if ($clientExecutables.Count -eq 0) {
             throw "Release package expected at least one client executable under $clientDir."
         }
@@ -515,6 +586,88 @@ function Stop-ProcessSafe {
     }
     catch {
     }
+}
+
+function Get-ChildProcessIds {
+    param([int]$ProcessId)
+
+    $results = @()
+    try {
+        $cimCommand = Get-Command Get-CimInstance -ErrorAction SilentlyContinue
+        if ($null -ne $cimCommand) {
+            $results = @(Get-CimInstance Win32_Process -Filter ("ParentProcessId = " + $ProcessId) -ErrorAction Stop |
+                Select-Object -ExpandProperty ProcessId)
+            return @($results)
+        }
+    }
+    catch {
+    }
+
+    try {
+        $wmiCommand = Get-Command Get-WmiObject -ErrorAction SilentlyContinue
+        if ($null -ne $wmiCommand) {
+            $results = @(Get-WmiObject Win32_Process -Filter ("ParentProcessId = " + $ProcessId) -ErrorAction Stop |
+                Select-Object -ExpandProperty ProcessId)
+        }
+    }
+    catch {
+    }
+
+    return @($results)
+}
+
+function Get-DescendantProcessIds {
+    param(
+        [int]$ProcessId,
+        [hashtable]$Visited = $null
+    )
+
+    if ($null -eq $Visited) {
+        $Visited = @{}
+    }
+
+    $ordered = New-Object System.Collections.Generic.List[int]
+    foreach ($childProcessId in @(Get-ChildProcessIds -ProcessId $ProcessId)) {
+        if ($Visited.ContainsKey($childProcessId)) {
+            continue
+        }
+
+        $Visited[$childProcessId] = $true
+        foreach ($descendantProcessId in @(Get-DescendantProcessIds -ProcessId $childProcessId -Visited $Visited)) {
+            $ordered.Add($descendantProcessId)
+        }
+        $ordered.Add([int]$childProcessId)
+    }
+
+    return @($ordered)
+}
+
+function Stop-ProcessTreeSafe {
+    param([System.Diagnostics.Process]$Process)
+
+    if ($null -eq $Process) {
+        return
+    }
+
+    try {
+        $processId = $Process.Id
+    }
+    catch {
+        return
+    }
+
+    foreach ($childProcessId in @(Get-DescendantProcessIds -ProcessId $processId)) {
+        try {
+            $childProcess = Get-Process -Id $childProcessId -ErrorAction Stop
+            if (-not $childProcess.HasExited) {
+                Stop-Process -Id $childProcessId -Force -ErrorAction SilentlyContinue
+            }
+        }
+        catch {
+        }
+    }
+
+    Stop-ProcessSafe -Process $Process
 }
 
 function Get-ListeningTcpProcessId {

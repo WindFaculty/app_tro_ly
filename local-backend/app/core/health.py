@@ -21,6 +21,8 @@ def build_recovery_actions(
     tts: dict[str, Any],
 ) -> list[str]:
     actions: list[str] = []
+    stt_degraded = not stt.get("available", False) or stt.get("provider_available") is False
+    tts_degraded = not tts.get("available", False) or tts.get("provider_available") is False
     if not database.get("available", False):
         actions.append(f"Check SQLite path and write permissions for {settings.db_path}.")
     if not llm.get("available", False):
@@ -50,14 +52,14 @@ def build_recovery_actions(
             actions.append(
                 "Configure assistant_llm_provider as hybrid, groq, or gemini and provide the matching API credentials."
             )
-    if not stt.get("available", False):
+    if stt_degraded:
         if stt.get("provider") == "faster-whisper":
             actions.append(
                 "Install faster-whisper or switch assistant_stt_provider=whisper_cpp and configure assistant_whisper_command."
             )
         else:
             actions.append("Configure assistant_whisper_command and assistant_whisper_model_path for speech-to-text.")
-    if not tts.get("available", False):
+    if tts_degraded:
         if str(tts.get("provider") or settings.tts_provider).lower() == "chattts":
             if str(tts.get("reason") or "").lower() in {"import_failed", "load_failed"}:
                 actions.append(

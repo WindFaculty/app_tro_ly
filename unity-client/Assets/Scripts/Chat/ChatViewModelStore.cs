@@ -4,6 +4,18 @@ using LocalAssistant.Core;
 
 namespace LocalAssistant.Chat
 {
+    public sealed class ChatPanelSnapshot
+    {
+        public string Transcript = string.Empty;
+        public string StatusBadge = "READY";
+        public string StatusTitle = "Ready for the next turn";
+        public string StatusDetail = string.Empty;
+        public string TranscriptPreviewTitle = "Transcript preview";
+        public string TranscriptPreviewText = string.Empty;
+        public string ActionSummaryTitle = "Action confirmation";
+        public string ActionSummaryText = string.Empty;
+    }
+
     public sealed class ChatViewModelStore
     {
         public sealed class ChatLine
@@ -23,6 +35,12 @@ namespace LocalAssistant.Chat
         public int FallbackCount { get; private set; }
         public bool IsThinking { get; private set; }
         public bool IsListening { get; private set; }
+        public bool IsTalking { get; private set; }
+        public string SystemStatusBadge { get; private set; } = string.Empty;
+        public string SystemStatusTitle { get; private set; } = string.Empty;
+        public string SystemStatusDetail { get; private set; } = string.Empty;
+        public string LastActionTitle { get; private set; } = "Action confirmation";
+        public string LastActionSummary { get; private set; } = "Task changes triggered from chat will appear here.";
 
         public void AddUser(string text)
         {
@@ -36,9 +54,25 @@ namespace LocalAssistant.Chat
 
         public void SetThinking(bool value) => IsThinking = value;
         public void SetListening(bool value) => IsListening = value;
+        public void SetTalking(bool value) => IsTalking = value;
         public void SetTranscriptPreview(string value) => TranscriptPreview = value ?? string.Empty;
+        public void SetSystemStatus(string badge, string title, string detail)
+        {
+            SystemStatusBadge = badge ?? string.Empty;
+            SystemStatusTitle = title ?? string.Empty;
+            SystemStatusDetail = detail ?? string.Empty;
+        }
+
+        public void ClearSystemStatus()
+        {
+            SystemStatusBadge = string.Empty;
+            SystemStatusTitle = string.Empty;
+            SystemStatusDetail = string.Empty;
+        }
+
         public void ResetAssistantDraft() => AssistantDraft = string.Empty;
         public void AppendAssistantDraft(string value) => AssistantDraft += value ?? string.Empty;
+
         public void FinalizeAssistantDraft(string fallbackText = null)
         {
             var finalText = string.IsNullOrWhiteSpace(fallbackText) ? AssistantDraft : fallbackText;
@@ -61,15 +95,41 @@ namespace LocalAssistant.Chat
             }
         }
 
+        public void SetTaskActions(IReadOnlyList<TaskActionReport> actions)
+        {
+            if (actions == null || actions.Count == 0)
+            {
+                LastActionTitle = "Action confirmation";
+                LastActionSummary = "Task changes triggered from chat will appear here.";
+                return;
+            }
+
+            LastActionTitle = actions.Count == 1 ? "Last task action" : $"Recent task actions ({actions.Count})";
+
+            var builder = new StringBuilder();
+            var limit = actions.Count > 3 ? 3 : actions.Count;
+            for (var index = 0; index < limit; index++)
+            {
+                if (index > 0)
+                {
+                    builder.AppendLine();
+                }
+
+                builder.Append(FormatAction(actions[index]));
+            }
+
+            if (actions.Count > limit)
+            {
+                builder.AppendLine();
+                builder.Append($"+{actions.Count - limit} more update(s)");
+            }
+
+            LastActionSummary = builder.ToString().Trim();
+        }
+
         public string BuildTranscript()
         {
             var builder = new StringBuilder();
-            if (!string.IsNullOrEmpty(CurrentRoute) || !string.IsNullOrEmpty(CurrentProvider))
-            {
-                builder.AppendLine($"<color=#FFD0A5><b>Route</b></color> {CurrentRoute} | {CurrentProvider} | {CurrentLatencyMs} ms");
-                builder.AppendLine($"<color=#FFD0A5><b>Fallbacks</b></color> {FallbackCount}");
-                builder.AppendLine();
-            }
 
             foreach (var line in Lines)
             {
@@ -87,23 +147,25 @@ namespace LocalAssistant.Chat
                 builder.AppendLine();
             }
 
-            if (IsListening)
-            {
-                builder.AppendLine("<color=#FFB168><b>Listening...</b></color>");
-            }
-            else if (IsThinking)
-            {
-                builder.AppendLine("<color=#FFB168><b>Thinking...</b></color>");
-            }
+            var transcript = builder.ToString().Trim();
+            return string.IsNullOrWhiteSpace(transcript)
+                ? "Conversation will appear here once a message or voice turn arrives."
+                : transcript;
+        }
 
-            if (!string.IsNullOrEmpty(TranscriptPreview))
+        public ChatPanelSnapshot BuildPanelSnapshot(bool transcriptPreviewEnabled)
+        {
+            return new ChatPanelSnapshot
             {
-                builder.AppendLine();
-                builder.AppendLine("<color=#FFD0A5><b>Transcript</b></color>");
-                builder.AppendLine(TranscriptPreview);
-            }
-
-            return builder.ToString().Trim();
+                Transcript = BuildTranscript(),
+                StatusBadge = BuildStatusBadge(),
+                StatusTitle = BuildStatusTitle(),
+                StatusDetail = BuildStatusDetail(transcriptPreviewEnabled),
+                TranscriptPreviewTitle = transcriptPreviewEnabled ? "Transcript preview" : "Transcript preview off",
+                TranscriptPreviewText = BuildTranscriptPreviewText(transcriptPreviewEnabled),
+                ActionSummaryTitle = LastActionTitle,
+                ActionSummaryText = LastActionSummary,
+            };
         }
 
         public static ChatRequestPayload CreateRequest(string text, string conversationId, string selectedDate, bool includeVoice)
@@ -119,5 +181,130 @@ namespace LocalAssistant.Chat
                 voice_mode = false,
             };
         }
+
+        private string BuildStatusBadge()
+        {
+            if (IsTalking)
+            {
+                return "TALKING";
+            }
+
+            if (IsListening)
+            {
+                return "LISTENING";
+            }
+
+            if (IsThinking)
+            {
+                return "THINKING";
+            }
+
+            if (HasSystemStatus())
+            {
+                return SystemStatusBadge;
+            }
+
+            return HasRecentAction() ? "CONFIRM" : "READY";
+        }
+
+        private string BuildStatusTitle()
+        {
+            if (IsTalking)
+            {
+                return "Speaking the current reply";
+            }
+
+            if (IsListening)
+            {
+                return "Listening for your next voice turn";
+            }
+
+            if (IsThinking)
+            {
+                return "Planning the next response";
+            }
+
+            if (HasSystemStatus())
+            {
+                return SystemStatusTitle;
+            }
+
+            return HasRecentAction()
+                ? "Applied task updates from the latest turn"
+                : "Ready for the next turn";
+        }
+
+        private string BuildStatusDetail(bool transcriptPreviewEnabled)
+        {
+            var builder = new StringBuilder();
+            if (!string.IsNullOrWhiteSpace(CurrentRoute) || !string.IsNullOrWhiteSpace(CurrentProvider))
+            {
+                builder.AppendLine($"Route {ToKnownText(CurrentRoute)} | Provider {ToKnownText(CurrentProvider)} | Latency {CurrentLatencyMs} ms");
+            }
+            else if (HasSystemStatus())
+            {
+                builder.AppendLine(SystemStatusDetail);
+            }
+            else
+            {
+                builder.AppendLine("Route diagnostics will appear after the assistant selects a provider.");
+            }
+
+            builder.Append($"Fallbacks {FallbackCount} | Transcript {(transcriptPreviewEnabled ? "On" : "Off")}");
+            return builder.ToString().Trim();
+        }
+
+        private string BuildTranscriptPreviewText(bool transcriptPreviewEnabled)
+        {
+            if (!transcriptPreviewEnabled)
+            {
+                return "Enable transcript preview in Settings to inspect captured speech before and during voice turns.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(TranscriptPreview))
+            {
+                return TranscriptPreview;
+            }
+
+            if (IsListening)
+            {
+                return "Live speech text will appear here while the microphone is active.";
+            }
+
+            if (IsThinking)
+            {
+                return "Waiting for the latest captured speech to settle into a final transcript.";
+            }
+
+            return "Start the mic to inspect captured speech before or during a voice turn.";
+        }
+
+        private bool HasRecentAction()
+        {
+            return !string.IsNullOrWhiteSpace(LastActionSummary)
+                && LastActionSummary != "Task changes triggered from chat will appear here.";
+        }
+
+        private bool HasSystemStatus()
+        {
+            return !string.IsNullOrWhiteSpace(SystemStatusBadge)
+                && !string.IsNullOrWhiteSpace(SystemStatusTitle);
+        }
+
+        private static string FormatAction(TaskActionReport action)
+        {
+            var title = string.IsNullOrWhiteSpace(action?.title) ? "Untitled task" : action.title;
+            var detail = string.IsNullOrWhiteSpace(action?.detail) ? string.Empty : $" {action.detail.Trim()}";
+            return action?.type switch
+            {
+                "create_task" => $"Created '{title}'.{detail}".Trim(),
+                "complete_task" => $"Marked '{title}' complete.{detail}".Trim(),
+                "reschedule_task" => $"Rescheduled '{title}'.{detail}".Trim(),
+                "priority_task" => $"Raised priority for '{title}'.{detail}".Trim(),
+                _ => $"Applied {ToKnownText(action?.type)} for '{title}'.{detail}".Trim(),
+            };
+        }
+
+        private static string ToKnownText(string value) => string.IsNullOrWhiteSpace(value) ? "unknown" : value;
     }
 }

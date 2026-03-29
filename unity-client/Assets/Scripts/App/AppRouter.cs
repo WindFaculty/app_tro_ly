@@ -34,11 +34,9 @@ namespace LocalAssistant.App
 
         public void BindTabs()
         {
-            shell.TodayTab.clicked += () => Navigate(AppScreen.Today);
-            shell.WeekTab.clicked += () => Navigate(AppScreen.Week);
-            schedule.InboxTab.clicked += () => Navigate(AppScreen.Inbox);
-            schedule.CompletedTab.clicked += () => Navigate(AppScreen.Completed);
-            shell.SettingsTab.clicked += () => Navigate(AppScreen.Settings);
+            UiButtonActionBinder.Bind(shell.TodayTab, () => Navigate(AppScreen.Today));
+            UiButtonActionBinder.Bind(shell.WeekTab, () => Navigate(AppScreen.Week));
+            UiButtonActionBinder.Bind(shell.SettingsTab, () => Navigate(AppScreen.Settings));
         }
 
         public void Navigate(AppScreen screen)

@@ -1,6 +1,7 @@
 param(
     [string]$UnityExecutablePath = "",
-    [string]$BackendPython = "python"
+    [string]$BackendPython = "python",
+    [switch]$ShutdownBackendOnExit
 )
 
 $ErrorActionPreference = "Stop"
@@ -133,11 +134,22 @@ try {
         Write-AssistantInfo "No packaged client executable found. Open the Unity project from 'unity-client/' or pass -UnityExecutablePath."
     }
 
+    if ($ShutdownBackendOnExit) {
+        $exitCode = 28
+        Invoke-AssistantStep -Name "Stop backend process after startup validation" -Action {
+            Stop-ProcessTreeSafe -Process $backendProcess
+            $script:backendProcess = $null
+        }
+    }
+    elseif ($null -ne $backendProcess) {
+        Write-AssistantInfo ("Backend is still running as " + (Get-ProcessSummary -ProcessId $backendProcess.Id) + ". Rerun with -ShutdownBackendOnExit if you only want setup validation without leaving the backend running.")
+    }
+
     Write-AssistantSuccess "Startup flow completed."
     exit 0
 }
 catch {
-    Stop-ProcessSafe -Process $backendProcess
+    Stop-ProcessTreeSafe -Process $backendProcess
     if (-not [string]::IsNullOrWhiteSpace($backendStdoutLog)) {
         $stdoutTail = Read-AssistantLogTail -Path $backendStdoutLog -LineCount 10
         foreach ($line in $stdoutTail) {

@@ -5,26 +5,110 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <ui:VisualElement name="SettingsPanel" class="view-container hidden settings-panel" style="flex-direction: column;">
-        <ui:Label text="Cáº¥u hÃ¬nh Há»‡ thá»‘ng" class="settings-header" />
-        <ui:Label text="Äiá»u chá»‰nh tráº£i nghiá»‡m tÆ°Æ¡ng tÃ¡c vá»›i Trá»£ lÃ½ áº¢o Ä‘á»ƒ phÃ¹ há»£p nháº¥t vá»›i phong cÃ¡ch lÃ m viá»‡c cá»§a báº¡n." class="settings-desc" />
+    <ui:VisualElement name="SettingsPanel" class="view-container hidden settings-panel">
+        <ui:VisualElement class="settings-screen-shell">
+            <ui:Label text="Settings" class="panel-kicker" />
+            <ui:Label text="Assistant preferences" class="settings-header" />
+            <ui:Label
+                text="Tune voice, transcript, shell, and reminder behavior without losing the backend-backed context."
+                class="settings-desc" />
 
-        <ui:VisualElement class="settings-card">
-            <ui:VisualElement class="settings-card-header">
-                <ui:Label text="TÃ¹y chá»n TÆ°Æ¡ng tÃ¡c" class="settings-card-title" />
-                <ui:Label name="SettingsStatusText" text="ÄÃ£ lÆ°u" style="background-color: rgba(6, 182, 212, 0.2); color: #06B6D4; padding: 4px 12px; border-radius: 12px; font-size: 12px; -unity-font-style: bold;" />
+            <ui:VisualElement class="settings-card settings-hero-card">
+                <ui:VisualElement class="settings-card-header">
+                    <ui:VisualElement class="settings-card-heading">
+                        <ui:Label text="Current profile" class="settings-card-title" />
+                        <ui:Label
+                            name="SettingsSummaryText"
+                            text="Loading settings..."
+                            class="settings-summary-block" />
+                    </ui:VisualElement>
+                    <ui:Label name="SettingsStatusText" text="Saved" class="settings-status-pill" />
+                </ui:VisualElement>
+                <ui:Label
+                    name="SettingsActionHintText"
+                    text="Reload pulls the latest backend-backed values before you save."
+                    class="settings-helper-text" />
             </ui:VisualElement>
 
-            <ui:Label name="SettingsSummaryText" text="Status Summary" style="margin-bottom: 16px; color: #94A3B8;" />
+            <ui:VisualElement class="settings-grid">
+                <ui:VisualElement class="settings-card settings-section-card settings-section-card-spaced">
+                    <ui:Label text="Voice and transcript" class="settings-card-title" />
+                    <ui:Label
+                        name="SettingsVoiceSummaryText"
+                        text="Voice settings summary"
+                        class="settings-inline-summary" />
 
-            <ui:Toggle name="SpeakRepliesToggle" label="PhÃ¡t giá»ng nÃ³i (AI tráº£ lá»i báº±ng giá»ng thá»±c táº¿)" />
-            <ui:Toggle name="TranscriptPreviewToggle" label="Xem trÆ°á»›c transcript (Hiá»ƒn thá»‹ preview vÄƒn báº£n)" />
-            <ui:Toggle name="MiniAssistantToggle" label="Cháº¿ Ä‘á»™ mini assistant (Popup Assistant thu nhá»)" />
-            <ui:Toggle name="ReminderSpeechToggle" label="Äá»c nháº¯c nhá»Ÿ báº±ng tiáº¿ng (ThÃ´ng bÃ¡o quÃ¡ lá»‹ch trá»±c tiáº¿p)" />
+                    <ui:VisualElement class="settings-option-row">
+                        <ui:VisualElement class="settings-option-copy">
+                            <ui:Label text="Speak replies" class="settings-option-title" />
+                            <ui:Label
+                                text="Read assistant replies aloud when voice output is available."
+                                class="settings-option-desc" />
+                        </ui:VisualElement>
+                        <ui:Toggle name="SpeakRepliesToggle" class="setting-toggle" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="settings-option-row">
+                        <ui:VisualElement class="settings-option-copy">
+                            <ui:Label text="Transcript preview" class="settings-option-title" />
+                            <ui:Label
+                                text="Keep a live preview visible while speech input is processed."
+                                class="settings-option-desc" />
+                        </ui:VisualElement>
+                        <ui:Toggle name="TranscriptPreviewToggle" class="setting-toggle" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="settings-card settings-section-card">
+                    <ui:Label text="Window and reminders" class="settings-card-title" />
+                    <ui:Label
+                        name="SettingsAutomationSummaryText"
+                        text="Window and reminder summary"
+                        class="settings-inline-summary" />
+
+                    <ui:VisualElement class="settings-option-row">
+                        <ui:VisualElement class="settings-option-copy">
+                            <ui:Label text="Mini assistant" class="settings-option-title" />
+                            <ui:Label
+                                text="Allow the compact shell mode when that workflow is enabled later."
+                                class="settings-option-desc" />
+                        </ui:VisualElement>
+                        <ui:Toggle name="MiniAssistantToggle" class="setting-toggle" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="settings-option-row">
+                        <ui:VisualElement class="settings-option-copy">
+                            <ui:Label text="Reminder speech" class="settings-option-title" />
+                            <ui:Label
+                                text="Read due reminders aloud instead of showing only the overlay."
+                                class="settings-option-desc" />
+                        </ui:VisualElement>
+                        <ui:Toggle name="ReminderSpeechToggle" class="setting-toggle" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="settings-detail-grid">
+                <ui:VisualElement class="settings-card settings-detail-card settings-detail-card-spaced">
+                    <ui:Label text="Model routing" class="settings-detail-title" />
+                    <ui:Label
+                        name="SettingsModelSummaryText"
+                        text="Model summary"
+                        class="settings-detail-copy" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="settings-card settings-detail-card">
+                    <ui:Label text="Memory and startup" class="settings-detail-title" />
+                    <ui:Label
+                        name="SettingsMemorySummaryText"
+                        text="Memory summary"
+                        class="settings-detail-copy" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <ui:VisualElement class="settings-action-row">
-                <ui:Button name="ReloadButton" text="âŸ³ Táº£i láº¡i cÃ i Ä‘áº·t" class="btn-secondary" style="margin-right: 12px;" />
-                <ui:Button name="SaveButton" text="ðŸ’¾ LÆ°u thay Ä‘á»•i" class="btn-primary" />
+                <ui:Button name="ReloadButton" text="Reload settings" class="btn-secondary settings-action-secondary" />
+                <ui:Button name="SaveButton" text="Save changes" class="btn-primary" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

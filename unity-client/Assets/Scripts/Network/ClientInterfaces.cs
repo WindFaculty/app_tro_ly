@@ -17,6 +17,8 @@ namespace LocalAssistant.Network
         Task<TaskListResponse> GetInboxAsync();
         Task<TaskListResponse> GetCompletedAsync();
         Task<SettingsPayload> GetSettingsAsync();
+        Task<TaskRecord> CompleteTaskAsync(string taskId, CompleteTaskRequestPayload payload = null);
+        Task<TaskRecord> RescheduleTaskAsync(string taskId, RescheduleTaskRequestPayload payload);
         Task<ChatResponsePayload> SendChatAsync(ChatRequestPayload payload);
         Task<SpeechSttResponse> SendSpeechToTextAsync(byte[] wavBytes, string language = "vi");
         Task<SettingsPayload> UpdateSettingsAsync(SettingsPayload payload);

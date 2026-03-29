@@ -45,6 +45,13 @@ def _parse_day(day_value: str | None) -> date:
     return now_local().date()
 
 
+def _runtime_is_degraded(runtime_payload: dict[str, Any]) -> bool:
+    if not runtime_payload.get("available", False):
+        return True
+    provider_available = runtime_payload.get("provider_available")
+    return provider_available is False
+
+
 @router.get("/health", response_model=HealthResponse)
 async def health(request: Request) -> HealthResponse:
     container = _container(request)
@@ -56,9 +63,9 @@ async def health(request: Request) -> HealthResponse:
     degraded = []
     if not llm["available"]:
         degraded.append("llm")
-    if not stt["available"]:
+    if _runtime_is_degraded(stt):
         degraded.append("stt")
-    if not tts["available"]:
+    if _runtime_is_degraded(tts):
         degraded.append("tts")
     status = "ready"
     if not database["available"]:

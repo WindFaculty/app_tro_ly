@@ -64,15 +64,15 @@ Cập nhật: 2026-03-17
 - [ ] Tạo Bottom_01 (quần/chân váy cơ bản)
 - [ ] Tạo Dress_01 (váy liền thân)
 - [ ] Tạo Shoes_01 (giày cơ bản)
-- [ ] Test equip/unequip từng slot qua `AvatarEquipmentManager`
-- [ ] Test conflict: equip Dress → tự động unequip Top và Bottom
-- [ ] Test hide body regions: áo dài tay che cánh tay, quần dài che đùi
+- [x] Test equip/unequip từng slot qua `AvatarEquipmentManager` (EditMode pass trong `LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests`, 2026-03-28)
+- [x] Test conflict: equip Dress → tự động unequip Top và Bottom (EditMode pass trong `LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests`, 2026-03-28)
+- [x] Test hide body regions: áo dài tay che cánh tay, quần dài che đùi (EditMode pass trong `LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests`, 2026-03-28)
 - [ ] Tạo thêm: Hair_02, Hair_03, HairAccessory_01, HairAccessory_02
 - [ ] Tạo thêm: Socks_01, Socks_02, Gloves_01, Gloves_02
 - [ ] Tạo thêm: BraceletL_01, BraceletR_01
 - [ ] Test conflict: Gloves full → chặn BraceletL/R
 - [ ] Tạo 3 outfit preset (`OutfitPresetDefinition`) và test bấm 1 nút đổi nguyên set
-- [ ] Test save/load outfit qua `AvatarPresetManager`
+- [x] Test save/load outfit qua `AvatarPresetManager` (EditMode pass trong `LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests`, 2026-03-28)
 
 ---
 
@@ -81,13 +81,13 @@ Cập nhật: 2026-03-17
 - [ ] Test nói chuyện khi đang đổi đồ
 - [ ] Test animation khi mặc các loại đồ khác nhau (kiểm tra clipping)
 - [ ] Fix clipping, material lỗi, missing reference
-- [ ] Chạy `Tools > AvatarSystem > Validate All Item Definitions` → 0 errors
-- [ ] Chạy `Tools > AvatarSystem > Validate Outfit Presets` → 0 issues
-- [ ] Tạo 4 scene test riêng:
-  - [ ] `AvatarSandbox.unity` — test prefab cơ bản
-  - [ ] `OutfitTest.unity` — test equip/unequip, preset, conflict
-  - [ ] `FacialAndLipSyncTest.unity` — test blink, expression, viseme
-  - [ ] `ConversationTest.unity` — test luồng hội thoại đầy đủ
+- [x] Chạy `Tools > AvatarSystem > Validate All Item Definitions` → 0 errors (Unity menu run 2026-03-28: scan 1 item definition, `0 errors`, `0 warnings`; only optional thumbnail note on `ITM_Hair_01`)
+- [ ] Chạy `Tools > AvatarSystem > Validate Outfit Presets` → 0 issues (Unity menu run 2026-03-28 returned `0 issues` but scanned `0 outfit presets`, so keep open until preset assets exist)
+- [x] Tạo 4 scene test riêng:
+  - [x] `AvatarSandbox.unity` — test prefab cơ bản (scene scaffold tạo ngày 2026-03-28 tại `Assets/AvatarSystem/AvatarProduction/Scenes/AvatarSandbox.unity`)
+  - [x] `OutfitTest.unity` — test equip/unequip, preset, conflict (scene scaffold tạo ngày 2026-03-28 tại `Assets/AvatarSystem/AvatarProduction/Scenes/OutfitTest.unity`)
+  - [x] `FacialAndLipSyncTest.unity` — test blink, expression, viseme (scene scaffold tạo ngày 2026-03-28 tại `Assets/AvatarSystem/AvatarProduction/Scenes/FacialAndLipSyncTest.unity`)
+  - [x] `ConversationTest.unity` — test luồng hội thoại đầy đủ (scene scaffold tạo ngày 2026-03-28 tại `Assets/AvatarSystem/AvatarProduction/Scenes/ConversationTest.unity`)
 - [ ] Viết README hướng dẫn thêm món đồ mới (quy trình từ Blender → Unity → ScriptableObject)
 - [ ] Kiểm tra thay thế placeholder avatar bằng avatar thật mà không sửa core app nhiều
 

@@ -70,7 +70,7 @@ def build_container(settings: Settings) -> AppContainer:
         llm_service=llm_service,
     )
     conversation_service = ConversationService(assistant_orchestrator)
-    scheduler_service = SchedulerService(repository, event_bus, settings)
+    scheduler_service = SchedulerService(repository, event_bus, settings, speech_service)
     return AppContainer(
         settings=settings,
         repository=repository,

@@ -67,7 +67,6 @@ def run_token_benchmark(tmp_path: Path) -> dict[str, Any]:
         deep_provider="gemini",
         groq_api_key="test-key",
         gemini_api_key="test-key",
-        enable_ollama=False,
         stt_provider="whisper_cpp",
         whisper_command=None,
         piper_command=None,

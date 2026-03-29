@@ -179,3 +179,43 @@ def test_exercise_degraded_endpoints_handles_available_and_unavailable_runtimes(
 
     assert available == {"tts_available_status": 200, "stt_available_status": 200}
     assert unavailable == {"tts_unavailable_status": 503, "stt_unavailable_status": 503}
+
+
+def test_exercise_degraded_endpoints_rejects_health_endpoint_mismatch(monkeypatch: pytest.MonkeyPatch) -> None:
+    class FakeResponse:
+        def __init__(self, status_code: int, payload: dict[str, object]) -> None:
+            self.status_code = status_code
+            self._payload = payload
+
+        def raise_for_status(self) -> None:
+            if self.status_code >= 400:
+                raise RuntimeError(f"unexpected status {self.status_code}")
+
+        def json(self) -> dict[str, object]:
+            return self._payload
+
+    class FakeAsyncClient:
+        def __init__(self, *args, **kwargs) -> None:
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, exc_type, exc, tb) -> None:
+            return None
+
+        async def post(self, path: str, json=None, files=None):
+            if path == "/v1/speech/tts":
+                return FakeResponse(503, {"detail": "tts unavailable"})
+            raise AssertionError(f"Unexpected request: {path}")
+
+    monkeypatch.setattr(smoke_backend.httpx, "AsyncClient", FakeAsyncClient)
+
+    with pytest.raises(RuntimeError, match="unexpected status 503"):
+        smoke_backend.asyncio.run(
+            smoke_backend._exercise_degraded_endpoints(
+                "http://127.0.0.1:8096",
+                10.0,
+                {"runtimes": {"tts": {"available": True}, "stt": {"available": False}}},
+            )
+        )

@@ -37,6 +37,91 @@ def test_scheduler_emits_due_event(client) -> None:
     assert delivered >= 1
 
 
+def test_scheduler_reminder_event_includes_audio_when_speech_succeeds(client) -> None:
+    container = client.app.state.container
+    container.repository.set_setting("reminder", {"speech_enabled": True})
+    container.repository.set_setting("voice", {"tts_voice": "demo-voice"})
+    captured: list[dict[str, object]] = []
+
+    async def capture(payload: dict[str, object]) -> None:
+        captured.append(payload)
+
+    container.event_bus.publish = capture  # type: ignore[method-assign]
+    container.speech_service.synthesize = lambda text, voice=None, cache=True: {
+        "audio_path": container.settings.audio_dir / "reminder.wav",
+        "audio_url": "/v1/speech/cache/reminder.wav",
+        "duration_ms": 321,
+        "cached": False,
+    }
+
+    start_at = now_local().replace(second=0, microsecond=0)
+    end_at = start_at + timedelta(minutes=30)
+    response = client.post(
+        "/v1/tasks",
+        json={
+            "title": "Hop nhac reminder",
+            "status": "planned",
+            "priority": "high",
+            "scheduled_date": iso_date(start_at.date()),
+            "start_at": iso_datetime(start_at),
+            "end_at": iso_datetime(end_at),
+            "repeat_rule": "none",
+            "tags": [],
+        },
+    )
+    assert response.status_code == 200
+
+    delivered = asyncio.run(container.scheduler_service.tick())
+
+    assert delivered == 1
+    reminder_event = next(item for item in captured if item["type"] == "reminder_due")
+    assert reminder_event["audio_url"] == "/v1/speech/cache/reminder.wav"
+    assert reminder_event["audio_duration_ms"] == 321
+    assert "speech_fallback_reason" not in reminder_event
+
+
+def test_scheduler_reminder_event_keeps_text_when_speech_fails(client) -> None:
+    container = client.app.state.container
+    container.repository.set_setting("reminder", {"speech_enabled": True})
+    captured: list[dict[str, object]] = []
+
+    async def capture(payload: dict[str, object]) -> None:
+        captured.append(payload)
+
+    container.event_bus.publish = capture  # type: ignore[method-assign]
+
+    def fail_synthesize(text: str, voice: str | None = None, cache: bool = True):
+        raise RuntimeError("tts reminder offline")
+
+    container.speech_service.synthesize = fail_synthesize
+
+    start_at = now_local().replace(second=0, microsecond=0)
+    end_at = start_at + timedelta(minutes=30)
+    response = client.post(
+        "/v1/tasks",
+        json={
+            "title": "Fallback reminder",
+            "status": "planned",
+            "priority": "medium",
+            "scheduled_date": iso_date(start_at.date()),
+            "start_at": iso_datetime(start_at),
+            "end_at": iso_datetime(end_at),
+            "repeat_rule": "none",
+            "tags": [],
+        },
+    )
+    assert response.status_code == 200
+
+    delivered = asyncio.run(container.scheduler_service.tick())
+
+    assert delivered == 1
+    reminder_event = next(item for item in captured if item["type"] == "reminder_due")
+    assert reminder_event["title"] == "Fallback reminder"
+    assert "Nhac viec:" in reminder_event["speech_text"]
+    assert reminder_event["speech_fallback_reason"] == "tts reminder offline"
+    assert "audio_url" not in reminder_event
+
+
 def test_tts_endpoint_can_be_stubbed_for_smoke(client) -> None:
     audio_path = client.app.state.container.settings.audio_dir / "stub.wav"
     _write_wav(audio_path)
@@ -53,6 +138,32 @@ def test_tts_endpoint_can_be_stubbed_for_smoke(client) -> None:
     response = client.post("/v1/speech/tts", json={"text": "Xin chao", "voice": "stub", "cache": True})
     assert response.status_code == 200
     assert response.json()["audio_url"].endswith("stub.wav")
+
+
+def test_backend_startup_cleans_stale_audio_artifacts(settings) -> None:
+    settings.ensure_directories()
+    stale_stt = settings.audio_dir / "stt_old.wav"
+    stale_tts_temp = settings.audio_dir / "reply.tts123.tmp.wav"
+    empty_wav = settings.audio_dir / "empty.wav"
+    healthy_wav = settings.audio_dir / "keep.wav"
+    stale_stt.write_bytes(b"stale-stt")
+    stale_tts_temp.write_bytes(b"stale-tts-temp")
+    empty_wav.write_bytes(b"")
+    _write_wav(healthy_wav)
+
+    from app.main import create_app
+
+    app = create_app(settings)
+    from fastapi.testclient import TestClient
+
+    with TestClient(app) as test_client:
+        cleanup = test_client.app.state.audio_cleanup
+        assert cleanup == {"stt_temp": 1, "tts_temp": 1, "empty_audio": 1}
+
+    assert not stale_stt.exists()
+    assert not stale_tts_temp.exists()
+    assert not empty_wav.exists()
+    assert healthy_wav.exists()
 
 
 def test_settings_update_roundtrip(client) -> None:
@@ -110,11 +221,62 @@ def test_stt_endpoint_returns_503_when_runtime_is_missing(client) -> None:
     assert "whisper.cpp runtime is not configured" in response.json()["detail"]
 
 
+def test_stt_endpoint_cleans_temp_audio_after_success(client) -> None:
+    observed = {"path": None}
+
+    def fake_transcribe(audio_path: Path, language: str | None = None):
+        observed["path"] = audio_path
+        assert audio_path.exists()
+        return {"text": "xin chao", "language": language or "vi", "confidence": 1.0}
+
+    client.app.state.container.speech_service.transcribe = fake_transcribe
+    response = client.post(
+        "/v1/speech/stt?language=vi",
+        files={"audio": ("speech.wav", b"stub-wav", "audio/wav")},
+    )
+
+    assert response.status_code == 200
+    assert observed["path"] is not None
+    assert not observed["path"].exists()
+
+
+def test_stt_endpoint_cleans_temp_audio_after_runtime_failure(client) -> None:
+    observed = {"path": None}
+
+    def fail_transcribe(audio_path: Path, language: str | None = None):
+        observed["path"] = audio_path
+        assert audio_path.exists()
+        raise RuntimeError("stt crashed after temp write")
+
+    client.app.state.container.speech_service.transcribe = fail_transcribe
+    response = client.post(
+        "/v1/speech/stt?language=vi",
+        files={"audio": ("speech.wav", b"stub-wav", "audio/wav")},
+    )
+
+    assert response.status_code == 503
+    assert "stt crashed after temp write" in response.json()["detail"]
+    assert observed["path"] is not None
+    assert not observed["path"].exists()
+
+
 def test_tts_endpoint_returns_503_when_runtime_is_missing(client) -> None:
     response = client.post("/v1/speech/tts", json={"text": "Xin chao", "cache": True})
 
     assert response.status_code == 503
     assert "Piper runtime is not configured" in response.json()["detail"]
+
+
+def test_tts_endpoint_returns_503_when_runtime_raises_unexpected_error(client) -> None:
+    def boom(text: str, voice: str | None = None, cache: bool = True):
+        raise ValueError("chattts load mismatch")
+
+    client.app.state.container.speech_service.synthesize = boom
+
+    response = client.post("/v1/speech/tts", json={"text": "Xin chao", "cache": True})
+
+    assert response.status_code == 503
+    assert "chattts load mismatch" in response.json()["detail"]
 
 
 def test_reschedule_replaces_pending_reminder(client) -> None:

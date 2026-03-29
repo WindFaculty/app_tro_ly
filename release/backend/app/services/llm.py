@@ -40,14 +40,6 @@ class LlmService:
     def health(self) -> dict[str, Any]:
         if self._settings.llm_provider in {"groq", "gemini"}:
             return self.provider_health(self._settings.llm_provider)
-        if self._settings.llm_provider == "ollama":
-            return {
-                "available": False,
-                "provider": "ollama",
-                "base_url": self._settings.ollama_base_url,
-                "model": self._settings.ollama_model,
-                "reason": "disabled_for_this_phase",
-            }
         fast = self.provider_health(self._settings.fast_provider)
         deep = self.provider_health(self._settings.deep_provider)
         available = fast.get("available", False) or deep.get("available", False)
@@ -63,14 +55,6 @@ class LlmService:
         }
 
     def provider_health(self, provider: str) -> dict[str, Any]:
-        if provider == "ollama":
-            return {
-                "available": False,
-                "provider": "ollama",
-                "model": self._settings.ollama_model,
-                "base_url": self._settings.ollama_base_url,
-                "reason": "disabled_for_this_phase",
-            }
         return self._clients[provider].health()
 
     def provider_available(self, provider: str) -> bool:
@@ -88,9 +72,7 @@ class LlmService:
     def model_name(self, provider: str) -> str:
         if provider == "groq":
             return self._settings.groq_model
-        if provider == "gemini":
-            return self._settings.gemini_model
-        return self._settings.ollama_model
+        return self._settings.gemini_model
 
     def complete(
         self,

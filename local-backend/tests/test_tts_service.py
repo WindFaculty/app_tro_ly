@@ -105,6 +105,41 @@ def test_chattts_health_reports_load_failure(tmp_path: Path) -> None:
     assert "weights mismatch" in payload["error"]
 
 
+def test_chattts_health_reports_probe_failure(tmp_path: Path) -> None:
+    settings = _settings(tmp_path, tts_provider="chattts")
+    settings.ensure_directories()
+    service = TtsService(settings)
+    service._import_chattts = lambda: SimpleNamespace(Chat=object())  # type: ignore[method-assign]
+    service._load_chattts = lambda chattts_module: object()  # type: ignore[method-assign]
+    service._probe_chattts = lambda: (_ for _ in ()).throw(RuntimeError("'Chat' object has no attribute 'gpt'"))  # type: ignore[method-assign]
+
+    payload = service.health()
+
+    assert payload["available"] is False
+    assert payload["reason"] == "probe_failed"
+    assert "attribute 'gpt'" in payload["error"]
+
+
+def test_piper_health_reports_probe_failure(tmp_path: Path) -> None:
+    settings = _settings(
+        tmp_path,
+        tts_provider="piper",
+        piper_command=str(tmp_path / "piper.exe"),
+        piper_model_path=str(tmp_path / "voice.onnx"),
+    )
+    settings.ensure_directories()
+    Path(settings.piper_command).write_text("stub", encoding="utf-8")
+    Path(settings.piper_model_path).write_text("stub", encoding="utf-8")
+    service = TtsService(settings)
+    service._probe_piper = lambda: (_ for _ in ()).throw(RuntimeError("piper failed to initialize"))  # type: ignore[method-assign]
+
+    payload = service.health()
+
+    assert payload["available"] is False
+    assert payload["reason"] == "probe_failed"
+    assert "failed to initialize" in payload["error"]
+
+
 def test_chattts_synthesize_writes_cached_wav(tmp_path: Path) -> None:
     settings = _settings(tmp_path, tts_provider="chattts")
     settings.ensure_directories()
@@ -240,3 +275,28 @@ def test_apply_chattts_torch_compat_restores_file_like_symbol() -> None:
             torch.serialization.FILE_LIKE = original
         elif hasattr(torch.serialization, "FILE_LIKE"):
             delattr(torch.serialization, "FILE_LIKE")
+
+
+def test_tts_health_uses_cache_until_ttl_expires(tmp_path: Path, monkeypatch) -> None:
+    settings = _settings(tmp_path, tts_provider="piper")
+    settings.ensure_directories()
+    service = TtsService(settings)
+    calls = {"count": 0}
+    clock = {"value": 200.0}
+
+    def fake_health(probe_endpoint: bool) -> dict[str, object]:
+        calls["count"] += 1
+        return {"available": True, "provider": "piper", "effective_provider": "piper"}
+
+    monkeypatch.setattr("app.services.tts.time.monotonic", lambda: clock["value"])
+    service._piper_health = fake_health  # type: ignore[method-assign]
+
+    first = service.health()
+    second = service.health()
+    clock["value"] += 61.0
+    third = service.health()
+
+    assert calls["count"] == 2
+    assert first["probe_cached"] is False
+    assert second["probe_cached"] is True
+    assert third["probe_cached"] is False

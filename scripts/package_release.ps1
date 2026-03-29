@@ -88,8 +88,10 @@ function Assert-PackagingInputsReady {
             throw "UnityBuildPath must point to the built client directory, not a single file."
         }
 
-        $unityExecutables = Get-ChildItem -Path $unityBuildItem.FullName -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
-            Where-Object { $_.Name -ne "UnityCrashHandler64.exe" }
+        $unityExecutables = @(
+            Get-ChildItem -Path $unityBuildItem.FullName -Filter "*.exe" -File -Recurse -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -ne "UnityCrashHandler64.exe" }
+        )
         if ($unityExecutables.Count -eq 0) {
             throw "UnityBuildPath must contain at least one client executable."
         }

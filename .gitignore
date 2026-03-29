@@ -15,8 +15,17 @@ htmlcov/
 .env.*
 logs/
 tmp/
+*.blend1
+Clothy3D_Studio/HDataGenerated/
 
 agent-platform/
+release/client/
+local-backend/*.log
+release/backend/*.log
+local-backend/chattts_error.txt
+local-backend/health_check.json
+local-backend/data/audio/*.wav
+release/backend/data/audio/*.wav
 unity-client/.vscode/
 unity-client/Library/
 unity-client/Logs/
@@ -27,3 +36,8 @@ unity-client/MemoryCaptures/
 unity-client/*.csproj
 unity-client/*.sln
 unity-client/*.slnx
+unity-client/*.log
+unity-client/TestResults/
+unity-client/Assets/Screenshots/
+unity-client/Assets/Screenshots.meta
+unity-client/ProjectSettings/mcp-ci-autoboot.flag

@@ -1,52 +1,78 @@
 .layout-container {
     flex-grow: 1;
-    background-color: var(--color-bg-dark);
     display: flex;
     flex-direction: column;
+    background-color: var(--color-bg-dark);
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+}
+
+.shell-root {
+    padding: var(--space-4);
+    min-height: 100%;
+}
+
+.shell-surface {
+    background-color: var(--color-bg-elevated);
+    border-width: 1px;
+    border-color: var(--color-border-soft);
 }
 
 .top-bar {
-    height: 80px;
-    background-color: var(--color-bg-dark);
-    border-bottom-width: 1px;
-    border-bottom-color: rgba(255, 255, 255, 0.05);
+    min-height: 88px;
+    border-radius: var(--radius-xl);
     flex-direction: row;
     align-items: center;
-    padding: 0 24px;
-    flex-shrink: 0;
+    padding: 0 var(--space-5);
+    margin-bottom: var(--space-4);
 }
 
 .brand-container {
+    width: 280px;
     flex-direction: row;
     align-items: center;
-    width: 250px;
+}
+
+.brand-copy {
+    flex-direction: column;
 }
 
 .brand-mark {
-    width: 32px;
-    height: 32px;
-    background-color: var(--color-primary-cyan);
-    border-radius: var(--radius-sm);
+    width: 44px;
+    height: 44px;
     justify-content: center;
     align-items: center;
-    margin-right: 12px;
+    margin-right: var(--space-3);
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary-cyan-soft);
+    border-width: 1px;
+    border-color: var(--color-border-strong);
 }
 
 .brand-mark Label {
-    color: #000;
+    color: var(--color-primary-cyan);
     -unity-font-style: bold;
-    font-size: 16px;
+    font-size: var(--font-size-lg);
 }
 
 .brand-title {
-    color: var(--color-primary-cyan);
+    color: var(--color-text-main);
     -unity-font-style: bold;
-    font-size: 20px;
+    font-size: 22px;
+}
+
+.brand-subtitle {
+    margin-top: 2px;
+    color: var(--color-text-dim);
+    font-size: var(--font-size-sm);
 }
 
 .top-tabs {
     flex-direction: row;
+    align-items: center;
     flex-grow: 1;
+    justify-content: center;
 }
 
 .top-actions {
@@ -54,56 +80,385 @@
     align-items: center;
 }
 
+.top-status-chip {
+    min-width: 120px;
+    margin-right: var(--space-3);
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    background-color: rgba(255, 255, 255, 0.04);
+    border-width: 1px;
+    border-color: var(--color-border-soft);
+}
+
+.top-status-chip-label {
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+    -unity-text-align: middle-center;
+}
+
+.top-status-chip-secondary {
+    margin-right: var(--space-3);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    justify-content: center;
+    align-items: center;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary-cyan-soft);
+    border-width: 1px;
+    border-color: var(--color-border-strong);
+}
+
+.user-avatar Label {
+    color: var(--color-primary-cyan);
+    -unity-font-style: bold;
+    font-size: var(--font-size-sm);
+}
+
 .main-content {
     flex-grow: 1;
     flex-direction: row;
+    min-height: 0;
 }
 
 .left-sidebar {
-    width: 280px;
-    background-color: var(--color-bg-dark);
-    border-right-width: 1px;
-    border-right-color: rgba(255, 255, 255, 0.05);
-    padding: 24px 20px;
+    width: 312px;
+    min-width: 312px;
+    flex-shrink: 0;
+    padding-right: var(--space-4);
     flex-direction: column;
 }
 
 .sidebar-identity {
-    margin-bottom: 32px;
+    margin-bottom: var(--space-4);
+}
+
+.sidebar-hero {
+    min-height: 124px;
 }
 
 .sidebar-identity-title {
-    font-size: 18px;
+    font-size: 20px;
+    line-height: 25px;
     -unity-font-style: bold;
     color: var(--color-text-main);
+    margin-bottom: var(--space-2);
 }
 
 .sidebar-identity-subtitle {
-    font-size: 12px;
+    font-size: var(--font-size-sm);
     color: var(--color-primary-cyan);
-    margin-top: 4px;
 }
 
-.sidebar-footer {
+.sidebar-section {
+    margin-bottom: var(--space-4);
+}
+
+.sidebar-section-title {
+    margin-bottom: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: var(--font-size-kicker);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.shell-spacer {
     flex-grow: 1;
-    justify-content: flex-end;
+}
+
+.shell-help-text {
+    margin-bottom: var(--space-3);
+    color: var(--color-text-dim);
+    white-space: normal;
+    line-height: 18px;
 }
 
 .center-stage {
     flex-grow: 1;
-    background-color: var(--color-bg-dark);
-    padding: 24px;
+    padding: 0 var(--space-4);
+    min-height: 0;
+}
+
+.stage-shell {
+    border-radius: var(--radius-xl);
+    background-color: rgba(255, 255, 255, 0.01);
 }
 
 .view-container {
     flex-grow: 1;
     display: flex;
+    min-height: 0;
+    flex-shrink: 1;
 }
 
 .right-panel {
-    width: 380px;
-    background-color: var(--color-panel-dark);
-    border-left-width: 1px;
-    border-left-color: rgba(255, 255, 255, 0.05);
+    width: 392px;
+    min-width: 392px;
+    flex-shrink: 0;
+    padding-left: var(--space-4);
     flex-direction: column;
+    min-height: 0;
+}
+
+.sidebar-status-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.03);
+    border-width: 1px;
+    border-color: var(--color-border-soft);
+}
+
+.sidebar-status-copy {
+    flex-grow: 1;
+    margin-right: var(--space-3);
+}
+
+.sidebar-status-label {
+    color: var(--color-text-main);
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.sidebar-status-help {
+    color: var(--color-text-dim);
+    font-size: var(--font-size-sm);
+    white-space: normal;
+    line-height: 16px;
+}
+
+.sidebar-status-value {
+    color: var(--color-primary-cyan);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+}
+
+.schedule-side-panel {
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-bg-elevated);
+    border-width: 1px;
+    border-color: var(--color-border-soft);
+}
+
+.panel-section-heading {
+    margin-bottom: var(--space-3);
+}
+
+.panel-kicker {
+    color: var(--color-primary-cyan);
+    font-size: var(--font-size-kicker);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    margin-bottom: var(--space-1);
+}
+
+.panel-title {
+    color: var(--color-text-main);
+    font-size: var(--font-size-xl);
+    -unity-font-style: bold;
+    margin-bottom: var(--space-2);
+}
+
+.panel-body {
+    color: var(--color-text-soft);
+    white-space: normal;
+    line-height: 20px;
+}
+
+.panel-meta {
+    color: var(--color-text-soft);
+    white-space: normal;
+    line-height: 19px;
+}
+
+.stack-card-list {
+    flex-direction: column;
+}
+
+.shell-muted-label {
+    color: var(--color-text-dim);
+}
+
+.schedule-screen {
+    flex-direction: column;
+}
+
+.schedule-title {
+    font-size: 30px;
+    -unity-font-style: bold;
+    margin-bottom: var(--space-2);
+}
+
+.schedule-summary {
+    margin-bottom: var(--space-4);
+    color: var(--color-text-soft);
+    white-space: normal;
+    line-height: 20px;
+}
+
+.schedule-toolbar {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: var(--space-4);
+}
+
+.schedule-toolbar-date-nav {
+    flex-direction: row;
+    margin-right: var(--space-3);
+}
+
+.schedule-toolbar-date-nav Button {
+    margin-right: var(--space-2);
+}
+
+.schedule-toolbar-actions {
+    flex-direction: row;
+}
+
+.schedule-toolbar-actions Button {
+    margin-right: var(--space-2);
+}
+
+.schedule-month-label {
+    flex-grow: 1;
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--color-text-main);
+}
+
+.schedule-canvas {
+    flex-grow: 1;
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    background-color: var(--color-bg-elevated);
+    border-width: 1px;
+    border-color: var(--color-border-soft);
+}
+
+.schedule-meta {
+    margin-bottom: var(--space-3);
+    color: var(--color-text-dim);
+    white-space: normal;
+    line-height: 18px;
+}
+
+.schedule-empty-state {
+    margin-bottom: var(--space-3);
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.03);
+    color: var(--color-text-dim);
+    white-space: normal;
+}
+
+.schedule-list-container {
+    flex-direction: column;
+}
+
+.schedule-day-card {
+    margin-bottom: var(--space-3);
+    background-color: var(--color-panel-dark);
+}
+
+.schedule-day-card-selected {
+    border-color: var(--color-border-strong);
+    background-color: rgba(60, 200, 232, 0.08);
+}
+
+.schedule-day-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-2);
+}
+
+.schedule-day-select-btn {
+    flex-grow: 1;
+    margin-right: var(--space-2);
+    padding: 0;
+    background-color: transparent;
+    border-width: 0;
+    -unity-text-align: middle-left;
+}
+
+.schedule-day-select-btn:hover {
+    background-color: transparent;
+}
+
+.schedule-day-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--color-text-main);
+}
+
+.schedule-day-count {
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    background-color: rgba(60, 200, 232, 0.16);
+    color: var(--color-primary-cyan);
+    font-size: var(--font-size-sm);
+    -unity-font-style: bold;
+}
+
+.schedule-day-meta {
+    margin-bottom: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: var(--font-size-sm);
+}
+
+.schedule-task-row {
+    margin-bottom: var(--space-2);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    background-color: rgba(255, 255, 255, 0.03);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.04);
+}
+
+.schedule-task-content {
+    flex-grow: 1;
+}
+
+.schedule-task-layout {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.schedule-task-actions {
+    margin-left: var(--space-3);
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.schedule-task-action-btn {
+    min-width: 124px;
+    margin-bottom: var(--space-2);
+}
+
+.schedule-task-title {
+    color: var(--color-text-main);
+    -unity-font-style: bold;
+    white-space: normal;
+    margin-bottom: 4px;
+}
+
+.schedule-task-meta {
+    color: var(--color-text-dim);
+    font-size: var(--font-size-sm);
+    white-space: normal;
+    line-height: 17px;
+}
+
+.schedule-task-empty,
+.schedule-task-more {
+    color: var(--color-text-dim);
+    font-size: var(--font-size-sm);
 }

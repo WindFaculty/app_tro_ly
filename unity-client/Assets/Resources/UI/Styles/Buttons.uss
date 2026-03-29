@@ -1,12 +1,13 @@
 .tab-button {
-    background-color: transparent;
+    min-width: 96px;
+    padding: 10px 0;
+    margin: 0 18px;
     border-width: 0;
+    border-radius: 0;
+    background-color: transparent;
     color: var(--color-text-dim);
     font-size: 15px;
     -unity-font-style: bold;
-    margin-right: 24px;
-    padding: 8px 0;
-    border-radius: 0;
     border-bottom-width: 2px;
     border-bottom-color: transparent;
 }
@@ -21,28 +22,33 @@
 }
 
 .notif-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
+    min-width: 64px;
+    height: 38px;
+    margin-right: var(--space-3);
+    border-width: 1px;
+    border-color: var(--color-border-soft);
+    border-radius: var(--radius-pill);
     background-color: var(--color-panel-dark);
-    justify-content: center;
-    align-items: center;
-    margin-right: 16px;
-    border-width: 0;
     color: var(--color-text-main);
 }
 
+.notif-btn:hover {
+    border-color: var(--color-border-strong);
+    color: var(--color-primary-cyan);
+}
+
 .sidebar-menu-btn {
-    background-color: transparent;
-    border-width: 0;
+    min-height: 46px;
+    margin-bottom: var(--space-2);
     padding: 12px 16px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 8px;
-    -unity-text-align: middle-left;
-    font-size: 14px;
+    border-width: 0;
+    border-radius: var(--radius-md);
+    background-color: transparent;
     color: var(--color-text-dim);
     flex-direction: row;
     justify-content: space-between;
+    -unity-text-align: middle-left;
+    font-size: 14px;
 }
 
 .sidebar-menu-btn:hover {
@@ -51,19 +57,20 @@
 }
 
 .sidebar-menu-btn.active {
-    background-color: var(--color-panel-dark);
+    background-color: var(--color-panel-mid);
     color: var(--color-text-main);
     border-left-width: 3px;
     border-left-color: var(--color-primary-cyan);
 }
 
 .btn-primary {
-    background-color: var(--color-primary-cyan);
-    color: black;
-    -unity-font-style: bold;
-    border-radius: var(--radius-sm);
+    min-height: 40px;
+    padding: 10px 16px;
     border-width: 0;
-    padding: 12px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary-cyan);
+    color: #03131b;
+    -unity-font-style: bold;
 }
 
 .btn-primary:hover {
@@ -71,30 +78,34 @@
 }
 
 .btn-secondary {
+    min-height: 40px;
+    padding: 10px 16px;
+    border-width: 1px;
+    border-color: var(--color-border-soft);
+    border-radius: var(--radius-md);
     background-color: var(--color-panel-dark);
     color: var(--color-text-main);
-    border-radius: var(--radius-sm);
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.1);
-    padding: 10px 16px;
+}
+
+.btn-secondary:hover {
+    border-color: var(--color-border-strong);
 }
 
 .chat-btn {
     width: 48px;
     height: 48px;
-    border-radius: 24px;
+    border-radius: var(--radius-pill);
     justify-content: center;
     align-items: center;
     background-color: rgba(255, 255, 255, 0.05);
     border-width: 0;
     color: white;
     font-size: 18px;
-    transition: background-color 0.2s;
 }
 
 .chat-btn.primary {
     background-color: var(--color-primary-cyan);
-    color: black;
+    color: #03131b;
 }
 
 .chat-btn:hover {

@@ -1,16 +1,18 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using LocalAssistant.Audio;
 using LocalAssistant.Avatar;
 using LocalAssistant.Core;
+using LocalAssistant.Features.Chat;
 using LocalAssistant.Network;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
-using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 namespace LocalAssistant.Tests.PlayMode
 {
@@ -43,11 +45,11 @@ namespace LocalAssistant.Tests.PlayMode
             yield return null;
             yield return null;
 
-            StringAssert.Contains("Partial", FindText("HealthBanner").text);
-            StringAssert.Contains("Some local features are degraded", FindText("ChatLogText").text);
-            Assert.IsFalse(FindButton("MicButton").interactable);
-            Assert.IsTrue(FindInput("ChatInput").interactable);
-            Assert.IsTrue(FindButton("SaveButton").interactable);
+            StringAssert.Contains("Partial", FindLabel("HealthBanner").text);
+            StringAssert.Contains("Some local features are degraded", FindLabel("ChatLogText").text);
+            Assert.IsFalse(FindButton("MicButton").enabledSelf);
+            Assert.IsTrue(FindTextField("ChatInput").enabledSelf);
+            Assert.IsTrue(FindButton("SaveButton").enabledSelf);
             Assert.IsTrue(eventsClient.Connected);
         }
 
@@ -70,10 +72,10 @@ namespace LocalAssistant.Tests.PlayMode
             yield return null;
             yield return null;
 
-            Assert.AreEqual("Backend unavailable.", FindText("SettingsStatusText").text);
-            Assert.IsFalse(FindInput("ChatInput").interactable);
-            Assert.IsFalse(FindButton("MicButton").interactable);
-            Assert.IsFalse(FindButton("SaveButton").interactable);
+            Assert.AreEqual("Backend unavailable.", FindLabel("SettingsStatusText").text);
+            Assert.IsFalse(FindTextField("ChatInput").enabledSelf);
+            Assert.IsFalse(FindButton("MicButton").enabledSelf);
+            Assert.IsFalse(FindButton("SaveButton").enabledSelf);
             Assert.AreEqual(AvatarState.Warning, FindAvatarStateMachine().CurrentState);
             Assert.IsFalse(eventsClient.Connected);
         }
@@ -90,8 +92,8 @@ namespace LocalAssistant.Tests.PlayMode
             yield return null;
             yield return null;
 
-            Assert.AreEqual("Backend unavailable.", FindText("SettingsStatusText").text);
-            StringAssert.Contains("Cannot reach the local backend: backend down", FindText("ChatLogText").text);
+            Assert.AreEqual("Backend unavailable.", FindLabel("SettingsStatusText").text);
+            StringAssert.Contains("Cannot reach the local backend: backend down", FindLabel("ChatLogText").text);
             Assert.AreEqual(AvatarState.Warning, FindAvatarStateMachine().CurrentState);
         }
 
@@ -117,28 +119,121 @@ namespace LocalAssistant.Tests.PlayMode
                     cards = new List<ChatCard>(),
                 },
             };
+            var app = CreateApp(api, new FakeEventsClient());
+
+            yield return null;
+            yield return null;
+
+            FindTextField("ChatInput").value = "Hello";
+            SubmitCurrentInput(app);
+
+            yield return null;
+            yield return null;
+
+            var subtitle = FindLabel("SubtitleText");
+            var subtitleCard = FindElement<VisualElement>("SubtitleCard");
+            Assert.IsFalse(subtitleCard.ClassListContains("hidden"));
+            Assert.AreEqual("Fallback text response", subtitle.text);
+
+            yield return new WaitForSeconds(2.3f);
+
+            Assert.IsTrue(subtitleCard.ClassListContains("hidden"));
+            Assert.AreEqual(string.Empty, subtitle.text);
+            Assert.AreEqual(AvatarState.Idle, FindAvatarStateMachine().CurrentState);
+            Assert.AreEqual("Hello", api.LastChatRequest.message);
+            Assert.IsTrue(api.LastChatRequest.include_voice);
+        }
+
+        [UnityTest]
+        public IEnumerator AssistantAppCompleteTaskActionCallsApiAndUpdatesActionSummary()
+        {
+            var api = new FakeApiClient
+            {
+                Health = CreateHealth(
+                    status: "ready",
+                    databaseAvailable: true,
+                    sttAvailable: true,
+                    ttsAvailable: true,
+                    llmAvailable: true,
+                    recoveryActions: Array.Empty<string>()),
+                CompleteResponse = new TaskRecord
+                {
+                    id = "task-1",
+                    title = "Hop team",
+                    status = "done",
+                },
+            };
+            var app = CreateApp(api, new FakeEventsClient());
+
+            yield return null;
+            yield return null;
+
+            RequestCompleteTask(app, "task-1");
+            yield return null;
+            yield return null;
+
+            Assert.AreEqual("task-1", api.LastCompletedTaskId);
+            StringAssert.Contains("Hop team", FindLabel("ChatActionSummaryText").text);
+        }
+
+        [UnityTest]
+        public IEnumerator AssistantAppScheduleInboxActionCallsApiAndUsesSelectedDate()
+        {
+            var selectedDate = DateTime.Now.ToString("yyyy-MM-dd");
+            var api = new FakeApiClient
+            {
+                Health = CreateHealth(
+                    status: "ready",
+                    databaseAvailable: true,
+                    sttAvailable: true,
+                    ttsAvailable: true,
+                    llmAvailable: true,
+                    recoveryActions: Array.Empty<string>()),
+                RescheduleResponse = new TaskRecord
+                {
+                    id = "task-2",
+                    title = "Gui mail",
+                    status = "planned",
+                    scheduled_date = selectedDate,
+                },
+            };
+            var app = CreateApp(api, new FakeEventsClient());
+
+            yield return null;
+            yield return null;
+
+            RequestScheduleTask(app, "task-2", selectedDate);
+            yield return null;
+            yield return null;
+
+            Assert.AreEqual("task-2", api.LastRescheduledTaskId);
+            Assert.AreEqual(selectedDate, api.LastReschedulePayload.scheduled_date);
+            StringAssert.Contains("Gui mail", FindLabel("ChatActionSummaryText").text);
+        }
+
+        [UnityTest]
+        public IEnumerator AssistantAppSettingsToggleMarksUnsavedChanges()
+        {
+            var api = new FakeApiClient
+            {
+                Health = CreateHealth(
+                    status: "ready",
+                    databaseAvailable: true,
+                    sttAvailable: true,
+                    ttsAvailable: true,
+                    llmAvailable: true,
+                    recoveryActions: Array.Empty<string>()),
+            };
             CreateApp(api, new FakeEventsClient());
 
             yield return null;
             yield return null;
 
-            FindInput("ChatInput").text = "Hello";
-            FindButton("SendButton").onClick.Invoke();
-
-            yield return null;
+            var toggle = FindElement<Toggle>("SpeakRepliesToggle");
+            toggle.value = !toggle.value;
             yield return null;
 
-            var subtitle = FindText("SubtitleText");
-            Assert.IsTrue(subtitle.gameObject.activeSelf);
-            Assert.AreEqual("Fallback text response", subtitle.text);
-
-            yield return new WaitForSeconds(2.3f);
-
-            Assert.IsFalse(subtitle.gameObject.activeSelf);
-            Assert.AreEqual(string.Empty, subtitle.text);
-            Assert.AreEqual(AvatarState.Idle, FindAvatarStateMachine().CurrentState);
-            Assert.AreEqual("Hello", api.LastChatRequest.message);
-            Assert.IsTrue(api.LastChatRequest.include_voice);
+            Assert.AreEqual("Unsaved changes.", FindLabel("SettingsStatusText").text);
         }
 
         [UnityTest]
@@ -268,19 +363,75 @@ namespace LocalAssistant.Tests.PlayMode
             };
         }
 
-        private static Text FindText(string name)
+        private static Label FindLabel(string name)
         {
-            return FindGameObject(name).GetComponent<Text>();
+            return FindElement<Label>(name);
         }
 
         private static Button FindButton(string name)
         {
-            return FindGameObject(name).GetComponent<Button>();
+            return FindElement<Button>(name);
         }
 
-        private static InputField FindInput(string name)
+        private static TextField FindTextField(string name)
         {
-            return FindGameObject(name).GetComponent<InputField>();
+            return FindElement<TextField>(name);
+        }
+
+        private static T FindElement<T>(string name) where T : VisualElement
+        {
+            var element = FindUiDocument().rootVisualElement.Q<T>(name);
+            if (element != null)
+            {
+                return element;
+            }
+
+            Assert.Fail("Could not find UI Toolkit element named " + name);
+            return null;
+        }
+
+        private static UIDocument FindUiDocument()
+        {
+            foreach (var candidate in Resources.FindObjectsOfTypeAll<UIDocument>())
+            {
+                if (candidate != null && candidate.gameObject.scene.IsValid())
+                {
+                    return candidate;
+                }
+            }
+
+            Assert.Fail("Could not find runtime UIDocument");
+            return null;
+        }
+
+        private static void SubmitCurrentInput(AssistantApp app)
+        {
+            var field = typeof(AssistantApp).GetField("chatPanelController", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp chatPanelController field was not found.");
+
+            var controller = field.GetValue(app) as ChatPanelController;
+            Assert.NotNull(controller, "AssistantApp chatPanelController was not initialized.");
+            controller.SubmitCurrentInput();
+        }
+
+        private static void RequestCompleteTask(AssistantApp app, string taskId)
+        {
+            var field = typeof(AssistantApp).GetField("scheduleScreenController", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp scheduleScreenController field was not found.");
+
+            var controller = field.GetValue(app) as LocalAssistant.Features.Schedule.ScheduleScreenController;
+            Assert.NotNull(controller, "AssistantApp scheduleScreenController was not initialized.");
+            controller.RequestCompleteTask(taskId);
+        }
+
+        private static void RequestScheduleTask(AssistantApp app, string taskId, string selectedDate)
+        {
+            var field = typeof(AssistantApp).GetField("scheduleScreenController", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp scheduleScreenController field was not found.");
+
+            var controller = field.GetValue(app) as LocalAssistant.Features.Schedule.ScheduleScreenController;
+            Assert.NotNull(controller, "AssistantApp scheduleScreenController was not initialized.");
+            controller.RequestScheduleTask(taskId, selectedDate);
         }
 
         private static AvatarStateMachine FindAvatarStateMachine()
@@ -348,11 +499,39 @@ namespace LocalAssistant.Tests.PlayMode
             public Task<TaskListResponse> GetInboxAsync() => Task.FromResult(Inbox);
             public Task<TaskListResponse> GetCompletedAsync() => Task.FromResult(Completed);
             public Task<SettingsPayload> GetSettingsAsync() => Task.FromResult(Settings);
+            public string LastCompletedTaskId { get; private set; }
+            public CompleteTaskRequestPayload LastCompletePayload { get; private set; }
+            public string LastRescheduledTaskId { get; private set; }
+            public RescheduleTaskRequestPayload LastReschedulePayload { get; private set; }
+            public TaskRecord CompleteResponse { get; set; } = new TaskRecord { id = "task-complete", title = "Completed task", status = "done" };
+            public TaskRecord RescheduleResponse { get; set; } = new TaskRecord { id = "task-reschedule", title = "Rescheduled task", status = "planned" };
 
             public Task<ChatResponsePayload> SendChatAsync(ChatRequestPayload payload)
             {
                 LastChatRequest = payload;
                 return Task.FromResult(Chat);
+            }
+
+            public Task<TaskRecord> CompleteTaskAsync(string taskId, CompleteTaskRequestPayload payload = null)
+            {
+                LastCompletedTaskId = taskId;
+                LastCompletePayload = payload ?? new CompleteTaskRequestPayload();
+                if (string.IsNullOrWhiteSpace(CompleteResponse.id))
+                {
+                    CompleteResponse.id = taskId;
+                }
+                return Task.FromResult(CompleteResponse);
+            }
+
+            public Task<TaskRecord> RescheduleTaskAsync(string taskId, RescheduleTaskRequestPayload payload)
+            {
+                LastRescheduledTaskId = taskId;
+                LastReschedulePayload = payload ?? new RescheduleTaskRequestPayload();
+                if (string.IsNullOrWhiteSpace(RescheduleResponse.id))
+                {
+                    RescheduleResponse.id = taskId;
+                }
+                return Task.FromResult(RescheduleResponse);
             }
 
             public Task<SpeechSttResponse> SendSpeechToTextAsync(byte[] wavBytes, string language = "vi")

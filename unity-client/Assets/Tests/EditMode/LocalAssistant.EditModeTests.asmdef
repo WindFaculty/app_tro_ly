@@ -1,7 +1,8 @@
 {
   "name": "LocalAssistant.EditModeTests",
   "references": [
-    "AssistantRuntime"
+    "AssistantRuntime",
+    "AvatarSystem"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"
