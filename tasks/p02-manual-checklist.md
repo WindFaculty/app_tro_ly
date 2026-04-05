@@ -1,6 +1,6 @@
 # P02 Manual Smoke Checklist
 
-Updated: 2026-04-04
+Updated: 2026-04-06
 
 Use this file for the next clean P02 sign-off pass.
 This checklist feeds `P02` in `tasks/task-people.md` and the live-smoke closure for `UI-1` through `UI-4` in `tasks/task-queue.md`.
@@ -39,19 +39,34 @@ This checklist feeds `P02` in `tasks/task-people.md` and the live-smoke closure 
   Additional 2026-04-04 Unity GUI-agent surface capture after playmode toggle:
   `ai-dev-system/logs/gui-agent/20260404T161040Z-inspect-unity-editor/screenshots/surface-game.png`
 
-## Manual Sign-off Table
+## P02a — Core Smoke (Ưu tiên cao — sign off trước)
+
+Hoàn thành P02a trước để unblock A04, A07, A09, A10, A11 và đóng UI-1 đến UI-3.
+
+| Flow | Result | Surface | Artifact / Note |
+| --- | --- | --- | --- |
+| Shell navigation (tab switching) | TODO | Unity Editor Game view or packaged window | Verify left rail routes to Home, Schedule, Chat, Settings without hanging. |
+| Chat send | TODO | Unity Editor Game view or packaged window | Repo PlayMode coverage exists, but clean live sign-off still missing. |
+| Backend ready state | PASS | Game view | `p02-20260329-e2-backend-ready-gameview.png` — prior evidence, reconfirm if needed. |
+| Backend unavailable state | PASS | Game view | `p02-20260329-e1-backend-unavailable-gameview.png` — prior evidence. |
+| Backend partial state | TODO | Game view or packaged window | Clean game view capture still needed after editor-state hardening. |
+| Settings save | TODO | Unity Editor Game view or packaged window | Repo PlayMode `35 passed` covers it; clean live sign-off still missing. |
+| Settings reload | TODO | Unity Editor Game view or packaged window | Same as above. |
+| Settings dirty | TODO | Unity Editor Game view or packaged window | Same as above. |
+| Subtitle overlay | TODO | Unity Editor Game view or packaged window | Repo PlayMode coverage exists, live sign-off missing. |
+| Reminder overlay | TODO | Unity Editor Game view or packaged window | Overlay behavior still needs live sign-off. |
+
+## P02b — Extended Smoke (Sau P02a — sign off để close UI-4 và A34)
+
+Hoàn thành P02b để unblock A34, A31, A42 closure, A44 live-smoke closure.
 
 | Flow | Result | Surface | Artifact / Note |
 | --- | --- | --- | --- |
 | Selected-date navigation | TODO | Unity Editor Game view or packaged window | Repo PlayMode coverage exists, but clean live sign-off still missing. |
 | Direct complete | TODO | Unity Editor Game view or packaged window | Repo PlayMode coverage exists, but clean live sign-off still missing. |
-| Inbox scheduling | TODO | Unity Editor Game view or packaged window | Manual validation on 2026-03-29 found the `Inbox` button on the Schedule screen was non-responsive. Repo-side follow-up landed later on 2026-03-29 and Unity PlayMode re-verified with `35 passed`, so this row now needs a fresh clean rerun instead of staying in fail-only state. |
-| Chat send | TODO | Unity Editor Game view or packaged window | Repo PlayMode coverage exists, but clean live sign-off still missing. |
-| Subtitle overlay | TODO | Unity Editor Game view or packaged window | Repo PlayMode coverage exists, but clean live sign-off still missing. |
-| Reminder overlay | TODO | Unity Editor Game view or packaged window | Overlay behavior still needs live sign-off. |
-| Settings dirty | TODO | Unity Editor Game view or packaged window | Manual validation on 2026-03-29 found the top-level `Settings` tab did not switch screens. Repo-side follow-up landed later on 2026-03-29 and Unity PlayMode re-verified with `35 passed`, so dirty-state behavior now needs a fresh clean rerun. |
-| Settings reload | TODO | Unity Editor Game view or packaged window | Manual validation on 2026-03-29 found the top-level `Settings` tab did not switch screens. Repo-side follow-up landed later on 2026-03-29 and Unity PlayMode re-verified with `35 passed`, so reload behavior now needs a fresh clean rerun. |
-| Settings save | TODO | Unity Editor Game view or packaged window | Manual validation on 2026-03-29 found the top-level `Settings` tab did not switch screens. Repo-side follow-up landed later on 2026-03-29 and Unity PlayMode re-verified with `35 passed`, so save behavior now needs a fresh clean rerun. |
+| Inbox scheduling | TODO | Unity Editor Game view or packaged window | Repo-side follow-up landed 2026-03-29 and PlayMode re-verified; needs fresh clean rerun. |
+| Character Space room overlay | TODO | Unity Editor Game view | Confirm selected-object card, current-activity strip, room action dock buttons, return-to-avatar behavior, and hotspot toggle all render and respond cleanly in the Home stage. |
+
 
 ## Closure Rule
 

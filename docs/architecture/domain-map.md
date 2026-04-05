@@ -1,6 +1,6 @@
 # Domain Map - Phase 1
 
-Updated: 2026-04-05
+Updated: 2026-04-06
 Status: Current implementation map for boundary work inside the existing repo layout
 
 This map adapts the Phase 1 modularization plan to the runtime that actually exists today in `unity-client/` plus `local-backend/`.
@@ -30,7 +30,7 @@ This map adapts the Phase 1 modularization plan to the runtime that actually exi
 
 ### Home/Stage
 
-- Owns: center-stage home rendering, quick-add input capture, orbit-status copy, quick-add status presentation
+- Owns: center-stage home rendering, selected-object overlay presentation, quick-add input capture, orbit-status copy, quick-add status presentation
 - Main files:
   - `unity-client/Assets/Scripts/Features/Home/HomeModule.cs`
   - `unity-client/Assets/Scripts/Features/Home/HomeModuleContracts.cs`
@@ -38,6 +38,7 @@ This map adapts the Phase 1 modularization plan to the runtime that actually exi
   - `unity-client/Assets/Scripts/Features/Home/HomeQuickAddApplicationService.cs`
 - Provides:
   - a module boundary for the center-stage Home surface
+  - selected room-object presentation driven by a world-owned snapshot
   - raw quick-add intent capture from presentation code
   - application-owned quick-add command and status wording
 - Must not:
@@ -114,14 +115,17 @@ This map adapts the Phase 1 modularization plan to the runtime that actually exi
 
 ### Avatar/Presentation
 
-- Owns: placeholder avatar state, lip-sync fallback, optional bridge into the production avatar system
+- Owns: placeholder avatar state, lip-sync fallback, room-avatar spawn or attention bridge, optional bridge into the production avatar system
 - Main files:
+  - `unity-client/Assets/Scripts/Avatar/CharacterRoomBridge.cs`
   - `unity-client/Assets/Scripts/Avatar/AvatarStateMachine.cs`
   - `unity-client/Assets/Scripts/Avatar/AvatarOutfitApplicationService.cs`
   - `unity-client/Assets/Scripts/Avatar/LipSyncController.cs`
   - `unity-client/Assets/AvatarSystem/Core/Scripts/AvatarConversationBridge.cs`
 - Provides:
   - visible conversation-state presentation
+  - placeholder-safe avatar presence inside the room-backed Home stage
+  - spawn and attention wiring between room selection and the active avatar or proxy
   - optional scene bridge to production avatar objects
   - a placeholder-safe application-facing outfit contract over `AvatarEquipmentManager` and `AvatarPresetManager`
 - Must not:
@@ -131,6 +135,68 @@ This map adapts the Phase 1 modularization plan to the runtime that actually exi
 - Allowed dependencies:
   - shared event payloads
   - shell-visible runtime state passed in by the coordinator
+
+### World/Room
+
+- Owns: placeholder-safe Character Space room bootstrap, room layout definition, room-template hierarchy, stage camera anchor, avatar spawn anchor, and initial room shell geometry
+- Main files:
+  - `unity-client/Assets/Resources/World/Rooms/Room_Base.prefab`
+  - `unity-client/Assets/Scripts/World/Room/RoomLayoutDefinition.cs`
+  - `unity-client/Assets/Scripts/World/Room/RoomSceneBootstrap.cs`
+  - `unity-client/Assets/Scripts/World/Room/RoomWorldController.cs`
+- Provides:
+  - one room-root lifecycle inside the active assistant scene
+  - one template-backed room hierarchy for the Home stage foundation
+  - stable stage camera setup for the room-backed Home surface
+  - anchor points for avatar spawn and future room-object placement
+- Must not:
+  - own planner or chat state
+  - become a second shell router
+  - bypass later registry or interaction boundaries by turning ad-hoc scene objects into runtime truth
+- Allowed dependencies:
+  - Unity scene primitives and camera types
+  - future character-space and object subsystems through explicit contracts
+
+### World/Objects
+
+- Owns: room-object metadata, registry lookup, placement records, anchor-targeted spawn configuration, and primitive object factory behavior for the current room foundation
+- Main files:
+  - `unity-client/Assets/Scripts/World/Objects/RoomObjectDefinition.cs`
+  - `unity-client/Assets/Scripts/World/Objects/RoomObjectPlacement.cs`
+  - `unity-client/Assets/Scripts/World/Objects/RoomObjectRegistry.cs`
+  - `unity-client/Assets/Scripts/World/Objects/RoomObjectFactory.cs`
+- Provides:
+  - one registry-backed path for MVP room furniture and decor
+  - shape and metadata definitions that can later move to prefab-backed intake
+  - placement-driven object spawning instead of hardcoded cluster assembly in the room controller
+- Must not:
+  - become UI-owned logic
+  - bypass future prefab and registry intake rules with ad-hoc scene references
+  - own interaction state or avatar behavior
+- Allowed dependencies:
+  - `World/Room` anchor contracts
+  - Unity primitive construction for placeholder-safe fallback rendering
+
+### World/Interaction
+
+- Owns: hovered or selected room-object state, click-hit resolution, highlight state, stage-camera focus handoff, and selected-object snapshots for the current room foundation
+- Main files:
+  - `unity-client/Assets/Scripts/World/Interaction/InteractableObject.cs`
+  - `unity-client/Assets/Scripts/World/Interaction/SelectedRoomObjectStore.cs`
+  - `unity-client/Assets/Scripts/World/Interaction/RoomInteractionController.cs`
+  - `unity-client/Assets/Scripts/World/Interaction/RoomObjectSelectionSnapshot.cs`
+- Provides:
+  - one world-owned path for hover and click-select behavior on registry-spawned room objects
+  - selected-object snapshots that the Home stage can render without owning world logic
+  - basic focus-camera behavior and character-attention targets for room objects that opt into focus interactions
+- Must not:
+  - become the place where planner or chat UI rules accumulate
+  - bypass the room-object registry by attaching ad-hoc metadata to scene-only objects
+  - own character movement or avatar-state rules that belong to later bridge work
+- Allowed dependencies:
+  - `World/Objects`
+  - Unity camera and physics types
+  - `Core/` UI refs only through composition-time viewport plumbing
 
 ### Shared/System
 

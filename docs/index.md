@@ -11,6 +11,7 @@
 - [architecture/dependency-rules.md](architecture/dependency-rules.md) - dependency rules for the current repo layout
 - [architecture/phase1-audit.md](architecture/phase1-audit.md) - current violation list and cleanup status
 - [architecture/phase2-layering.md](architecture/phase2-layering.md) - current Phase 2 layering slice notes
+- [architecture/ui-modules-plan.md](architecture/ui-modules-plan.md) - planned Phase 0 route and ownership map for future Character Space, Planner, Chat, and Wardrobe shell surfaces
 - [architecture/adr/README.md](architecture/adr/README.md) - ADR index for deeper decision rationale
 
 ## Features
@@ -18,6 +19,9 @@
 - [features/README.md](features/README.md) - feature-level navigation for UI and avatar docs
 - [04-ui.md](04-ui.md) - current Unity UI behavior and placeholder boundaries
 - [03-api.md](03-api.md) - current backend contract
+- [features/room-world-plan.md](features/room-world-plan.md) - planned room-subsystem baseline for a future room-backed Character Space
+- [features/room-object-spec.md](features/room-object-spec.md) - planned registry and metadata rules for future Character Space room objects
+- [features/room-object-intake-checklist.md](features/room-object-intake-checklist.md) - intake checklist for room object and prefab-backed Character Space changes
 - [features/avatar-asset-spec.md](features/avatar-asset-spec.md) - current avatar asset contract, registry boundary, and slot rules
 - [features/avatar-asset-intake-checklist.md](features/avatar-asset-intake-checklist.md) - intake checklist for avatar content changes
 - [avatar-spec.md](avatar-spec.md) - avatar-specific spec notes currently tracked in the repo

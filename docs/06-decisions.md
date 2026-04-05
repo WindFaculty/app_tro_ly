@@ -79,3 +79,13 @@
 - Decision: Separate repo-wide agent rules from the reusable task protocol by keeping `AGENTS.md` as the machine-facing rule file and adding a dedicated agent workflow document plus completion protocol.
 - Why: Phase 5 needs a consistent before-or-during-or-after coding workflow, explicit completion reporting, and tracker-aware scope control without overloading the active queue files.
 - Tradeoff: The repo now has one more governance page to maintain, but the workflow is easier to audit and reuse across future tasks.
+
+## 2026-04-05
+- Decision: Keep the planned Character Space, Planner, Chat, and Wardrobe expansion as shell-hosted feature surfaces inside the current `unity-client/` tree instead of treating them as separate apps or a new runtime root.
+- Why: The shipped shell already has stable Home or Schedule or Chat or Settings boundaries, and Phase 0 planning needs one route and ownership map that evolves those boundaries without creating a second source of truth.
+- Tradeoff: Future UI work must distinguish shell-surface routing from the planner's existing `AppScreen` sub-views, and Settings still remains a drawer rather than a primary route.
+
+## 2026-04-05
+- Decision: Plan the future Character Space room as a world subsystem mounted in the active assistant scene, with registry-backed room objects and a thin UI overlay, instead of a separate scene-first app flow or UI-owned world logic.
+- Why: The current shell and runtime coordinator already assume one active assistant scene, while the requested room direction needs explicit ownership for room bootstrap, object metadata, and avatar placement without creating a second source of truth.
+- Tradeoff: Later room work will need to replace the current orthographic placeholder-stage assumptions and still must pass tracker scope plus Unity smoke before any shipped-behavior claim.

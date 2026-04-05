@@ -4,8 +4,20 @@ namespace LocalAssistant.Core
 {
     public sealed class HomeScreenRefs
     {
+        public VisualElement HomeStageViewport;
         public Label HomeAvatarStateBadge;
         public Label StagePlaceholderText;
+        public Label SelectedRoomObjectTitleText;
+        public Label SelectedRoomObjectMetaText;
+        public Label SelectedRoomObjectActionText;
+        public Label RoomActivityTitleText;
+        public Label RoomActivityDetailText;
+        public Label RoomModeText;
+        public Button RoomGoToButton;
+        public Button RoomInspectButton;
+        public Button RoomUseButton;
+        public Button RoomReturnButton;
+        public Button RoomHotspotToggleButton;
         public Label TaskSummaryText;
         public Label TaskContentText;
         public Label TaskEmptyStateText;
@@ -31,8 +43,20 @@ namespace LocalAssistant.Core
 
         public HomeScreenRefs(VisualElement root)
         {
+            HomeStageViewport = root.Q<VisualElement>(UiElementNames.Home.HomeStageViewport);
             HomeAvatarStateBadge = root.Q<Label>("HomeAvatarStateBadge");
             StagePlaceholderText = root.Q<Label>(UiElementNames.Home.StagePlaceholderText);
+            SelectedRoomObjectTitleText = root.Q<Label>(UiElementNames.Home.SelectedRoomObjectTitleText);
+            SelectedRoomObjectMetaText = root.Q<Label>(UiElementNames.Home.SelectedRoomObjectMetaText);
+            SelectedRoomObjectActionText = root.Q<Label>(UiElementNames.Home.SelectedRoomObjectActionText);
+            RoomActivityTitleText = root.Q<Label>(UiElementNames.Home.RoomActivityTitleText);
+            RoomActivityDetailText = root.Q<Label>(UiElementNames.Home.RoomActivityDetailText);
+            RoomModeText = root.Q<Label>(UiElementNames.Home.RoomModeText);
+            RoomGoToButton = root.Q<Button>(UiElementNames.Home.RoomGoToButton);
+            RoomInspectButton = root.Q<Button>(UiElementNames.Home.RoomInspectButton);
+            RoomUseButton = root.Q<Button>(UiElementNames.Home.RoomUseButton);
+            RoomReturnButton = root.Q<Button>(UiElementNames.Home.RoomReturnButton);
+            RoomHotspotToggleButton = root.Q<Button>(UiElementNames.Home.RoomHotspotToggleButton);
             TaskSummaryText = root.Q<Label>(UiElementNames.Home.TaskSummaryText);
             TaskContentText = root.Q<Label>(UiElementNames.Home.TaskContentText);
             TaskEmptyStateText = root.Q<Label>(UiElementNames.Home.TaskEmptyStateText);

@@ -64,7 +64,13 @@ namespace LocalAssistant.Avatar
                 return;
             }
 
-            placeholderRenderer.material.color = state switch
+            var targetMaterial = Application.isPlaying ? placeholderRenderer.material : placeholderRenderer.sharedMaterial;
+            if (targetMaterial == null)
+            {
+                return;
+            }
+
+            targetMaterial.color = state switch
             {
                 AvatarState.Listening => new Color(0.15f, 0.55f, 0.85f),
                 AvatarState.Thinking => new Color(0.95f, 0.65f, 0.18f),

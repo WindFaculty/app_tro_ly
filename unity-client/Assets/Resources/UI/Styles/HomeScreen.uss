@@ -175,152 +175,204 @@
     margin-left: -215px;
     margin-top: -305px;
     border-radius: 36px;
-    background-color: #cbe1e7;
+    background-color: rgba(8, 14, 24, 0.18);
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.28);
+    border-color: rgba(228, 241, 247, 0.24);
     overflow: hidden;
 }
 
-.home-stage-backdrop {
-    position: absolute;
-    border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.24);
-}
-
-.home-stage-backdrop-large {
-    width: 360px;
-    height: 360px;
-    left: 34px;
-    top: 120px;
-}
-
-.home-stage-backdrop-small {
-    width: 230px;
-    height: 230px;
-    right: -44px;
-    bottom: -36px;
-    background-color: rgba(154, 214, 229, 0.4);
-}
-
-.home-stage-dust {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.82);
-}
-
-.home-stage-dust-a {
-    left: 118px;
-    top: 188px;
-}
-
-.home-stage-dust-b {
-    right: 108px;
-    top: 206px;
-}
-
-.home-stage-dust-c {
-    right: 136px;
-    top: 328px;
-}
-
-.home-stage-center {
+.home-stage-viewport {
     flex-grow: 1;
-    align-items: center;
-    justify-content: center;
-    padding: 34px 24px 30px;
-}
-
-.home-stage-kicker {
-    color: #49606b;
-    margin-bottom: 8px;
-}
-
-.home-swing-stage {
-    width: 280px;
-    height: 380px;
-    position: relative;
-    margin-bottom: 18px;
-}
-
-.home-swing-vine {
-    position: absolute;
-    left: 128px;
-    top: 0;
-    width: 24px;
-    height: 98px;
-    border-radius: 999px;
-    background-color: rgba(76, 123, 90, 0.24);
-}
-
-.home-swing-ropes {
     position: absolute;
     left: 0;
     right: 0;
-    top: 92px;
-    height: 110px;
-}
-
-.home-swing-rope {
-    position: absolute;
-    left: 94px;
     top: 0;
-    width: 3px;
-    height: 124px;
-    background-color: rgba(164, 139, 104, 0.72);
+    bottom: 0;
+    padding: 20px;
+    justify-content: space-between;
 }
 
-.home-swing-rope-right {
-    left: auto;
-    right: 94px;
-}
-
-.home-swing-seat {
+.home-stage-sheen {
     position: absolute;
-    left: 50%;
-    bottom: 18px;
-    width: 236px;
-    height: 236px;
-    margin-left: -118px;
-    border-radius: 999px;
-    border-width: 10px;
-    border-color: rgba(198, 172, 131, 0.92);
-    background-color: rgba(244, 233, 210, 0.12);
-    justify-content: center;
-    align-items: center;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(9, 19, 32, 0.16);
 }
 
-.home-avatar-figure {
-    width: 130px;
-    height: 232px;
-    justify-content: flex-start;
-    align-items: center;
+.home-stage-grid {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 20px;
+    bottom: 20px;
+    border-radius: 28px;
+    border-width: 1px;
+    border-color: rgba(228, 241, 247, 0.14);
+    background-color: rgba(8, 15, 24, 0.18);
+}
+
+.home-stage-header-row {
     position: relative;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
 }
 
-.home-avatar-head {
-    width: 70px;
-    height: 70px;
+.home-stage-title {
+    margin-top: 4px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: rgba(248, 252, 255, 0.96);
+}
+
+.home-stage-kicker {
+    color: rgba(204, 235, 244, 0.78);
+    margin-bottom: 0;
+}
+
+.home-stage-floor-glow {
+    position: absolute;
+    left: 56px;
+    right: 56px;
+    bottom: 120px;
+    height: 168px;
     border-radius: 999px;
-    background-color: rgba(63, 51, 54, 0.96);
-    margin-top: 18px;
+    background-color: rgba(115, 186, 210, 0.1);
+    border-width: 1px;
+    border-color: rgba(180, 223, 235, 0.16);
 }
 
-.home-avatar-body {
-    width: 102px;
-    height: 126px;
+.home-stage-selection-card {
+    position: absolute;
+    right: 20px;
+    top: 92px;
+    width: 190px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background-color: rgba(8, 17, 31, 0.72);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.home-stage-selection-title {
+    margin-top: 4px;
+    color: rgba(248, 252, 255, 0.96);
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.home-stage-selection-meta {
+    margin-top: 4px;
+    color: rgba(184, 239, 255, 0.82);
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.home-stage-selection-action {
+    margin-top: 8px;
+    color: rgba(244, 249, 255, 0.82);
+    white-space: normal;
+    line-height: 17px;
+    font-size: 12px;
+}
+
+.home-stage-activity-card {
+    position: absolute;
+    left: 20px;
+    top: 102px;
+    width: 174px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    background-color: rgba(8, 17, 31, 0.68);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.14);
+}
+
+.home-stage-activity-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.home-stage-mode-badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background-color: rgba(184, 239, 255, 0.16);
+    color: rgba(208, 243, 252, 0.9);
+    font-size: 10px;
+    -unity-font-style: bold;
+}
+
+.home-stage-activity-title {
+    margin-top: 8px;
+    color: rgba(248, 252, 255, 0.96);
+    font-size: 15px;
+    -unity-font-style: bold;
+}
+
+.home-stage-activity-detail {
+    margin-top: 6px;
+    color: rgba(244, 249, 255, 0.8);
+    white-space: normal;
+    line-height: 16px;
+    font-size: 11px;
+}
+
+.home-stage-dock-card {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 116px;
+    padding: 14px 16px;
+    border-radius: 22px;
+    background-color: rgba(8, 17, 31, 0.7);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.home-stage-dock-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-top: 10px;
-    border-top-left-radius: 48px;
-    border-top-right-radius: 48px;
-    border-bottom-left-radius: 34px;
-    border-bottom-right-radius: 34px;
-    background-color: rgba(32, 28, 31, 0.96);
+}
+
+.home-stage-dock-button {
+    min-width: 82px;
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 14px;
+    background-color: rgba(184, 239, 255, 0.14);
+    border-width: 1px;
+    border-color: rgba(184, 239, 255, 0.18);
+    color: rgba(248, 252, 255, 0.94);
+}
+
+.home-stage-dock-button:disabled {
+    opacity: 0.45;
+}
+
+.home-stage-dock-button-secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.home-stage-dock-toggle {
+    margin-top: 10px;
+    align-self: flex-start;
+    min-height: 30px;
+    padding: 0 12px;
+    border-radius: 14px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(244, 249, 255, 0.82);
+    font-size: 11px;
 }
 
 .avatar-badge {
-    position: absolute;
-    bottom: 0;
     background-color: rgba(255, 255, 255, 0.92);
     color: #344753;
     padding: 5px 14px;
@@ -329,12 +381,24 @@
     font-size: 12px;
 }
 
+.home-stage-state-badge {
+    align-self: flex-start;
+}
+
+.home-stage-caption-card {
+    position: relative;
+    align-self: stretch;
+    padding: 16px 18px;
+    border-radius: 22px;
+    background-color: rgba(8, 17, 31, 0.62);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
 .home-stage-copy {
-    max-width: 292px;
-    color: #425866;
+    color: rgba(244, 249, 255, 0.84);
     white-space: normal;
     line-height: 19px;
-    -unity-text-align: middle-center;
 }
 
 .home-focus-list {

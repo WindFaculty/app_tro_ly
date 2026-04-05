@@ -13,3 +13,5 @@ Use this folder for decisions that need more context than the summary log in `do
 - [ADR-001-documentation-governance.md](ADR-001-documentation-governance.md) - adopts the documentation hierarchy, source-of-truth map, and docs-changed-with-code workflow
 - [ADR-002-avatar-asset-registry.md](ADR-002-avatar-asset-registry.md) - adopts the registry-backed avatar asset catalog and metadata boundary
 - [ADR-003-agent-task-governance.md](ADR-003-agent-task-governance.md) - adopts the current agent workflow, task protocol, and completion reporting shape
+- [ADR-004-shell-hosted-ui-modules-plan.md](ADR-004-shell-hosted-ui-modules-plan.md) - keeps future Character Space, Planner, Chat, and Wardrobe expansion inside the current Unity shell
+- [ADR-005-room-world-subsystem-plan.md](ADR-005-room-world-subsystem-plan.md) - keeps the planned Character Space room as a world subsystem inside the active assistant scene

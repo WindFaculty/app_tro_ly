@@ -1,728 +1,663 @@
-Dưới đây là kế hoạch chi tiết, tập trung đúng 5 điểm bạn muốn xử lý trước. Tôi viết theo hướng có thể dùng luôn để triển khai bằng agent/Codex, nhưng vẫn đủ chặt để bạn kiểm soát kiến trúc.
+> **Status (2026-04-06):** File này là design notes cho 4 UI modules mới. Mapping sang A-tasks: UI-001→D044(DONE), UI-002/003/004→A43(TODO), UI-005→A28(PARTIAL), UI-006→A30(DONE), UI-007→A09/A31(DOING), UI-008→A32(DONE), UI-009→A10(DOING), UI-010→A33(DONE), UI-011/012→A44(DONE), UI-013→A43(TODO), UI-014→A36(DOING), UI-015→A07(DOING), UI-016→A37(DOING). Task tracker chính là `tasks/task-queue.md`. File này nên được move vào `docs/planning/` trong tương lai.
 
-Mục tiêu tổng thể
+Dưới đây là kế hoạch code 4 phần UI mới cho dự án hiện tại của bạn, bám theo mục tiêu bạn đã chốt trước:
 
-Trong 4 phase đầu, mục tiêu không phải thêm tính năng mới. Mục tiêu là làm cho repo:
 
-dễ tách phần
-khó bị code dính chéo
-docs bám sát code hơn
-asset/avatar có chuẩn
-agent làm việc có hàng rào rõ ràng
+UI không gian nhân vật
+UI lịch trình và quản lý công việc
+UI chat với trợ lý
+UI thay trang phục và phụ kiện
 
-Nguyên tắc xuyên suốt
+Tôi sẽ viết theo hướng:
 
-Không refactor toàn bộ repo trong một lần
-Mỗi phase phải có deliverable rõ
-Mỗi thay đổi kiến trúc phải đi kèm docs và task queue
-Không cho agent tự ý tạo thêm cấu trúc nếu chưa có rule
-Tính năng mới chỉ được phép thêm sau khi qua “cổng kiến trúc” của phase tương ứng
+có thể đưa cho agent/Codex chạy
+phù hợp với repo hiện tại đang có Unity client shell
+không phá kiến trúc bạn vừa làm sạch
 
-Kế hoạch tổng thể theo phase
+Mục tiêu chung
 
-Phase 0. Đóng băng mở rộng tính năng và tạo nền quản trị thay đổi
-Phase 1. Gỡ code dính logic giữa các phần
-Phase 2. Tách UI khỏi domain
-Phase 3. Đồng bộ docs với repo bằng quy trình bắt buộc
-Phase 4. Chuẩn hóa asset/avatar/customization
-Phase 5. Thiết lập agent workflow với task queue và rule file cứng
+4 phần UI mới không được code kiểu “4 màn hình riêng lẻ”. Chúng phải là 4 module giao diện có thể sống chung trong một shell thống nhất.
 
-Tôi sẽ đi chi tiết từng phase.
+Mục tiêu cuối:
 
-Chi tiết Phase 0: Đóng băng mở rộng tính năng và tạo nền quản trị thay đổi
+chung router
+chung design system
+chung interaction pattern
+tách controller theo module
+view chỉ render
+logic đi qua service/store
+dễ gắn với backend và avatar system
 
-Mục tiêu
-Chặn việc vừa refactor kiến trúc vừa mở rộng roadmap theo kiểu ad-hoc, để các phase sau có nền quản trị thay đổi rõ và truy vết được.
+Kiến trúc UI đích
 
-Nguyên tắc áp dụng cho repo hiện tại
+Tôi đề xuất coi 4 UI này là 4 feature surfaces trong cùng một shell:
 
-Không tạo thêm runtime gốc ngoài `local-backend/` và `unity-client/` trong phase này
-Không hứa hẹn cấu trúc tương lai như đã ship nếu repo chưa có thật
-Không kéo thêm feature mới vào active queue nếu chưa đi qua task queue và architecture gate
-Ưu tiên việc làm rõ source of truth, task protocol, docs update rule, và validation baseline
+Character Space
+Planner
+Chat
+Wardrobe
 
-Cách làm
+Mỗi phần phải có 4 lớp:
 
-Bước 0.1: Chốt phạm vi freeze
-Trong phase này chỉ cho phép:
+UXML layout
+USS style
+Controller
+ViewModel binding
 
-tách boundary
-đồng bộ docs với code
-siết task governance
-thêm validation/checklist
-sửa lỗi hồi quy
-tạo contract placeholder-safe cho phase sau
+Cấu trúc nên đi theo hướng này trong Unity:
 
-Chưa cho phép mặc định:
+Assets/Resources/UI/Screens/CharacterSpace/
+Assets/Resources/UI/Screens/Planner/
+Assets/Resources/UI/Screens/Chat/
+Assets/Resources/UI/Screens/Wardrobe/
 
-mở rộng feature roadmap
-đổi root layout của repo
-tạo thêm source of truth cạnh tranh
-claim production avatar hay module structure mới nếu chưa có evidence
+và tương ứng code:
 
-Bước 0.2: Chốt source of truth hiện tại
-Với repo này cần khóa rõ:
+Assets/Scripts/Features/CharacterSpace/
+Assets/Scripts/Features/Planner/
+Assets/Scripts/Features/Chat/
+Assets/Scripts/Features/Wardrobe/
 
-runtime backend: `local-backend/`
-runtime client: `unity-client/`
-quy tắc agent: `AGENTS.md`
-phase 0 baseline và governance: `docs/migration/phase0.md`
-AI queue hiện hành: `tasks/task-queue.md`
-manual/off-repo gate: `tasks/task-people.md`
-lịch sử hoàn tất: `tasks/done.md`
-quyết định kiến trúc đang dùng: `docs/06-decisions.md`
+Nguyên tắc thiết kế trước khi code
 
-Bước 0.3: Tạo architecture gate
-Một số thay đổi không được agent tự mở rộng nếu chưa cập nhật đủ artefact:
+4 phần phải dùng chung shell
+Không làm 4 app con.
+Mỗi phần có controller riêng
+Không nhét logic vào AssistantApp hay AppShellController.
+Mỗi phần có UXML riêng
+Không kéo dài một AppShell.uxml thành file khổng lồ.
+Mỗi phần phải có trạng thái loading, empty, error
+Để sau này dễ gắn dữ liệu thật.
+Chưa cần hoàn thiện feature logic ngay
+Ưu tiên dựng UI architecture đúng trước.
 
-thêm module boundary lớn
-đổi persistence strategy
-đổi event bus/state ownership
-đổi asset structure hoặc avatar slot rule
-đổi root path của runtime bắt buộc
+Tổng thể layout đề xuất
 
-Các thay đổi này phải đi kèm:
+Shell chính gồm:
 
-cập nhật task tracker
-cập nhật docs current-state liên quan
-cập nhật `docs/06-decisions.md`
+top bar
+left sidebar
+center stage
+right utility panel
 
-Bước 0.4: Chuẩn hóa task protocol
-Tạo template task thống nhất để mọi task đều có tối thiểu:
+Mapping 4 UI mới như sau:
 
-objective
-non-goals
-in scope
-out of scope
-files allowed to change
-validation steps
-docs updates required
-acceptance criteria
+Character Space
+Center stage: phòng + nhân vật + interaction hotspots
+Right panel: thông tin trạng thái, hành động nhanh, nhật ký ngắn
+Planner
+Center stage: lịch, task list, summary
+Right panel: AI suggestions, task detail, action quick panel
+Chat
+Center stage: conversation thread lớn
+Right panel: context cards, memory snippets, quick actions
+Wardrobe
+Center stage: preview nhân vật
+Right panel: danh sách outfit slot, item list, filter, equip actions
 
-Khi kết thúc task, agent phải báo được:
+Kế hoạch triển khai theo phase
 
-đã sửa gì
-đã không sửa ngoài scope gì
-đã verify bằng gì
-docs nào đã cập nhật
-còn rủi ro hoặc manual gate nào
-
-Bước 0.5: Chốt baseline evidence trước phase 1
-Trước khi bước sang phase 1 phải có một mốc baseline mô tả:
-
-runtime nào là current implementation
-blocker/manual gate nào đang tồn tại
-docs nào là current-state, docs nào là design target
-test/evidence terminal nào đang là mốc mới nhất
-
-Deliverable của phase này
-
-phase 0 baseline doc
-freeze rule
-architecture gate rule
-task template
-tracker được cập nhật theo governance mới
-
-Definition of done
-
-Agent không thể mở rộng feature ngoài task đang được theo dõi
-Mọi thay đổi kiến trúc đều có đường truy vết qua task + docs + decision log
-Repo có baseline rõ để phase 1 trở đi chỉ tập trung vào boundary/refactor, không tranh cãi lại phạm vi
-
-Xử lý vấn đề: Code dính logic giữa các phần
+Phase 0. Chốt UI architecture trước khi code
 
 Mục tiêu
-Chặn việc chat, planner, avatar, room, settings, persistence gọi trực tiếp lẫn nhau một cách hỗn loạn.
-
-Triệu chứng thường gặp
-
-Component UI gọi thẳng file xử lý business logic
-Module chat tự sửa state planner
-Avatar customization truy cập trực tiếp local storage hoặc settings
-File helper dùng chung quá nhiều, thành “sọt rác logic”
-Một màn hình import quá nhiều thứ từ nhiều domain khác nhau
-
-Đích cần đạt
-Repo được chia theo domain rõ, mỗi domain có trách nhiệm riêng, giao tiếp qua interface hoặc application service.
-
-Cách làm
-
-Bước 1.1: Vẽ lại domain map của dự án
-Tạo một file kiến trúc gốc, ví dụ:
-docs/architecture/domain-map.md
-
-Nội dung phải chốt tối thiểu 5 domain:
-
-world-3d
-assistant-chat
-planner
-avatar-customization
-shared/system
-
-Mỗi domain cần ghi rõ:
-
-nó sở hữu state gì
-nó cung cấp service gì
-nó không được làm gì
-nó được phép phụ thuộc vào đâu
-
-Ví dụ:
-
-assistant-chat không được import trực tiếp avatar asset registry
-planner không được gọi thẳng UI component
-world-3d không được lưu file config trực tiếp, chỉ gọi persistence service
-
-Bước 1.2: Audit import và phụ thuộc
-Lập bảng kiểm:
-
-file nào import chéo domain
-file nào vừa render UI vừa xử lý logic
-file nào vừa load asset vừa xử lý state
-file nào là “god file”
-
-Phân loại thành 4 mức:
-
-mức A: cần sửa ngay
-mức B: sửa trong phase hiện tại
-mức C: chờ tách module
-mức D: giữ nguyên tạm thời
-
-Bước 1.3: Định nghĩa module boundary
-Tạo cấu trúc chuẩn kiểu:
-
-src/app
-src/modules/world-3d
-src/modules/assistant-chat
-src/modules/planner
-src/modules/avatar-customization
-src/shared
-
-Trong mỗi module nên có:
-
-components/
-domain/
-application/
-infrastructure/
-index.ts
-
-Ý nghĩa:
-
-components: UI của module
-domain: entity, type, rule nghiệp vụ
-application: use-case/service/orchestrator
-infrastructure: storage adapter, API adapter, file loader
-
-Bước 1.4: Tạo anti-corruption layer tạm thời
-Không đập hết code cũ ngay. Dùng lớp trung gian:
-
-legacy-adapters/
-facades/
-services/bridge
-
-Mục đích:
-
-giữ app chạy được
-di chuyển dần logic cũ sang module mới
-giảm nguy cơ vỡ hàng loạt
-
-Bước 1.5: Cấm import chéo trực tiếp
-Đặt rule:
-
-module A không import file internal của module B
-chỉ import qua public entry index.ts
-
-Ví dụ đúng:
-import { createTask } from '@/modules/planner'
-
-Ví dụ sai:
-import { internalPlannerStore } from '@/modules/planner/domain/store/internal'
-
-Deliverable của phase này
-
-domain map
-dependency rules
-danh sách file vi phạm
-module skeleton mới
-bridge layer cho code cũ
-
-Definition of done
-
-Không còn file “vừa UI vừa business logic vừa persistence”
-Không còn import chéo sâu giữa các domain
-Mọi module đều có public entry rõ
-Xử lý vấn đề: UI và domain chưa tách sạch
-
-Mục tiêu
-UI chỉ lo hiển thị và tương tác, domain xử lý nghiệp vụ, application điều phối use-case.
-
-Đây là lỗi rất hay làm project chết chậm:
-
-UI component chứa logic workflow
-click button là chạy nguyên chuỗi logic phức tạp
-khó test
-khó tái sử dụng
-đổi giao diện là vỡ logic
-
-Mô hình đề xuất
-
-Tách 3 lớp rõ:
-
-Presentation
-Application
-Domain
-
-2.1 Presentation layer
-Gồm:
-
-page
-layout
-component hiển thị
-hooks UI
-animation binding UI
-
-Chỉ được:
-
-nhận props
-phát event
-gọi application command
-
-Không được:
-
-viết logic nghiệp vụ chính
-truy cập storage trực tiếp
-sửa domain object tùy tiện
-
-2.2 Application layer
-Gồm:
-
-use case
-command handler
-query service
-orchestration
-
-Ví dụ:
-
-sendMessage
-createReminder
-equipOutfit
-moveAvatarToInteractionPoint
-
-Application layer nhận event từ UI, gọi domain service, rồi gọi infrastructure adapter nếu cần.
-
-2.3 Domain layer
-Gồm:
-
-entity
-value object
-rule
-validation
-state transition rule
-
-Ví dụ:
-
-outfit slot conflict
-task status flow
-avatar state machine rule
-room interaction permission
-
-Cách triển khai
-
-Bước 2.1: Chọn 3 luồng quan trọng nhất để refactor mẫu
-Đừng refactor toàn bộ một lúc. Chọn:
-
-gửi chat
-tạo/cập nhật task
-thay trang phục/phụ kiện
-
-Đây là 3 use-case đại diện cho 3 domain lớn.
-
-Bước 2.2: Với mỗi luồng, tách thành dạng
-
-UI component
-application service
-domain model
-storage adapter
-
-Ví dụ outfit:
-
-AvatarWardrobePanel.tsx
-EquipOutfitItem.ts
-OutfitRules.ts
-WardrobeRepository.ts
-
-Bước 2.3: Loại bỏ side effect khỏi component
-Mọi thứ như:
-
-đọc file
-ghi config
-sửa local db
-quyết định business rule
-phải rời khỏi component.
-
-Bước 2.4: Dùng DTO/view model rõ ràng
-UI không nên dùng trực tiếp entity raw phức tạp.
-Tạo:
-
-TaskViewModel
-ChatMessageViewModel
-AvatarOutfitViewModel
-
-Bước 2.5: Tạo test tối thiểu cho application/domain
-Không cần test UI trước. Test:
-
-rule outfit conflict
-task transition
-message action routing
+Định nghĩa cách 4 phần UI mới cắm vào shell hiện tại.
+
+Việc cần làm
+
+Tạo file:
+docs/architecture/ui-modules-plan.md
+Chốt:
+route names
+màn nào dùng center stage thế nào
+màn nào dùng right panel thế nào
+event nào chuyển route
+controller nào sở hữu màn nào
+Chốt navigation model:
+CharacterSpace
+Planner
+Chat
+Wardrobe
+Chốt shared components:
+top bar
+sidebar
+panel header
+empty state
+loading state
+action button row
+badge
+section card
 
 Deliverable
 
-3 flow refactor mẫu
-convention 3 lớp
-component guideline
-application service guideline
-test nền cho business logic
+UI modules plan
+navigation map
+screen ownership map
 
 Definition of done
 
-3 use-case chính không còn business logic nằm trong UI
-UI có thể thay đổi mà không phải viết lại rule nghiệp vụ
-Xử lý vấn đề: Docs dễ lệch repo
+có sơ đồ màn hình và controller responsibility rõ
+
+Phase 1. Dựng khung 4 màn hình mới
 
 Mục tiêu
-Biến docs thành một phần của quá trình phát triển, không phải tài liệu viết sau.
+Có đủ 4 màn hình riêng, route được, không cần logic sâu.
 
-Gốc rễ vấn đề
-Docs lệch vì:
+Việc cần làm
 
-không có file nào là nguồn sự thật chính
-agent sửa code nhưng không sửa docs
-docs quá dài, quá chung
-không có checklist cập nhật docs khi merge
-
-Cách làm
-
-Bước 3.1: Thiết lập “documentation hierarchy”
-Chia docs thành 4 tầng:
-
-README.md
-Giới thiệu dự án, cách chạy, cấu trúc cấp cao
-docs/architecture/
-Sơ đồ module, dependency rules, patterns
-docs/features/
-Tài liệu theo tính năng/domain
-docs/operations/
-Quy trình dev, release, agent workflow, task queue, coding rules
-
-Bước 3.2: Chỉ định source of truth cho từng loại thông tin
-Ví dụ:
-
-cấu trúc module: docs/architecture/module-boundaries.md
-quy tắc agent: AGENTS.md
-task đang làm: docs/project/task-queue.md
-trạng thái roadmap: docs/project/roadmap.md
-asset format: docs/features/avatar-asset-spec.md
-
-Không để cùng một thông tin xuất hiện ở 4 chỗ khác nhau.
-
-Bước 3.3: Áp dụng “docs changed with code”
-Rule cứng:
-Mọi PR thay đổi một trong các mục sau bắt buộc cập nhật docs:
-
-cấu trúc thư mục
-luồng tính năng
-interface giữa module
-asset spec
-command agent / workflow
-
-Bước 3.4: Tạo file changelog kiến trúc
-Ví dụ:
-docs/architecture/adr/
-Mỗi quyết định lớn có 1 file:
-
-tại sao chọn cách này
-lựa chọn bị loại bỏ
-tác động
-
-Ví dụ:
-
-ADR-001-module-boundaries.md
-ADR-002-avatar-slot-system.md
-ADR-003-agent-task-queue-governance.md
-
-Bước 3.5: Tạo doc audit checklist
-Mỗi lần agent làm xong phải tự kiểm:
-
-README có bị lỗi thời không
-feature doc có đúng flow không
-architecture doc có đúng module mới không
-task queue có cập nhật trạng thái không
+Tạo 4 UXML root screens:
+CharacterSpaceScreen.uxml
+PlannerScreen.uxml
+ChatScreen.uxml
+WardrobeScreen.uxml
+Tạo 4 controller:
+CharacterSpaceScreenController.cs
+PlannerScreenController.cs
+ChatScreenController.cs
+WardrobeScreenController.cs
+Mỗi screen phải có:
+header
+body
+empty/loading/error placeholders
+Gắn vào AppRouter
+AppShell chỉ chứa slot hiển thị screen hiện tại, không chứa logic riêng của từng screen
 
 Deliverable
 
-hệ phân tầng docs
-source of truth map
-ADR folder
-doc update checklist
-rule docs bắt buộc theo PR/task
+4 screen render được
+route qua lại được
+shell không phình thêm logic
 
 Definition of done
 
-Không còn tài liệu trùng vai trò
-PR/task nào đổi kiến trúc đều phải cập nhật docs tương ứng
-Agent không thể kết thúc task mà bỏ qua docs
-Xử lý vấn đề: Asset/avatar/customization dễ thành mớ hỗn hợp nếu không chuẩn hóa
+có thể chuyển qua lại 4 UI mới trong app
+
+Kế hoạch chi tiết cho từng phần UI
+
+UI phần 1: Không gian nhân vật
 
 Mục tiêu
-Biến avatar system thành một hệ thống có spec rõ, không phải bộ sưu tập file mesh/material/prefab rời rạc.
+Đây là giao diện “hero screen” của sản phẩm. Nó phải làm người dùng thấy đây là trợ lý sống trong một không gian, không phải dashboard bình thường.
 
-Rủi ro nếu không chuẩn hóa
+Bố cục đề xuất
 
-file asset đặt tên lộn xộn
-thiếu metadata cho item
-không rõ item nào dành cho slot nào
-model thay đổi skeleton làm hỏng animation
-outfit chồng sai layer
-phụ kiện không đồng bộ anchor point
-agent thêm asset nhưng phá pipeline
+Center stage:
 
-Cách làm
+khu vực phòng
+vùng render nhân vật
+vùng interaction hotspots
+subtitle/assistant state overlay
+action dock nhỏ
 
-Bước 4.1: Thiết kế asset contract
-Tạo tài liệu:
-docs/features/avatar-asset-spec.md
+Right panel:
 
-Trong đó định nghĩa:
+trạng thái nhân vật
+mood/state
+activity log ngắn
+quick actions:
+nói chuyện
+mở lịch
+thay đồ
+tương tác vật thể
 
-naming convention
-folder convention
-slot system
-metadata schema
-versioning
-preview/render rule
-dependency giữa item
+Cấu trúc UI nội bộ
 
-Ví dụ slot:
+Character Space center:
+
+RoomViewport
+AvatarStage
+InteractionHotspotLayer
+CharacterActionDock
+SubtitleOverlay
+
+Character Space right panel:
+
+CharacterStatusCard
+CurrentActivityCard
+QuickActionList
+EnvironmentInfoCard
+
+Các component cần code
+
+CharacterSpaceHeader
+AvatarViewportCard
+InteractionHotspotButton
+CharacterQuickActionBar
+CharacterStatusBadge
+ActivityFeedMini
+
+Controller responsibilities
+CharacterSpaceScreenController
+
+bind avatar state
+bind room state
+bind hotspots
+forward quick action events
+sync subtitle visibility
+
+Giai đoạn code cho phần này
+
+Step 1
+Dựng layout tĩnh phòng + nhân vật placeholder
+
+Step 2
+Dựng hotspot layer giả lập
+
+Step 3
+Dựng status panel và quick actions
+
+Step 4
+Nối với avatar state machine hiện có
+
+Step 5
+Chuẩn bị hook cho world interaction sau này
+
+Definition of done
+
+vào màn này thấy rõ phòng, nhân vật, nút tương tác, trạng thái nhân vật
+chưa cần AI world simulation hoàn chỉnh
+UI phần 2: Lịch trình và quản lý công việc
+
+Mục tiêu
+Đây là task/planner hub riêng, không còn chỉ là panel text placeholder như hiện tại.
+
+Bố cục đề xuất
+
+Center stage:
+
+top summary row
+task filters
+main calendar/list region
+quick add bar
+
+Right panel:
+
+AI planner suggestions
+selected task details
+actions:
+complete
+reschedule
+prioritize
+open in chat
+
+Cấu trúc UI nội bộ
+
+Planner center:
+
+PlannerSummaryRow
+PlannerFilterTabs
+PlannerMainContent
+TaskQuickAddBar
+
+Planner main content có 3 mode:
+
+Today
+Week
+Inbox/Completed
+
+Right panel:
+
+PlannerInsightCard
+SelectedTaskDetailCard
+TaskActionPanel
+
+Các component cần code
+
+PlannerSummaryCard
+TaskFilterTabGroup
+TaskListPanel
+TaskListItem
+TaskEmptyState
+TaskQuickAddInput
+TaskDetailCard
+PlannerInsightPanel
+
+Controller responsibilities
+PlannerScreenController
+
+bind task summaries
+bind current task view mode
+bind selected task
+dispatch task actions
+giữ planner chỉ là UI surface, không giữ business logic
+
+Giai đoạn code cho phần này
+
+Step 1
+Dựng skeleton có summary + filter + list + right detail panel
+
+Step 2
+Bind với TaskViewModelStore
+
+Step 3
+Tách selected task state riêng
+
+Step 4
+Thêm quick add và action bar
+
+Step 5
+Thay panel text placeholder hiện tại bằng layout module hóa
+
+Definition of done
+
+planner nhìn như một màn riêng hoàn chỉnh
+task list, filters, detail panel tồn tại rõ
+không còn cảm giác “text summary tạm bợ”
+UI phần 3: Chat với trợ lý
+
+Mục tiêu
+Biến chat từ panel phụ thành một surface mạnh hơn, có thể trở thành trung tâm điều phối của assistant.
+
+Bố cục đề xuất
+
+Center stage:
+
+thread chat lớn
+composer
+transcript preview
+assistant state row
+
+Right panel:
+
+context cards
+suggested prompts
+task actions generated
+memory snippets hoặc route diagnostics
+
+Cấu trúc UI nội bộ
+
+Chat center:
+
+ConversationHeader
+MessageThread
+AssistantStateBar
+TranscriptPreview
+ChatComposer
+
+Right panel:
+
+ContextSummaryCard
+TaskActionResultCard
+SuggestedPromptList
+MemorySnippetCard
+
+Các component cần code
+
+ChatMessageBubbleUser
+ChatMessageBubbleAssistant
+ChatThreadView
+ChatComposerBar
+MicButton
+ThinkingStateBar
+TranscriptPreviewPanel
+SuggestedPromptChip
+TaskActionConfirmationCard
+
+Controller responsibilities
+ChatScreenController
+
+bind conversation store
+bind transcript preview
+bind assistant route/state
+bind task action confirmations
+bind send/mic actions
+
+Giai đoạn code cho phần này
+
+Step 1
+Tách chat panel hiện có thành full screen layout
+
+Step 2
+Dựng message thread chuẩn
+
+Step 3
+Tách composer và transcript preview
+
+Step 4
+Thêm context right panel
+
+Step 5
+Giữ khả năng embed chat panel nhỏ ở shell nếu cần sau này
+
+Definition of done
+
+chat có thể sống như màn chính, không chỉ panel phụ
+đủ chỗ cho voice, transcript, task action confirmations
+UI phần 4: Thay trang phục và phụ kiện
+
+Mục tiêu
+Tạo giao diện wardrobe rõ ràng, sẵn sàng cho avatar asset pipeline.
+
+Bố cục đề xuất
+
+Center stage:
+
+preview nhân vật lớn
+current outfit summary
+preview controls
+
+Right panel:
+
+slot selector
+item list theo slot
+filter/search
+equip/unequip/reset/apply
+
+Cấu trúc UI nội bộ
+
+Center:
+
+WardrobeAvatarPreview
+CurrentOutfitSummary
+PreviewControls
+
+Right:
+
+WardrobeSlotTabs
+WardrobeItemGrid
+WardrobeItemDetail
+WardrobeActionBar
+
+Slots ban đầu:
 
 hair
-hair_accessory
+hair accessory
 top
 bottom
 skirt
 socks
 shoes
 gloves
-bracelet_left
-bracelet_right
+bracelet left
+bracelet right
 
-Bước 4.2: Chuẩn hóa thư mục asset
-Ví dụ:
+Các component cần code
 
-assets/avatar/base/
-assets/avatar/outfits/
-assets/avatar/accessories/
-assets/avatar/materials/
-assets/avatar/icons/
-assets/avatar/registry/
+WardrobeSlotTab
+WardrobeItemCard
+WardrobeItemGrid
+WardrobeFilterBar
+WardrobeItemDetailCard
+OutfitSummaryCard
+EquipActionBar
 
-Bước 4.3: Mỗi asset phải có metadata
-Ví dụ JSON hoặc TS object:
+Controller responsibilities
+WardrobeScreenController
 
-id
-displayName
-category
-slot
-compatibleBodyType
-requiredBaseVersion
-conflictsWith
-previewIcon
-modelPath
-materialSet
-tags
+bind selected slot
+bind item list của slot
+bind selected item
+gọi equip/unequip/apply/reset qua wardrobe service
+cập nhật preview state
 
-Không cho phép asset “chỉ có file mà không có metadata”.
+Giai đoạn code cho phần này
 
-Bước 4.4: Tạo avatar registry
-Một nơi duy nhất quản lý asset đã đăng ký:
+Step 1
+Dựng preview + slot tabs + item grid
 
-không scan tự do khắp repo
-không để UI đọc trực tiếp folder
+Step 2
+Bind với metadata item giả lập hoặc registry thật nếu đã có
 
-Ví dụ:
-AvatarAssetRegistry.ts
+Step 3
+Thêm selected item detail
 
-Nó chịu trách nhiệm:
+Step 4
+Thêm action bar equip/reset
 
-liệt kê item hợp lệ
-validate metadata
-trả item theo slot
-kiểm tra conflict
-
-Bước 4.5: Chuẩn hóa outfit rule
-Cần rule rõ:
-
-item nào loại trừ nhau
-layer render
-fallback khi thiếu asset
-xử lý item không tương thích
-equip atomic hay partial
-
-Ví dụ:
-
-mặc full dress thì vô hiệu hóa top + bottom
-tóc dài có thể conflict với áo cổ cao
-giày đặc biệt yêu cầu loại tất tương thích
-
-Bước 4.6: Tạo pipeline nhập asset mới
-Mỗi asset mới phải đi qua:
-
-kiểm tra naming
-kiểm tra metadata
-kiểm tra slot
-kiểm tra skeleton/anchor
-render preview
-đăng ký vào registry
-update docs
-
-Deliverable
-
-asset spec
-registry system
-metadata schema
-slot and conflict rules
-asset intake checklist
+Step 5
+Chuẩn bị hook để gắn asset registry sau
 
 Definition of done
 
-Không còn asset “vô danh”
-Không còn UI truy cập asset tùy tiện
-Avatar customization chạy qua registry và rules
-Xử lý vấn đề: Dùng agent mà thiếu task queue và rule file sẽ làm kiến trúc xấu nhanh
+có thể chuyển slot, xem item, chọn item, xem detail, bấm equip giả lập
+sẵn sàng nối vào avatar system
 
-Mục tiêu
-Biến agent từ “thợ code tự phát” thành “executor trong hệ thống có luật”.
+Shared UI system cần làm song song
 
-Đây là điểm cực quan trọng với workflow của bạn.
+Để 4 UI nhìn cùng một sản phẩm, cần 1 lớp shared UI:
 
-Vấn đề gốc
-Nếu không có task queue + rule file:
+shared tokens
+spacing
+radius
+card styles
+badge styles
+text hierarchy
+panel styles
+shared components
+SectionHeader
+StatusBadge
+PrimaryButton
+SecondaryButton
+EmptyStateCard
+LoadingCard
+ErrorCard
+InfoCard
+shared layout helpers
+CenterStageLayout
+RightUtilityPanel
+SplitPanelContainer
+ScreenHeaderRow
 
-agent sửa lan
-tạo file trùng
-docs không cập nhật
-cấu trúc repo drift
-bug fix làm hỏng kiến trúc
-context ngày càng bẩn
+Nếu không làm shared layer, 4 phần sẽ rất dễ lệch phong cách và lặp code.
 
-Cách làm
+Lộ trình triển khai thực tế
 
-Bước 5.1: Tạo AGENTS.md mạnh và ngắn gọn
-Không viết lan man. Chỉ viết rule thi hành.
+Giai đoạn A. Shared shell foundation
 
-AGENTS.md nên có các phần:
+chốt router
+chốt screen slots
+dựng shared styles/components
 
-mục tiêu repo
-module boundaries
-những gì bị cấm
-quy trình trước khi code
-quy trình sau khi code
-quy tắc docs
-quy tắc task queue
-done criteria
+Giai đoạn B. 4 screen skeleton
 
-Các rule cứng nên có:
+tạo đủ 4 screen
+tạo 4 controller
+route qua lại được
 
-luôn đọc task hiện tại trước khi sửa
-không sửa ngoài phạm vi task nếu không ghi rõ
-không tạo file mới nếu đã có file đúng vai trò
-không import chéo domain trái quy định
-mọi thay đổi kiến trúc phải cập nhật docs liên quan
-mọi task phải cập nhật trạng thái trước và sau khi làm
+Giai đoạn C. Planner + Chat trước
+Lý do:
 
-Bước 5.2: Tạo task queue chuẩn
-Dùng file như:
-docs/project/task-queue.md
+2 phần này đã có dữ liệu/backend rõ hơn
+nhanh ra kết quả usable
 
-Mỗi task có:
+Giai đoạn D. Character Space
 
-id
-title
-type
-scope
-files expected
-constraints
-dependencies
-acceptance criteria
-docs to update
-status
+dựng visual shell + avatar state binding
 
-Status chuẩn:
+Giai đoạn E. Wardrobe
 
-backlog
-ready
-in_progress
-blocked
-review
-done
+dựng preview + slot system + item list
 
-Bước 5.3: Tách task theo kích thước nhỏ
-Agent không nên nhận task mơ hồ kiểu:
-“refactor whole app”
+Thứ tự ưu tiên code
 
-Nên tách kiểu:
+Tôi khuyên làm theo thứ tự này:
 
-TSK-001 tạo module skeleton
-TSK-002 chuyển planner logic sang application layer
-TSK-003 tạo avatar asset registry
-TSK-004 viết architecture docs cho module boundary
-TSK-005 cấm import chéo và sửa vi phạm mức A
+Shared UI foundation
+Planner UI
+Chat UI
+Character Space UI
+Wardrobe UI
 
-Bước 5.4: Tạo template task cho agent
-Mỗi task phải có template cứng:
+Lý do:
 
-objective
-non-goals
-in-scope
-out-of-scope
-files allowed to change
-expected outputs
-validation steps
-docs updates required
+Planner và Chat tận dụng code hiện có nhiều nhất
+Character và Wardrobe phụ thuộc avatar/world nhiều hơn
 
-Bước 5.5: Tạo completion protocol
-Khi agent kết thúc task phải báo:
+Danh sách task cụ thể cho agent
 
-đã sửa file nào
-đã không sửa file nào ngoài scope
-rule nào đã tuân thủ
-docs nào đã cập nhật
-còn nợ gì
-rủi ro gì còn lại
+UI-001
+Tạo docs/architecture/ui-modules-plan.md
 
-Bước 5.6: Tạo “architecture gate”
-Một số thay đổi phải qua gate, không cho agent tự làm rộng:
+UI-002
+Tạo 4 route mới trong AppRouter
 
-thêm module mới
-đổi cấu trúc asset
-đổi persistence strategy
-đổi event bus / state model
-đổi wardrobe slot spec
+UI-003
+Tạo 4 UXML root screens cho CharacterSpace, Planner, Chat, Wardrobe
 
-Các thay đổi này phải yêu cầu:
+UI-004
+Tạo 4 screen controllers tương ứng
 
-cập nhật ADR
-cập nhật docs kiến trúc
-cập nhật task queue
+UI-005
+Tạo shared style tokens và shared card/button/status components
 
-Deliverable
+UI-006
+Refactor shell để chỉ chịu trách nhiệm render screen hiện tại và utility panel framing
 
-AGENTS.md
-task queue
-task template
-completion checklist
-architecture gate rules
+UI-007
+Code Planner screen skeleton với summary, filter, task list, detail panel
 
-Definition of done
+UI-008
+Bind Planner screen với TaskViewModelStore
 
-Agent không làm việc ngoài task
-Mọi thay đổi đều truy vết được
-Repo không bị xấu nhanh do AI sửa tùy hứng
+UI-009
+Code Chat screen skeleton với thread, composer, transcript preview, context panel
+
+UI-010
+Bind Chat screen với conversation/chat store hiện có
+
+UI-011
+Code Character Space screen skeleton với avatar viewport, hotspot layer, status card, quick actions
+
+UI-012
+Bind Character Space với avatar state machine hiện có
+
+UI-013
+Code Wardrobe screen skeleton với preview, slot tabs, item grid, item detail
+
+UI-014
+Bind Wardrobe với wardrobe mock data hoặc registry nếu đã có
+
+UI-015
+Thêm loading/empty/error states cho cả 4 screens
+
+UI-016
+Cập nhật docs và task queue cho 4 UI modules mới
+
+Mốc hoàn thành mong muốn
+
+Mốc 1
+4 màn hình route được, render được
+
+Mốc 2
+Planner và Chat usable
+
+Mốc 3
+Character Space có cảm giác sản phẩm rõ
+
+Mốc 4
+Wardrobe có workflow chọn slot và item
+
+Mốc 5
+4 phần nhìn đồng bộ và có shared design system
+
+Tiêu chí hoàn thành cuối
+
+Xem như đạt nếu:
+
+4 UI mới tồn tại như 4 module rõ ràng
+Mỗi UI có controller riêng
+Mỗi UI có UXML và USS riêng
+Shared shell không bị nhồi logic
+Planner và Chat gắn được dữ liệu thật
+Character Space gắn được avatar state
+Wardrobe gắn được slot/item workflow
+Docs và task queue cập nhật đúng

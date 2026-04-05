@@ -25,7 +25,19 @@ namespace LocalAssistant.Core
 
         public static class Home
         {
+            public const string HomeStageViewport = "HomeStageViewport";
             public const string StagePlaceholderText = "StagePlaceholderText";
+            public const string SelectedRoomObjectTitleText = "SelectedRoomObjectTitleText";
+            public const string SelectedRoomObjectMetaText = "SelectedRoomObjectMetaText";
+            public const string SelectedRoomObjectActionText = "SelectedRoomObjectActionText";
+            public const string RoomActivityTitleText = "RoomActivityTitleText";
+            public const string RoomActivityDetailText = "RoomActivityDetailText";
+            public const string RoomModeText = "RoomModeText";
+            public const string RoomGoToButton = "RoomGoToButton";
+            public const string RoomInspectButton = "RoomInspectButton";
+            public const string RoomUseButton = "RoomUseButton";
+            public const string RoomReturnButton = "RoomReturnButton";
+            public const string RoomHotspotToggleButton = "RoomHotspotToggleButton";
             public const string TaskSummaryText = "TaskSummaryText";
             public const string TaskContentText = "TaskContentText";
             public const string TaskEmptyStateText = "TaskEmptyStateText";

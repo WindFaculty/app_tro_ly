@@ -9,6 +9,10 @@ Use this folder for current implementation architecture, dependency rules, and d
 - [phase1-audit.md](phase1-audit.md) - current Phase 1 violation list and cleanup status
 - [phase2-layering.md](phase2-layering.md) - current Phase 2 presentation/application split notes
 
+## Planned Work Docs
+
+- [ui-modules-plan.md](ui-modules-plan.md) - Phase 0 plan for future Character Space, Planner, Chat, and Wardrobe shell surfaces
+
 ## ADR
 
 - [adr/README.md](adr/README.md) - architecture decision record index

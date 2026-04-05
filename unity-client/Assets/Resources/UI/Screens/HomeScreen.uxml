@@ -99,32 +99,72 @@
             </ui:VisualElement>
 
             <ui:VisualElement class="home-stage-card">
-                <ui:VisualElement class="home-stage-backdrop home-stage-backdrop-large" />
-                <ui:VisualElement class="home-stage-backdrop home-stage-backdrop-small" />
-                <ui:VisualElement class="home-stage-dust home-stage-dust-a" />
-                <ui:VisualElement class="home-stage-dust home-stage-dust-b" />
-                <ui:VisualElement class="home-stage-dust home-stage-dust-c" />
+                <ui:VisualElement name="HomeStageViewport" class="home-stage-viewport">
+                    <ui:VisualElement class="home-stage-sheen" />
+                    <ui:VisualElement class="home-stage-grid" />
 
-                <ui:VisualElement class="home-stage-center">
-                    <ui:Label text="Avatar stage" class="panel-kicker home-stage-kicker" />
-                    <ui:VisualElement class="home-swing-stage">
-                        <ui:VisualElement class="home-swing-vine" />
-                        <ui:VisualElement class="home-swing-ropes">
-                            <ui:VisualElement class="home-swing-rope" />
-                            <ui:VisualElement class="home-swing-rope home-swing-rope-right" />
+                    <ui:VisualElement class="home-stage-header-row">
+                        <ui:VisualElement>
+                            <ui:Label text="Character Space" class="panel-kicker home-stage-kicker" />
+                            <ui:Label text="Room template online" class="home-stage-title" />
                         </ui:VisualElement>
-                        <ui:VisualElement class="home-swing-seat">
-                            <ui:VisualElement class="home-avatar-figure">
-                                <ui:VisualElement class="home-avatar-head" />
-                                <ui:VisualElement class="home-avatar-body" />
-                                <ui:Label name="HomeAvatarStateBadge" text="IDLE" class="avatar-badge" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
+                        <ui:Label name="HomeAvatarStateBadge" text="IDLE" class="avatar-badge home-stage-state-badge" />
                     </ui:VisualElement>
-                    <ui:Label
-                        name="StagePlaceholderText"
-                        text="Avatar stage placeholder. Runtime and shell status stay visible here until UI-07 binds the production stage."
-                        class="home-stage-copy" />
+
+                    <ui:VisualElement class="home-stage-floor-glow" />
+
+                    <ui:VisualElement class="shell-card home-stage-selection-card">
+                        <ui:Label text="Room focus" class="panel-kicker" />
+                        <ui:Label
+                            name="SelectedRoomObjectTitleText"
+                            text="No object selected"
+                            class="home-stage-selection-title" />
+                        <ui:Label
+                            name="SelectedRoomObjectMetaText"
+                            text="Character Space"
+                            class="home-stage-selection-meta" />
+                        <ui:Label
+                            name="SelectedRoomObjectActionText"
+                            text="Click a highlighted object in the room to inspect it."
+                            class="home-stage-selection-action" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="shell-card home-stage-activity-card">
+                        <ui:VisualElement class="home-stage-activity-header">
+                            <ui:Label text="Current activity" class="panel-kicker" />
+                            <ui:Label name="RoomModeText" text="ROOM READY" class="home-stage-mode-badge" />
+                        </ui:VisualElement>
+                        <ui:Label
+                            name="RoomActivityTitleText"
+                            text="Avatar hold"
+                            class="home-stage-activity-title" />
+                        <ui:Label
+                            name="RoomActivityDetailText"
+                            text="Select a highlighted room object to reveal contextual room actions."
+                            class="home-stage-activity-detail" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="shell-card home-stage-dock-card">
+                        <ui:Label text="Room action dock" class="panel-kicker" />
+                        <ui:VisualElement class="home-stage-dock-grid">
+                            <ui:Button name="RoomGoToButton" text="Go to" class="home-stage-dock-button" />
+                            <ui:Button name="RoomInspectButton" text="Inspect" class="home-stage-dock-button" />
+                            <ui:Button name="RoomUseButton" text="Use" class="home-stage-dock-button" />
+                            <ui:Button name="RoomReturnButton" text="Return" class="home-stage-dock-button home-stage-dock-button-secondary" />
+                        </ui:VisualElement>
+                        <ui:Button
+                            name="RoomHotspotToggleButton"
+                            text="Hide hotspots"
+                            class="home-stage-dock-toggle" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="shell-card home-stage-caption-card">
+                        <ui:Label text="Room status" class="panel-kicker" />
+                        <ui:Label
+                            name="StagePlaceholderText"
+                            text="Room template is loading. Camera, spawn point, and the basic room shell will appear behind this overlay."
+                            class="home-stage-copy" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

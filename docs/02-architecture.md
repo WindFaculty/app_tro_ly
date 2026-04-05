@@ -1,6 +1,6 @@
 # Architecture - Current Assistant Runtime
 
-Updated: 2026-04-05
+Updated: 2026-04-06
 
 This document describes the current implementation in the repo. It does not treat target-state design notes as already shipped.
 
@@ -27,7 +27,7 @@ Unity client
 ### Entry and composition
 
 - `Assets/Scripts/Core/AssistantApp.cs` is the runtime coordinator.
-- `Assets/Scripts/App/AppCompositionRoot.cs` creates the runtime camera, UI document, audio playback, subtitle presenter, reminder presenter, and placeholder avatar-state runtime pieces.
+- `Assets/Scripts/App/AppCompositionRoot.cs` creates the runtime camera, UI document, audio playback, subtitle presenter, reminder presenter, placeholder avatar-state runtime pieces, the room-world foundation bootstrap for the center stage, and the first character-to-room bridge for spawn plus attention wiring.
 - `Assets/Scripts/Core/UiDocumentLoader.cs` loads `Assets/Resources/UI/MainUI.uxml`.
 - `Assets/Scripts/Core/AssistantEventBus.cs` plus `Assets/Scripts/Core/AppModuleEvents.cs` now carry planner handoff, subtitle visibility, and avatar-state signals across the Unity client runtime.
 
@@ -44,11 +44,15 @@ Unity client
   - reminder overlay
 - Runtime styles live in `Assets/Resources/UI/Styles/*.uss`.
 - `Assets/Resources/UI/MainStyle.uss` is deprecated and not the active style source.
+- `Assets/Resources/World/Rooms/Room_Base.prefab` now provides the placeholder-safe room-root template used by the center-stage room bootstrap.
+- `Assets/Scripts/World/Room/` now holds the placeholder-safe room foundation bootstrap used by the Home center stage.
+- `Assets/Scripts/World/Objects/` now holds the placeholder-safe room-object registry, definitions, placements, and primitive object factory used by the room foundation.
+- `Assets/Scripts/World/Interaction/` now holds the basic room interaction layer for hover, selection, camera focus, and selected-object snapshots.
 
 ### Screen flow and controllers
 
 - `IShellModule` and `AppShellState` manage four-zone shell state such as planner-sheet expansion, chat visibility, and settings drawer visibility.
-- `HomeModule` now owns the center-stage Home boundary while `HomeScreenController` stays presentation-only for the orbit-style stage, task summary, quick-add input, focus lanes, and stage-status copy.
+- `HomeModule` now owns the center-stage Home boundary while `HomeScreenController` stays presentation-only for the room-backed Character Space foundation copy, selected-object overlay, current-activity strip, room action dock, task summary, quick-add input, focus lanes, and stage-status copy.
 - `ScheduleScreenController` renders today, week, inbox, and completed planner views into the bottom-sheet schedule canvas with date navigation and direct task actions.
 - `SettingsScreenController` binds backend-backed toggles and save or reload actions inside the drawer.
 - `SettingsModule` now owns the Unity-side settings snapshot, dirty-state tracking, and settings drawer event boundary before `AssistantApp` calls backend settings APIs.
@@ -77,6 +81,13 @@ Unity client
 - `AvatarStateMachine` drives placeholder state visuals.
 - `AudioPlaybackController` manages spoken reply playback while subtitle visibility and avatar-state transitions are now triggered from shared event contracts in `AssistantApp`.
 - `LipSyncController` applies amplitude-based lip sync to a fallback face mesh or transform.
+- `CharacterRoomBridge` now keeps the room-owned avatar presence aligned with the room spawn point: if no production avatar exists in the active scene, it builds a placeholder avatar proxy inside the room, binds that proxy to `AvatarStateMachine`, and turns the avatar toward the current room attention target.
+- `RoomSceneBootstrap` now loads `Assets/Resources/World/Rooms/Room_Base.prefab` when available and falls back to a generated room root when it is not.
+- `RoomWorldController` now binds to that room template hierarchy, rebuilds the placeholder shell geometry under `ShellGeometry`, and keeps the spawn point, camera anchor, and basic anchor clusters aligned with `RoomLayoutDefinition`.
+- `RoomObjectRegistry` and `RoomObjectFactory` now drive a richer 12-object placeholder population from metadata plus placement config instead of hardcoded per-cluster object creation, including the desk, laptop, chair, sofa, side table, shelf, books, plant, lamp, wall art, cabinet, and storage box clusters used by the current room foundation.
+- `RoomInteractionController`, `InteractableObject`, and `SelectedRoomObjectStore` now provide the first room interaction slice: selectable room objects can be hovered, clicked, highlighted, pushed into a selected-object snapshot with state plus suggested-action metadata, and focus-capable objects can redirect the stage camera while the Home overlay shows the current room selection.
+- `AssistantApp` now handles the first room action-dock commands on top of that selection flow: go-to or inspect or use intents remain placeholder-safe activity updates, return-to-avatar clears selection plus attention, and hotspot visibility toggles room anchor markers without moving world logic into `HomeScreenController`.
+- `RoomObjectRegistryValidator` now provides intake-time contract checks for the current room-object registry, and `Tools/TroLy/Validate Room Object Registry` plus `Tools/TroLy/Validate Room Object Prefab Intake` expose placeholder-safe versus strict-prefab validation paths in the Unity Editor.
 - `AvatarOutfitApplicationService` now exposes a placeholder-safe application contract over `AvatarEquipmentManager` and `AvatarPresetManager`, but no shell-facing wardrobe UI is shipped yet.
 - `AvatarAssetRegistryDefinition` now defines the registry shape for allowed outfit items, cross-slot rules, and presets so future customization flows do not need to scan folders or pass ad-hoc item lists.
 - `Assets/AvatarSystem/` contains the production-avatar groundwork:
@@ -165,7 +176,9 @@ SQLite stores:
 
 ## Known Gaps
 
-- The current client still contains placeholder or shell-owned helper content in the Home avatar stage and the schedule-side panel.
+- The room-backed Home stage is still a foundation slice only: a template-backed room root, fuller placeholder object population, selected-object UI, a lightweight room action dock, and a placeholder-safe character-room bridge now exist, but prefab-backed object intake, movement-grade character behavior behind the dock, real object-state mutations for use or go-to intents, and production-avatar scene binding are not implemented yet.
+- Phase 7 intake hardening is now repo-side only: checklist and validator scaffolding exist, but the current room population still uses primitive placeholder geometry rather than shipped prefab assets.
+- The current client still contains placeholder or shell-owned helper content in the schedule-side panel.
 - The schedule surface is list-first, not a finished calendar-grid module.
 - The Phase 2 layering slice is partial: `AssistantApp` still remains the top-level coordinator and the new application services are consumed from there instead of a separate application-composition root.
 - No wardrobe or accessory UI exists in the shell yet; only the outfit application contract is present.

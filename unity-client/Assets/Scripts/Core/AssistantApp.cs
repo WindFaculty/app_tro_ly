@@ -13,6 +13,8 @@ using LocalAssistant.Features.Settings;
 using LocalAssistant.Network;
 using LocalAssistant.Notifications;
 using LocalAssistant.Tasks;
+using LocalAssistant.World.Interaction;
+using LocalAssistant.World.Room;
 using UnityEngine;
 using AvatarSystem;
 
@@ -45,6 +47,9 @@ namespace LocalAssistant.Core
         private AudioPlaybackController audioPlaybackController;
         private SubtitlePresenter subtitlePresenter;
         private ReminderPresenter reminderPresenter;
+        private RoomWorldController roomWorldController;
+        private RoomInteractionController roomInteractionController;
+        private CharacterRoomBridge characterRoomBridge;
         private IShellModule shellModule;
         private IHomeModule homeModule;
         private IPlannerModule plannerModule;
@@ -70,6 +75,9 @@ namespace LocalAssistant.Core
         private bool awaitingQuickAddResult;
         private AudioClip recordingClip;
         private AvatarState conversationVisualState = AvatarState.Idle;
+        private RoomObjectSelectionSnapshot currentRoomSelection = RoomObjectSelectionSnapshot.None;
+        private string currentRoomActivityTitle = "Avatar hold";
+        private string currentRoomActivityDetail = "Select a highlighted room object to reveal contextual room actions.";
 
         // UI init
         private void Awake()
@@ -84,8 +92,15 @@ namespace LocalAssistant.Core
             audioPlaybackController = composition.AudioPlaybackController;
             subtitlePresenter = composition.SubtitlePresenter;
             reminderPresenter = composition.ReminderPresenter;
+            roomWorldController = composition.RoomWorldController;
+            roomInteractionController = composition.RoomInteractionController;
+            characterRoomBridge = composition.CharacterRoomBridge;
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
+            if (roomInteractionController != null)
+            {
+                roomInteractionController.SelectionChanged += HandleRoomSelectionChanged;
+            }
             shellModule = new ShellModule(ui.Shell);
             homeModule = new HomeModule(ui.Home);
             plannerModule = new PlannerModule(ui.Schedule);
@@ -99,6 +114,7 @@ namespace LocalAssistant.Core
             RegisterSharedEventFlow();
             shellModule.RefreshRequested += RefreshWorkspace;
             homeModule.QuickAddRequested += SubmitQuickAddMessage;
+            homeModule.RoomActionRequested += HandleRoomActionRequested;
             plannerModule.TodayRequested += PublishPlannerTodayRequested;
             plannerModule.DateOffsetRequested += PublishPlannerDateOffsetRequested;
             plannerModule.DaySelected += PublishPlannerDaySelected;
@@ -115,6 +131,8 @@ namespace LocalAssistant.Core
             chatModule.SetSystemStatus("LOADING", "Loading local workspace", "Connecting to the backend and preparing stage, planner, settings, and chat.");
             shellModule.RenderBootState("Loading runtime", "Connecting to the local backend and preparing the four-zone shell...", LoadingColor);
             homeModule.SetQuickAddStatus("Quick add becomes available after the workspace loads.", InfoColor);
+            homeModule.RenderSelectedRoomObject(currentRoomSelection);
+            homeModule.RenderRoomOverlayState(BuildRoomOverlayState());
             SetSettingsStatus("Loading settings...", InfoColor);
 
             plannerModule.ShowScreen(currentPlannerScreen);
@@ -136,6 +154,7 @@ namespace LocalAssistant.Core
         {
             if (avatarStateMachine != null) avatarStateMachine.StateChanged -= OnAvatarStateChanged;
             if (audioPlaybackController != null) audioPlaybackController.PlaybackCompleted -= OnAudioPlaybackCompleted;
+            if (roomInteractionController != null) roomInteractionController.SelectionChanged -= HandleRoomSelectionChanged;
             foreach (var subscription in eventSubscriptions)
             {
                 subscription?.Dispose();
@@ -1024,6 +1043,97 @@ namespace LocalAssistant.Core
                     settingsModule,
                     chatModule));
             homeModule?.RenderStage(avatarStateMachine.CurrentState);
+            homeModule?.RenderSelectedRoomObject(currentRoomSelection);
+            homeModule?.RenderRoomOverlayState(BuildRoomOverlayState());
+        }
+
+        private void HandleRoomSelectionChanged(RoomObjectSelectionSnapshot snapshot)
+        {
+            currentRoomSelection = snapshot ?? RoomObjectSelectionSnapshot.None;
+            if (currentRoomSelection.HasSelection)
+            {
+                currentRoomActivityTitle = $"Focused on {currentRoomSelection.DisplayName}";
+                currentRoomActivityDetail = currentRoomSelection.SuggestedActionText;
+            }
+            else
+            {
+                currentRoomActivityTitle = "Avatar hold";
+                currentRoomActivityDetail = "Select a highlighted room object to reveal contextual room actions.";
+            }
+
+            if (!HasLiveUi())
+            {
+                return;
+            }
+
+            homeModule?.RenderSelectedRoomObject(currentRoomSelection);
+            homeModule?.RenderRoomOverlayState(BuildRoomOverlayState());
+        }
+
+        private void HandleRoomActionRequested(HomeRoomAction action)
+        {
+            switch (action)
+            {
+                case HomeRoomAction.GoTo:
+                    if (!currentRoomSelection.HasSelection)
+                    {
+                        return;
+                    }
+
+                    if (roomInteractionController != null && roomInteractionController.HasFocusTarget)
+                    {
+                        characterRoomBridge?.SetAttentionTarget(roomInteractionController.CurrentFocusPoint);
+                    }
+
+                    SetRoomActivity(
+                        $"Route prepared for {currentRoomSelection.DisplayName}",
+                        "Movement is still placeholder-safe in this phase, so the avatar keeps position and locks attention on the selected object.");
+                    break;
+
+                case HomeRoomAction.Inspect:
+                    if (!currentRoomSelection.HasSelection)
+                    {
+                        return;
+                    }
+
+                    SetRoomActivity(
+                        $"Inspecting {currentRoomSelection.DisplayName}",
+                        currentRoomSelection.StateText);
+                    break;
+
+                case HomeRoomAction.Use:
+                    if (!currentRoomSelection.HasSelection)
+                    {
+                        return;
+                    }
+
+                    SetRoomActivity(
+                        $"Use intent queued for {currentRoomSelection.DisplayName}",
+                        "Phase 6 keeps use flows placeholder-safe: the dock now records intent while later slices can add movement, animation, or real object state changes.");
+                    break;
+
+                case HomeRoomAction.ReturnToAvatar:
+                    roomInteractionController?.ClearSelection();
+                    characterRoomBridge?.ClearAttentionTarget();
+                    SetRoomActivity(
+                        "Avatar hold",
+                        "Selection cleared. The stage camera and avatar attention are back on the room's idle presentation.");
+                    break;
+
+                case HomeRoomAction.ToggleHotspots:
+                    if (roomWorldController == null)
+                    {
+                        return;
+                    }
+
+                    var hotspotsVisible = roomWorldController.ToggleHotspotsVisible();
+                    SetRoomActivity(
+                        hotspotsVisible ? "Room hotspots visible" : "Room hotspots hidden",
+                        hotspotsVisible
+                            ? "Anchor markers are visible again to show the room's main interaction clusters."
+                            : "Anchor markers are hidden so the room presentation stays cleaner while the action dock remains available.");
+                    break;
+            }
         }
 
         private void ClearSubtitleAndIdle()
@@ -1062,6 +1172,32 @@ namespace LocalAssistant.Core
             }
 
             homeModule.SetQuickAddStatus(status.Message, MapQuickAddColor(status.Kind));
+        }
+
+        private void SetRoomActivity(string title, string detail)
+        {
+            currentRoomActivityTitle = title ?? string.Empty;
+            currentRoomActivityDetail = detail ?? string.Empty;
+            homeModule?.RenderRoomOverlayState(BuildRoomOverlayState());
+        }
+
+        private HomeRoomOverlayState BuildRoomOverlayState()
+        {
+            var hotspotsVisible = roomWorldController == null || roomWorldController.HotspotsVisible;
+            return new HomeRoomOverlayState
+            {
+                ActivityTitle = string.IsNullOrWhiteSpace(currentRoomActivityTitle) ? "Avatar hold" : currentRoomActivityTitle,
+                ActivityDetail = string.IsNullOrWhiteSpace(currentRoomActivityDetail)
+                    ? "Select a highlighted room object to reveal contextual room actions."
+                    : currentRoomActivityDetail,
+                ModeLabel = currentRoomSelection.HasSelection ? "OBJECT FOCUS" : "ROOM READY",
+                HotspotButtonText = hotspotsVisible ? "Hide hotspots" : "Show hotspots",
+                GoToEnabled = currentRoomSelection.HasSelection && currentRoomSelection.SupportsGoTo,
+                InspectEnabled = currentRoomSelection.HasSelection && currentRoomSelection.SupportsInspect,
+                UseEnabled = currentRoomSelection.HasSelection && currentRoomSelection.SupportsUse,
+                ReturnEnabled = true,
+                ToggleHotspotsEnabled = roomWorldController != null,
+            };
         }
 
         private Color MapQuickAddColor(QuickAddStatusKind kind)

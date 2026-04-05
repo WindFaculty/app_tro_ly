@@ -2,6 +2,7 @@ using LocalAssistant.Avatar;
 using LocalAssistant.Chat;
 using LocalAssistant.Core;
 using LocalAssistant.Tasks;
+using LocalAssistant.World.Interaction;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace LocalAssistant.Features.Home
         private bool taskActionsEnabled = true;
         private string quickAddStatusText = string.Empty;
         private Color quickAddStatusColor = new(0.24f, 0.78f, 0.91f, 1f);
+        private HomeRoomOverlayState roomOverlayState = HomeRoomOverlayState.Default;
 
         public HomeScreenController(HomeScreenRefs home)
         {
@@ -22,6 +24,7 @@ namespace LocalAssistant.Features.Home
         }
 
         public event Action<string> QuickAddRequested;
+        public event Action<HomeRoomAction> RoomActionRequested;
 
         public void Bind()
         {
@@ -33,6 +36,31 @@ namespace LocalAssistant.Features.Home
             if (home.QuickAddInput != null)
             {
                 home.QuickAddInput.RegisterCallback<KeyDownEvent>(HandleQuickAddKeyDown);
+            }
+
+            if (home.RoomGoToButton != null)
+            {
+                home.RoomGoToButton.clicked += () => RequestRoomAction(HomeRoomAction.GoTo);
+            }
+
+            if (home.RoomInspectButton != null)
+            {
+                home.RoomInspectButton.clicked += () => RequestRoomAction(HomeRoomAction.Inspect);
+            }
+
+            if (home.RoomUseButton != null)
+            {
+                home.RoomUseButton.clicked += () => RequestRoomAction(HomeRoomAction.Use);
+            }
+
+            if (home.RoomReturnButton != null)
+            {
+                home.RoomReturnButton.clicked += () => RequestRoomAction(HomeRoomAction.ReturnToAvatar);
+            }
+
+            if (home.RoomHotspotToggleButton != null)
+            {
+                home.RoomHotspotToggleButton.clicked += () => RequestRoomAction(HomeRoomAction.ToggleHotspots);
             }
         }
 
@@ -153,12 +181,37 @@ namespace LocalAssistant.Features.Home
             }
         }
 
+        public void RequestRoomAction(HomeRoomAction action)
+        {
+            if (!CanRequestRoomAction(action))
+            {
+                return;
+            }
+
+            RoomActionRequested?.Invoke(action);
+        }
+
         public void RenderStage(AvatarState avatarState)
         {
             if (home.HomeAvatarStateBadge != null)
             {
                 home.HomeAvatarStateBadge.text = avatarState.ToString().ToUpperInvariant();
             }
+        }
+
+        public void RenderSelectedRoomObject(RoomObjectSelectionSnapshot snapshot)
+        {
+            snapshot ??= RoomObjectSelectionSnapshot.None;
+            SetLabel(home.SelectedRoomObjectTitleText, snapshot.DisplayName);
+            SetLabel(home.SelectedRoomObjectMetaText, snapshot.CategoryLabel);
+            SetLabel(home.SelectedRoomObjectActionText, BuildSelectionBodyText(snapshot));
+            RefreshRoomOverlayVisuals();
+        }
+
+        public void RenderRoomOverlayState(HomeRoomOverlayState state)
+        {
+            roomOverlayState = state ?? HomeRoomOverlayState.Default;
+            RefreshRoomOverlayVisuals();
         }
 
         private static string BuildHomeSummary(int scheduledCount, int dueSoonCount, int overdueCount, int inboxCount, int completedCount)
@@ -219,8 +272,8 @@ namespace LocalAssistant.Features.Home
         private static string BuildStagePlaceholderText(IPlannerTaskSnapshotSource taskStore)
         {
             return
-                "Avatar stage placeholder with an orbit-style shell.\n" +
-                "Hybrid streaming remains active while task, chat, and health signals float around the center stage.\n" +
+                "Room template active with a stable stage camera, anchor-driven avatar spawn, prefab-backed root hierarchy, and shell geometry.\n" +
+                "Select a highlighted room object to inspect it, use the room action dock, or hide anchor hotspots for a cleaner view.\n" +
                 $"Today {CountOf(taskStore.Today.Items)} | Due soon {CountOf(taskStore.Today.DueSoon)} | Overdue {CountOf(taskStore.Today.Overdue)}";
         }
 
@@ -259,6 +312,63 @@ namespace LocalAssistant.Features.Home
             if (label != null)
             {
                 label.text = value;
+            }
+        }
+
+        private void RefreshRoomOverlayVisuals()
+        {
+            SetLabel(home.RoomActivityTitleText, roomOverlayState.ActivityTitle);
+            SetLabel(home.RoomActivityDetailText, roomOverlayState.ActivityDetail);
+            SetLabel(home.RoomModeText, roomOverlayState.ModeLabel);
+            SetButtonText(home.RoomHotspotToggleButton, roomOverlayState.HotspotButtonText);
+            SetButtonEnabled(home.RoomGoToButton, roomOverlayState.GoToEnabled);
+            SetButtonEnabled(home.RoomInspectButton, roomOverlayState.InspectEnabled);
+            SetButtonEnabled(home.RoomUseButton, roomOverlayState.UseEnabled);
+            SetButtonEnabled(home.RoomReturnButton, roomOverlayState.ReturnEnabled);
+            SetButtonEnabled(home.RoomHotspotToggleButton, roomOverlayState.ToggleHotspotsEnabled);
+        }
+
+        private bool CanRequestRoomAction(HomeRoomAction action)
+        {
+            return action switch
+            {
+                HomeRoomAction.GoTo => roomOverlayState.GoToEnabled,
+                HomeRoomAction.Inspect => roomOverlayState.InspectEnabled,
+                HomeRoomAction.Use => roomOverlayState.UseEnabled,
+                HomeRoomAction.ReturnToAvatar => roomOverlayState.ReturnEnabled,
+                HomeRoomAction.ToggleHotspots => roomOverlayState.ToggleHotspotsEnabled,
+                _ => false,
+            };
+        }
+
+        private static string BuildSelectionBodyText(RoomObjectSelectionSnapshot snapshot)
+        {
+            var parts = new List<string>();
+            AppendNonEmpty(parts, snapshot.StateText);
+            AppendNonEmpty(parts, snapshot.DetailText);
+            AppendNonEmpty(parts, snapshot.SuggestedActionText);
+            AppendNonEmpty(parts, snapshot.ActionText);
+            return string.Join("\n", parts);
+        }
+
+        private static void AppendNonEmpty(List<string> parts, string value)
+        {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                parts.Add(value.Trim());
+            }
+        }
+
+        private static void SetButtonEnabled(Button button, bool isEnabled)
+        {
+            button?.SetEnabled(isEnabled);
+        }
+
+        private static void SetButtonText(Button button, string text)
+        {
+            if (button != null && !string.IsNullOrWhiteSpace(text))
+            {
+                button.text = text;
             }
         }
     }

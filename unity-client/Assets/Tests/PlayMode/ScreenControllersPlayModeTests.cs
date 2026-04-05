@@ -41,7 +41,7 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.AreEqual("1", refs.TodayCountText.text);
             Assert.AreEqual(DisplayStyle.Flex, refs.TaskContentText.style.display.value);
             StringAssert.Contains("Hop team", refs.FocusText.text);
-            StringAssert.Contains("orbit-style shell", refs.StagePlaceholderText.text);
+            StringAssert.Contains("Room template active", refs.StagePlaceholderText.text);
             Assert.AreEqual("READY", refs.HomeChatStatusBadge.text);
             StringAssert.Contains("planner", refs.HomeChatStatusDetail.text);
         }
@@ -56,7 +56,7 @@ namespace LocalAssistant.Tests.PlayMode
             controller.QuickAddRequested += value => submitted = value;
             controller.RequestQuickAdd();
 
-            Assert.AreEqual("Add task nap task", submitted);
+            Assert.AreEqual("nap task", submitted);
             Assert.AreEqual(string.Empty, refs.QuickAddInput.value);
         }
 
@@ -72,7 +72,7 @@ namespace LocalAssistant.Tests.PlayMode
             using var evt = KeyDownEvent.GetPooled('\n', KeyCode.Return, EventModifiers.None);
             controller.HandleQuickAddKeyDown(evt);
 
-            Assert.AreEqual("Add task xac nhan", submitted);
+            Assert.AreEqual("xac nhan", submitted);
         }
 
         [Test]
@@ -232,8 +232,20 @@ namespace LocalAssistant.Tests.PlayMode
         {
             return new HomeScreenRefs
             {
+                HomeStageViewport = new VisualElement(),
                 HomeAvatarStateBadge = new Label(),
                 StagePlaceholderText = new Label(),
+                RoomActivityTitleText = new Label(),
+                RoomActivityDetailText = new Label(),
+                RoomModeText = new Label(),
+                RoomGoToButton = new Button(),
+                RoomInspectButton = new Button(),
+                RoomUseButton = new Button(),
+                RoomReturnButton = new Button(),
+                RoomHotspotToggleButton = new Button(),
+                SelectedRoomObjectTitleText = new Label(),
+                SelectedRoomObjectMetaText = new Label(),
+                SelectedRoomObjectActionText = new Label(),
                 TaskSummaryText = new Label(),
                 TaskContentText = new Label(),
                 TaskEmptyStateText = new Label(),
