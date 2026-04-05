@@ -149,7 +149,7 @@ namespace LocalAssistant.Features.Home
             home.QuickAddInput.value = string.Empty;
             if (!string.IsNullOrWhiteSpace(value))
             {
-                QuickAddRequested?.Invoke("Add task " + value);
+                QuickAddRequested?.Invoke(value);
             }
         }
 

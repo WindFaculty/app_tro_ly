@@ -131,6 +131,38 @@ namespace AvatarSystem.Editor
 
             Debug.Log($"[AvatarValidator] Preset validation complete: {issues} issues out of {guids.Length} presets.");
         }
+
+        [MenuItem("Tools/AvatarSystem/Validate Asset Registries")]
+        public static void ValidateAssetRegistries()
+        {
+            string[] guids = AssetDatabase.FindAssets("t:AvatarAssetRegistryDefinition");
+            int errorCount = 0;
+            int warnCount = 0;
+
+            Debug.Log($"[AvatarValidator] Scanning {guids.Length} asset registries...");
+
+            foreach (string guid in guids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var registry = AssetDatabase.LoadAssetAtPath<AvatarAssetRegistryDefinition>(path);
+                if (registry == null) continue;
+
+                var report = registry.ValidateRegistry();
+                foreach (var error in report.Errors)
+                {
+                    Debug.LogError($"[AvatarValidator] {path}: {error}", registry);
+                    errorCount++;
+                }
+
+                foreach (var warning in report.Warnings)
+                {
+                    Debug.LogWarning($"[AvatarValidator] {path}: {warning}", registry);
+                    warnCount++;
+                }
+            }
+
+            Debug.Log($"[AvatarValidator] Registry validation complete: {errorCount} errors, {warnCount} warnings out of {guids.Length} registries.");
+        }
     }
 }
 #endif

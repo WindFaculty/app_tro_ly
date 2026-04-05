@@ -38,7 +38,7 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 
 - UI Toolkit entrypoint at `unity-client/Assets/Resources/UI/MainUI.uxml`
 - Shell layout in `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
-- Screen controllers for Home, Schedule, Settings, and Chat
+- Module boundaries for Shell, Planner, Chat, and Settings on top of the current UI Toolkit screens
 - REST plus WebSocket clients for health, tasks, settings, reminders, chat, and streaming assistant turns
 - Subtitle overlay, reminder overlay, audio playback, transcript preview, and task summaries
 - Placeholder avatar-state presentation plus optional scene-level `AvatarConversationBridge` integration
@@ -125,6 +125,19 @@ Use it before diving into the deeper architecture, API, UI, runbook, or task-tra
 
 - [docs/index.md](docs/index.md)
 - [docs/roadmap.md](docs/roadmap.md)
+- [docs/architecture/README.md](docs/architecture/README.md)
+- [docs/features/README.md](docs/features/README.md)
+- [docs/operations/README.md](docs/operations/README.md)
+- [docs/migration/phase0.md](docs/migration/phase0.md)
+- [docs/architecture/domain-map.md](docs/architecture/domain-map.md)
+- [docs/architecture/dependency-rules.md](docs/architecture/dependency-rules.md)
+- [docs/architecture/adr/README.md](docs/architecture/adr/README.md)
+- [docs/architecture/phase1-audit.md](docs/architecture/phase1-audit.md)
+- [docs/operations/agent-workflow.md](docs/operations/agent-workflow.md)
+- [docs/operations/documentation-governance.md](docs/operations/documentation-governance.md)
+- [docs/operations/doc-audit-checklist.md](docs/operations/doc-audit-checklist.md)
+- [docs/features/avatar-asset-spec.md](docs/features/avatar-asset-spec.md)
+- [docs/features/avatar-asset-intake-checklist.md](docs/features/avatar-asset-intake-checklist.md)
 - [docs/00-context.md](docs/00-context.md)
 - [docs/01-scope.md](docs/01-scope.md)
 - [docs/02-architecture.md](docs/02-architecture.md)
@@ -139,4 +152,19 @@ Use it before diving into the deeper architecture, API, UI, runbook, or task-tra
 
 - `tasks/task-queue.md`: current AI-executable repo work
 - `tasks/task-people.md`: manual or off-repo work
+- `tasks/task-template.md`: task template and completion checklist for scoped AI work
 - `tasks/done.md`: historical completion log and doc refresh history
+
+## Documentation Governance
+
+- `README.md` is the repo entry point.
+- `docs/architecture/` owns current architecture, boundary, and ADR records.
+- `docs/features/` owns feature-level navigation and specs.
+- `docs/operations/` owns workflow, governance, and runbook-oriented docs.
+- When code changes module boundaries, feature flow, public contracts, asset specs, or agent workflow, update docs in the same task.
+
+## Agent Workflow
+
+- `AGENTS.md` is the repo-wide machine-facing rule file.
+- `docs/operations/agent-workflow.md` defines the current before/during/after coding flow and completion protocol.
+- `tasks/task-template.md` defines the scoped task shape and the final completion report fields.

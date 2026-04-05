@@ -11,10 +11,12 @@ Ownership: `Axx` = AI-executable repo work | `Pxx` = manual or off-repo work tra
 - Move completed work to `tasks/done.md` instead of leaving stale done items in the active queue.
 - Use `tasks/task-people.md` for Unity Editor smoke, target-machine checks, external assets, approvals, or credentials.
 - Use `tasks/module-migration-backlog.md` for phased modularization planning; it is not the active queue.
+- Use `tasks/task-template.md` and `docs/operations/agent-workflow.md` when creating or splitting scoped AI work.
 
 ## Current Focus
 
 - Keep the current `unity-client/` plus `local-backend/` runtime stable while modularization continues inside the existing tree.
+- Respect the Phase 0 freeze: start only boundary, validation, docs, governance, regression-fix, or approved placeholder-safe contract work unless the tracker explicitly approves broader scope.
 - Close the remaining live-smoke gates under `P02` without rewriting current implementation history.
 - Continue phased module-boundary work only where repo-side evidence already exists.
 - Keep docs and task governance aligned with landed code so design-target material is not mistaken for shipped behavior.
@@ -37,6 +39,7 @@ The 4-lane split below supersedes the historical `UI-01` through `UI-09` slice m
 
 - Objective: keep shell navigation, degraded-mode messaging, packaged startup surfaces, and shared shell-state copy understandable while the module boundary work settles.
 - Completed groundwork reference: `A30` shell module extraction is done and now lives in `tasks/done.md` plus `tasks/module-migration-backlog.md`.
+- Completed groundwork reference: `A41` settings boundary extraction and the Phase 1 dependency audit are done and now live in `tasks/done.md` plus `tasks/module-migration-backlog.md`.
 - Active tasks:
   - `A04 | DOING | Polish Unity degraded-mode, recovery, and backend-unavailable UX so the shell stays understandable when health is partial or error. | Current state: health banners, recovery guidance, interaction gating, and shell-side status copy exist in repo; remaining work is live-client and packaged-client validation under the current shell boundary. | Manual gate: P02`
   - `A07 | DOING | Refine the existing UI Toolkit shell toward the design target without claiming the design target is already shipped. | Current state: the runtime shell now uses a four-zone layout with a left control rail, center avatar stage, bottom planner sheet, right chat panel, and drawer-based settings; remaining work is final smoke and polish against the current runtime. | Manual gate: P02`
@@ -79,7 +82,7 @@ The 4-lane split below supersedes the historical `UI-01` through `UI-09` slice m
   - `A14 | TODO | Formalize the production-avatar integration contract between the assistant shell and `Assets/AvatarSystem/`. | Current state: avatar runtime controllers, prototype assets, validators, and probe scenes exist, but the shell still needs a signed-off scene integration path. | Manual gate: P04`
   - `A15 | TODO | Prepare the final avatar replacement path so a signed-off avatar can replace placeholder presentation without broad shell rewrites. | Current state: avatar groundwork exists, but live shell integration is still partial. | Manual gates: P02 P04`
   - `A35 | BLOCKED | Implement the avatar-experience module boundary while preserving placeholder fallback until approved assets arrive. | Current state: blocked planned work; do not claim production avatar completion before the asset handoff exists. | Manual gate: P04`
-  - `A36 | TODO | Implement the wardrobe plus asset-data foundation so placeholder or sample customization can exist before final production content arrives. | Current state: planned modularization work only and still downstream from the avatar contract.`
+  - `A36 | DOING | Implement the wardrobe plus asset-data foundation so placeholder or sample customization can exist before final production content arrives. | Current state: Phase 4 placeholder-safe standardization now includes `AvatarAssetRegistryDefinition`, registry-aware outfit load paths, registry validation in the existing avatar validator menu, and feature docs for the asset contract plus intake checklist. Remaining work is asset population, Unity-side smoke, and the blocked production handoff under `P04`; this still does not claim production avatar completion or a shipped wardrobe UI.`
 - Legacy evidence note: `tasks/avatar-system-tasks.md` remains a legacy evidence file for prototype avatar groundwork and is not the active source of truth for this lane.
 - Future link: `A19` multiple-avatar support stays in the roadmap and remains blocked by `P04`; it is not lane-active work today.
 - Planned next: keep placeholder-safe avatar integration planning moving, finish any remaining shell-side smoke under `P02`, and wait for `P04` before calling production avatar or wardrobe work implementation-ready.
@@ -89,10 +92,11 @@ The 4-lane split below supersedes the historical `UI-01` through `UI-09` slice m
 ## Cross-Cutting / Non-UI
 
 - `A05 | DOING | Expand or maintain regression coverage for settings, reminders, subtitles, startup health, assistant streaming, and runtime fallback behavior. | Current state: backend automated coverage exists, Unity EditMode was re-verified on 2026-04-05 with `30 passed`, and Unity PlayMode was re-verified on 2026-04-05 with `43 passed`; future reruns still belong here as cross-cutting evidence.`
+- `A42 | DOING | Execute the first Phase 2 UI-versus-domain split inside the current Unity tree without inventing new runtime surfaces. | Current state: Home now has a module boundary, quick-add command wording plus status wording now live in `HomeQuickAddApplicationService`, chat-submit planning now lives in `ChatTurnApplicationService`, planner task-mutation summaries now live in `PlannerTaskCommandApplicationService`, and a placeholder-safe `AvatarOutfitApplicationService` now wraps the existing `AvatarSystem` outfit runtime. Remaining work is fresh Unity compile or EditMode evidence plus the downstream `P02` live smoke before this slice can move out of the active queue. | Manual gate when landed: P02`
 - `A24 | DOING | Build and harden the MCP-driven Unity automation workflow under `ai-dev-system/`. | Current state: local MCP scaffold, stdio connection, smoke tasks, screenshot evidence, and workflow reporting already exist; remaining work is broader live-run evidence and reconnect hardening follow-up.`
 - `A26 | DOING | Upgrade `ai-dev-system/app/` from a GUI-only Unity Editor profile to a hybrid Unity control plane. | Current state: the hybrid profile, live capability matrix, MCP-first routing, GUI fallback, and repo-side tests exist; remaining work is target-desktop manual validation under `P09` and `P10`. | Manual gates: P09 P10`
-- `A37 | DOING | Execute the docs rewrite for landed modules and migration phases so current implementation and planned work stay clearly separated. | Current state: `docs/roadmap.md` and `docs/index.md` are being added as navigation entry points, and README-level navigation is being aligned with the current runtime and migration baseline. Remaining work is the broader follow-through that keeps module docs current as later modularization slices land.`
-- `A38 | TODO | Execute the task-governance rewrite for phased modularization tracking while staying compatible with this repo's tracker rules.`
+- `A37 | DOING | Execute the docs rewrite for landed modules and migration phases so current implementation and planned work stay clearly separated. | Current state: `docs/roadmap.md`, `docs/index.md`, `docs/architecture/README.md`, `docs/features/README.md`, and `docs/operations/README.md` now provide a Phase 3 docs hierarchy, while `docs/architecture/adr/` plus `docs/operations/documentation-governance.md` add ADR and source-of-truth navigation for current docs. Remaining work is the broader follow-through that keeps module docs current as later modularization slices land.`
+- `A38 | DOING | Execute the task-governance rewrite for phased modularization tracking while staying compatible with this repo's tracker rules. | Current state: `docs/migration/phase0.md` now carries the freeze and architecture-gate guardrails, `AGENTS.md` stays the machine-facing rule file, `docs/operations/agent-workflow.md` now defines the current task protocol plus completion reporting, `tasks/task-template.md` defines the scoped-task and completion-report shape, and Phase 3 docs governance still enforces `docs changed with code`. Remaining work is to keep later phased tracker entries aligned as more slices land.`
 - `A40 | TODO | Add repeatable validation automation that catches task or doc drift during migration.`
 
 ## Future Roadmap

@@ -35,7 +35,6 @@ namespace LocalAssistant.Core
         private IAssistantStreamClient assistantStreamClient;
         private CancellationTokenSource cancellationTokenSource;
         private readonly TaskViewModelStore taskStore = new();
-        private readonly SettingsViewModelStore settingsStore = new();
         private readonly IAssistantEventBus sharedEventBus = new AssistantEventBus();
         private readonly List<IDisposable> eventSubscriptions = new();
         private readonly Queue<TtsSentenceReadyEvent> speechQueue = new();
@@ -47,15 +46,17 @@ namespace LocalAssistant.Core
         private SubtitlePresenter subtitlePresenter;
         private ReminderPresenter reminderPresenter;
         private IShellModule shellModule;
-        private HomeScreenController homeScreenController;
+        private IHomeModule homeModule;
         private IPlannerModule plannerModule;
-        private SettingsScreenController settingsScreenController;
+        private ISettingsModule settingsModule;
         private IChatModule chatModule;
+        private readonly ChatTurnApplicationService chatTurnService = new();
+        private readonly HomeQuickAddApplicationService homeQuickAddService = new();
+        private PlannerTaskCommandApplicationService plannerTaskCommands;
 
         private HealthResponse currentHealth = new();
         private AppScreen currentPlannerScreen = AppScreen.Week;
         private string selectedDate = string.Empty;
-        private bool isBindingSettingsUi;
         private bool continuousVoiceEnabled;
         private bool isRecording;
         private bool isPlayingSpeechQueue;
@@ -86,37 +87,34 @@ namespace LocalAssistant.Core
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
             shellModule = new ShellModule(ui.Shell);
-            homeScreenController = new HomeScreenController(ui.Home);
+            homeModule = new HomeModule(ui.Home);
             plannerModule = new PlannerModule(ui.Schedule);
-            settingsScreenController = new SettingsScreenController(ui.Settings);
+            settingsModule = new SettingsModule(ui.Settings);
             chatModule = new ChatModule(ui.Chat);
             shellModule.Bind();
-            homeScreenController.Bind();
+            homeModule.Bind();
             plannerModule.Bind();
-            settingsScreenController.Bind();
+            settingsModule.Bind();
             chatModule.Bind();
             RegisterSharedEventFlow();
             shellModule.RefreshRequested += RefreshWorkspace;
-            homeScreenController.QuickAddRequested += SubmitQuickAddMessage;
+            homeModule.QuickAddRequested += SubmitQuickAddMessage;
             plannerModule.TodayRequested += PublishPlannerTodayRequested;
             plannerModule.DateOffsetRequested += PublishPlannerDateOffsetRequested;
             plannerModule.DaySelected += PublishPlannerDaySelected;
             plannerModule.ScreenRequested += PublishPlannerScreenRequested;
             plannerModule.CompleteTaskRequested += PublishPlannerTaskCompletionRequested;
             plannerModule.ScheduleTaskRequested += PublishPlannerTaskSchedulingRequested;
-            settingsScreenController.ReloadRequested += ReloadSettings;
-            settingsScreenController.SaveRequested += SaveSettings;
-            settingsScreenController.SpeakRepliesChanged += OnSpeakRepliesChanged;
-            settingsScreenController.TranscriptPreviewChanged += OnTranscriptPreviewChanged;
-            settingsScreenController.MiniAssistantChanged += OnMiniAssistantChanged;
-            settingsScreenController.ReminderSpeechChanged += OnReminderSpeechChanged;
+            settingsModule.ReloadRequested += ReloadSettings;
+            settingsModule.SaveRequested += SaveSettings;
+            settingsModule.SettingsChanged += HandleSettingsChanged;
             chatModule.SendRequested += SubmitFromMessage;
             chatModule.MicRequested += ToggleVoiceSession;
 
             PublishConversationVisualState(AvatarState.Thinking);
             chatModule.SetSystemStatus("LOADING", "Loading local workspace", "Connecting to the backend and preparing stage, planner, settings, and chat.");
             shellModule.RenderBootState("Loading runtime", "Connecting to the local backend and preparing the four-zone shell...", LoadingColor);
-            homeScreenController.SetQuickAddStatus("Quick add becomes available after the workspace loads.", InfoColor);
+            homeModule.SetQuickAddStatus("Quick add becomes available after the workspace loads.", InfoColor);
             SetSettingsStatus("Loading settings...", InfoColor);
 
             plannerModule.ShowScreen(currentPlannerScreen);
@@ -154,6 +152,7 @@ namespace LocalAssistant.Core
         {
             apiClient = injectedApiClient;
             plannerBackend = null;
+            plannerTaskCommands = null;
             eventsClient = injectedEventsClient;
             assistantStreamClient = injectedStreamClient;
         }
@@ -301,11 +300,27 @@ namespace LocalAssistant.Core
 
         private async void SubmitFromMessage(string message) => await SubmitChatAsync(message, false, false);
 
-        private async void SubmitQuickAddMessage(string message) => await SubmitChatAsync(message, false, true);
+        private async void SubmitQuickAddMessage(string message)
+        {
+            if (!HomeQuickAddRequest.TryCreate(message, out var request))
+            {
+                return;
+            }
+
+            await SubmitChatAsync(homeQuickAddService.CreateAssistantMessage(request), false, true);
+        }
 
         private async Task SubmitChatAsync(string message, bool fromVoice, bool fromQuickAdd)
         {
-            if (string.IsNullOrWhiteSpace(message) || isSubmittingChatTurn)
+            if (isSubmittingChatTurn ||
+                !ChatTurnRequest.TryCreate(
+                    message,
+                    chatModule.ConversationId,
+                    chatModule.SessionId,
+                    selectedDate,
+                    fromVoice,
+                    settingsModule.Current.voice.speak_replies,
+                    out var request))
             {
                 return;
             }
@@ -314,38 +329,30 @@ namespace LocalAssistant.Core
             awaitingQuickAddResult = fromQuickAdd;
             if (fromQuickAdd)
             {
-                homeScreenController.SetQuickAddStatus("Sending quick add to the assistant...", LoadingColor);
+                ApplyQuickAddStatus(homeQuickAddService.BuildPendingStatus());
             }
 
-            chatModule.BeginTurn(message, fromVoice, settingsStore.Current.voice.show_transcript_preview);
+            chatModule.BeginTurn(request.Message, fromVoice, settingsModule.Current.voice.show_transcript_preview);
 
             PublishConversationVisualState(AvatarState.Thinking);
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
             try
             {
-                if (assistantStreamClient != null && assistantStreamClient.IsConnected)
+                var executionPlan = chatTurnService.BuildPlan(request, assistantStreamClient != null && assistantStreamClient.IsConnected);
+                if (executionPlan.Transport == ChatTurnTransport.Streaming)
                 {
-                    await SendStreamAsync(new AssistantStreamRequestPayload
-                    {
-                        type = "text_turn",
-                        session_id = chatModule.SessionId,
-                        conversation_id = chatModule.ConversationId,
-                        message = message,
-                        selected_date = selectedDate,
-                        voice_mode = fromVoice,
-                    });
+                    await SendStreamAsync(executionPlan.StreamRequest);
                     return;
                 }
 
-                await ApplyCompatibilityChatResponseAsync(await apiClient.SendChatAsync(
-                    ChatRequestFactory.CreateTextRequest(message, chatModule.ConversationId, selectedDate, settingsStore.Current.voice.speak_replies)));
+                await ApplyCompatibilityChatResponseAsync(await apiClient.SendChatAsync(executionPlan.CompatibilityRequest));
                 CompleteChatTurn();
             }
             catch (Exception exception)
             {
                 chatModule.ApplyRequestFailure("Request failed: " + exception.Message, "Check the backend and try the request again.");
-                ResolvePendingQuickAdd(Array.Empty<TaskActionReport>(), "Quick add failed. Check the backend and try again.", ErrorColor);
+                ResolvePendingQuickAdd(homeQuickAddService.BuildFailureStatus());
                 RefreshChatPanel();
                 CompleteChatTurn();
             }
@@ -355,7 +362,7 @@ namespace LocalAssistant.Core
         {
             chatModule.ApplyCompatibilityResponse(response);
             PublishBackendAssistantState("talking", response.animation_hint);
-            ResolvePendingQuickAdd(response.task_actions, "Quick add reached the assistant, but no task was created. Try a shorter task title.", WarningColor);
+            ResolvePendingQuickAdd(response.task_actions);
             RefreshChatPanel();
             if (response.task_actions != null && response.task_actions.Count > 0)
             {
@@ -434,7 +441,7 @@ namespace LocalAssistant.Core
             else
             {
                 var transcript = await apiClient.SendSpeechToTextAsync(WavEncoder.Encode(TrimClip(recordingClip, position)));
-                chatModule.SetTranscriptPreview(settingsStore.Current.voice.show_transcript_preview ? transcript.text : string.Empty);
+                chatModule.SetTranscriptPreview(settingsModule.Current.voice.show_transcript_preview ? transcript.text : string.Empty);
                 RefreshChatPanel();
                 await SubmitChatAsync(transcript.text, true, false);
             }
@@ -482,7 +489,7 @@ namespace LocalAssistant.Core
                         var partial = UnityJson.Deserialize<TranscriptEvent>(payload);
                         if (partial != null)
                         {
-                            chatModule.ApplyTranscriptPartial(partial.text, settingsStore.Current.voice.show_transcript_preview);
+                            chatModule.ApplyTranscriptPartial(partial.text, settingsModule.Current.voice.show_transcript_preview);
                             RefreshChatPanel();
                         }
                         break;
@@ -490,7 +497,7 @@ namespace LocalAssistant.Core
                         var transcript = UnityJson.Deserialize<TranscriptEvent>(payload);
                         if (transcript != null && !string.IsNullOrWhiteSpace(transcript.text))
                         {
-                            chatModule.ApplyTranscriptFinal(transcript.text, settingsStore.Current.voice.show_transcript_preview);
+                            chatModule.ApplyTranscriptFinal(transcript.text, settingsModule.Current.voice.show_transcript_preview);
                             RefreshChatPanel();
                         }
                         break;
@@ -515,14 +522,14 @@ namespace LocalAssistant.Core
                         if (finalReply != null)
                         {
                             chatModule.ApplyStreamingFinal(finalReply);
-                            ResolvePendingQuickAdd(finalReply.task_actions, "Quick add reached the assistant, but no task was created. Try a shorter task title.", WarningColor);
+                            ResolvePendingQuickAdd(finalReply.task_actions);
                             RefreshChatPanel();
                             if (finalReply.task_actions != null && finalReply.task_actions.Count > 0)
                             {
                                 _ = SafeReloadTasksAsync();
                             }
 
-                            if (!settingsStore.Current.voice.speak_replies)
+                            if (!settingsModule.Current.voice.speak_replies)
                             {
                                 PublishSubtitleShown(finalReply.reply_text);
                                 Invoke(nameof(ClearSubtitleAndIdle), 2.2f);
@@ -657,7 +664,7 @@ namespace LocalAssistant.Core
         private void RefreshTaskView()
         {
             if (!HasLiveUi()) return;
-            homeScreenController.Render(taskStore);
+            homeModule.Render(taskStore);
             plannerModule.Render(taskStore, selectedDate);
             RefreshStagePanel();
         }
@@ -717,8 +724,8 @@ namespace LocalAssistant.Core
             RefreshChatPanel();
             try
             {
-                var updatedTask = await GetPlannerBackend().CompleteTaskAsync(taskId);
-                chatModule.ApplyPlannerActionResult("complete_task", updatedTask.TaskId, updatedTask.Title, "Updated directly from the Schedule screen.");
+                var updatedTask = await GetPlannerTaskCommands().CompleteTaskAsync(taskId);
+                chatModule.ApplyPlannerActionResult(updatedTask.ActionType, updatedTask.TaskId, updatedTask.Title, updatedTask.Detail);
                 await ReloadAllAsync();
                 SyncHealthStatusToChat(currentHealth);
                 RefreshChatPanel();
@@ -749,8 +756,8 @@ namespace LocalAssistant.Core
             RefreshChatPanel();
             try
             {
-                var updatedTask = await GetPlannerBackend().ScheduleInboxTaskAsync(taskId, targetDate);
-                chatModule.ApplyPlannerActionResult("reschedule_task", updatedTask.TaskId, updatedTask.Title, $"Scheduled to {targetDate} from the Schedule inbox view.");
+                var updatedTask = await GetPlannerTaskCommands().ScheduleInboxTaskAsync(taskId, targetDate);
+                chatModule.ApplyPlannerActionResult(updatedTask.ActionType, updatedTask.TaskId, updatedTask.Title, updatedTask.Detail);
                 await ReloadAllAsync();
                 SyncHealthStatusToChat(currentHealth);
                 RefreshChatPanel();
@@ -797,8 +804,8 @@ namespace LocalAssistant.Core
         {
             if (HasLiveUi())
             {
-                var snapshot = chatModule.Render(settingsStore.Current.voice.show_transcript_preview);
-                homeScreenController?.RenderAssistantOrbit(snapshot);
+                var snapshot = chatModule.Render(settingsModule.Current.voice.show_transcript_preview);
+                homeModule?.RenderAssistantOrbit(snapshot);
             }
         }
 
@@ -840,9 +847,9 @@ namespace LocalAssistant.Core
 
         private async void SaveSettings()
         {
-            if (isSettingsRequestInFlight || !settingsStore.HasUnsavedChanges())
+            if (isSettingsRequestInFlight || !settingsModule.HasUnsavedChanges)
             {
-                if (!settingsStore.HasUnsavedChanges())
+                if (!settingsModule.HasUnsavedChanges)
                 {
                     SetSettingsStatus("No changes to save.", InfoColor);
                 }
@@ -854,8 +861,7 @@ namespace LocalAssistant.Core
                 isSettingsRequestInFlight = true;
                 SetSettingsStatus("Saving changes...", LoadingColor);
                 ApplyInteractionState(currentHealth);
-                settingsStore.Apply(await apiClient.UpdateSettingsAsync(settingsStore.Snapshot()));
-                ApplySettingsToUi();
+                settingsModule.Apply(await apiClient.UpdateSettingsAsync(settingsModule.Snapshot()));
                 SetSettingsStatus("Settings saved.", SuccessColor);
             }
             catch (Exception exception)
@@ -871,96 +877,24 @@ namespace LocalAssistant.Core
 
         private async Task LoadSettingsAsync(string statusMessage)
         {
-            settingsStore.Apply(await apiClient.GetSettingsAsync());
-            ApplySettingsToUi();
+            settingsModule.Apply(await apiClient.GetSettingsAsync());
             SetSettingsStatus(statusMessage, InfoColor);
         }
 
-        private void ApplySettingsToUi()
+        private void HandleSettingsChanged()
         {
-            if (!HasLiveUi()) return;
-            isBindingSettingsUi = true;
-            try
+            if (!settingsModule.Current.voice.show_transcript_preview)
             {
-                settingsScreenController.Render(settingsStore);
-            }
-            finally
-            {
-                isBindingSettingsUi = false;
+                chatModule.SetTranscriptPreview(string.Empty);
             }
 
+            RefreshChatPanel();
             RefreshStagePanel();
-        }
-
-        private void RefreshSettingsPanel()
-        {
-            if (HasLiveUi())
-            {
-                settingsScreenController.Render(settingsStore);
-            }
-        }
-
-        private void OnSpeakRepliesChanged(bool value)
-        {
-            if (!isBindingSettingsUi)
-            {
-                settingsStore.SetSpeakReplies(value);
-                OnSettingsChanged();
-            }
-        }
-
-        private void OnTranscriptPreviewChanged(bool value)
-        {
-            if (!isBindingSettingsUi)
-            {
-                settingsStore.SetTranscriptPreview(value);
-                if (!value)
-                {
-                    chatModule.SetTranscriptPreview(string.Empty);
-                }
-                RefreshChatPanel();
-                OnSettingsChanged();
-            }
-        }
-
-        private void OnMiniAssistantChanged(bool value)
-        {
-            if (!isBindingSettingsUi)
-            {
-                settingsStore.SetMiniAssistantEnabled(value);
-                OnSettingsChanged();
-            }
-        }
-
-        private void OnReminderSpeechChanged(bool value)
-        {
-            if (!isBindingSettingsUi)
-            {
-                settingsStore.SetReminderSpeechEnabled(value);
-                OnSettingsChanged();
-            }
-        }
-
-        private void OnSettingsChanged()
-        {
-            RefreshSettingsPanel();
-            RefreshStagePanel();
-            if (settingsStore.HasUnsavedChanges())
-            {
-                SetSettingsStatus("Unsaved changes.", WarningColor);
-            }
-            else
-            {
-                SetSettingsStatus("Settings saved.", SuccessColor);
-            }
         }
 
         private void SetSettingsStatus(string message, Color color)
         {
-            if (HasLiveUi())
-            {
-                settingsScreenController.SetStatus(message, color);
-            }
+            settingsModule?.SetStatus(message, color);
         }
 
         private void ApplyInteractionState(HealthResponse health)
@@ -983,10 +917,10 @@ namespace LocalAssistant.Core
                 && !isSubmittingChatTurn
                 && !isMutatingTask;
             chatModule.SetInteractable(enableChatText, enableMic);
-            homeScreenController.SetTaskActionsEnabled(enableTaskActions);
+            homeModule.SetTaskActionsEnabled(enableTaskActions);
             plannerModule.SetTaskActionsEnabled(enableTaskActions);
             shellModule.SetRefreshEnabled(!isInitializing && !isRefreshingWorkspace && !isSubmittingChatTurn && !isMutatingTask && !isSettingsRequestInFlight);
-            settingsScreenController.SetEditable(HealthRecoveryAdvisor.CanEditSettings(health) && !isInitializing && !isRefreshingWorkspace && !isSettingsRequestInFlight);
+            settingsModule.SetEditable(HealthRecoveryAdvisor.CanEditSettings(health) && !isInitializing && !isRefreshingWorkspace && !isSettingsRequestInFlight);
         }
 
         private void AppendRecoveryGuidance(HealthResponse health)
@@ -1030,7 +964,12 @@ namespace LocalAssistant.Core
             }
         }
 
-        private void ResolvePendingQuickAdd(IReadOnlyList<TaskActionReport> actions, string fallbackMessage, Color fallbackColor)
+        private void ResolvePendingQuickAdd(IReadOnlyList<TaskActionReport> actions)
+        {
+            ResolvePendingQuickAdd(homeQuickAddService.ResolveCompletion(actions));
+        }
+
+        private void ResolvePendingQuickAdd(HomeQuickAddStatus status)
         {
             if (!awaitingQuickAddResult)
             {
@@ -1038,22 +977,19 @@ namespace LocalAssistant.Core
             }
 
             awaitingQuickAddResult = false;
-            if (actions != null && actions.Count > 0)
-            {
-                var action = actions[0];
-                var title = string.IsNullOrWhiteSpace(action.title) ? "task" : action.title;
-                var detail = string.IsNullOrWhiteSpace(action.detail) ? "Task list refreshed." : action.detail.Trim();
-                homeScreenController.SetQuickAddStatus($"Added '{title}'. {detail}", SuccessColor);
-                return;
-            }
-
-            homeScreenController.SetQuickAddStatus(fallbackMessage, fallbackColor);
+            ApplyQuickAddStatus(status);
         }
 
         private IPlannerBackendIntegration GetPlannerBackend()
         {
             plannerBackend ??= new PlannerBackendIntegration(apiClient);
             return plannerBackend;
+        }
+
+        private PlannerTaskCommandApplicationService GetPlannerTaskCommands()
+        {
+            plannerTaskCommands ??= new PlannerTaskCommandApplicationService(GetPlannerBackend());
+            return plannerTaskCommands;
         }
 
         private void CompleteChatTurn()
@@ -1085,9 +1021,9 @@ namespace LocalAssistant.Core
                     currentHealth,
                     currentPlannerScreen,
                     selectedDate,
-                    settingsStore,
+                    settingsModule,
                     chatModule));
-            homeScreenController?.RenderStage(avatarStateMachine.CurrentState);
+            homeModule?.RenderStage(avatarStateMachine.CurrentState);
         }
 
         private void ClearSubtitleAndIdle()
@@ -1116,6 +1052,27 @@ namespace LocalAssistant.Core
 
             RefreshTaskView();
             RefreshStagePanel();
+        }
+
+        private void ApplyQuickAddStatus(HomeQuickAddStatus status)
+        {
+            if (status == null)
+            {
+                return;
+            }
+
+            homeModule.SetQuickAddStatus(status.Message, MapQuickAddColor(status.Kind));
+        }
+
+        private Color MapQuickAddColor(QuickAddStatusKind kind)
+        {
+            return kind switch
+            {
+                QuickAddStatusKind.Success => SuccessColor,
+                QuickAddStatusKind.Warning => WarningColor,
+                QuickAddStatusKind.Error => ErrorColor,
+                _ => LoadingColor,
+            };
         }
 
         private static AudioClip TrimClip(AudioClip source, int samples)

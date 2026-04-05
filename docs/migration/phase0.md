@@ -1,6 +1,6 @@
 # Migration Phase 0 Baseline
 
-Updated: 2026-04-04
+Updated: 2026-04-05
 Status: Current implementation baseline captured before module-boundary work begins
 
 ## Purpose
@@ -14,6 +14,28 @@ It captures:
 - placeholder or partial areas that still exist in code
 - latest verification evidence available from terminal and tracker history
 - the specific gaps that existed between code, docs, and task trackers before this baseline was refreshed
+
+## Change Governance Guardrails
+
+### Current implementation
+
+- Phase 0 now also freezes net-new feature expansion unless the task tracker explicitly scopes it as approved work.
+- Allowed work during the freeze is limited to boundary extraction, docs sync, tracker governance, validation automation, regression fixes, and placeholder-safe contracts needed for later phases.
+- The active runtime remains `local-backend/` plus `unity-client/`; Phase 0 does not authorize a root-level repo move or a second competing runtime entry.
+
+### Required artifacts for scoped changes
+
+- AI-executable work must appear in `tasks/task-queue.md` before implementation, or in `tasks/task-people.md` if the task requires Unity Editor interaction, target-machine checks, credentials, external assets, or approvals.
+- Each scoped task should use `tasks/task-template.md` so objective, non-goals, allowed files, validation, and doc updates stay explicit.
+- Architecture-affecting work must update the relevant current-state docs in the same task instead of leaving the tracker ahead of the docs.
+- Documentation-affecting work must follow `docs/operations/documentation-governance.md` and close with the checklist in `docs/operations/doc-audit-checklist.md`.
+- Agent execution flow and completion protocol now live in `docs/operations/agent-workflow.md` and must remain aligned with `AGENTS.md`.
+
+### Architecture gate
+
+- The gate applies to new module boundaries, required runtime path moves, persistence-strategy changes, shared event-bus or state-ownership changes, avatar asset-structure changes, avatar slot-rule changes, and any new source-of-truth split.
+- A gated change is not complete until the task tracker is updated, the affected docs are updated, and `docs/06-decisions.md` records the decision.
+- If the governance rules themselves change, this Phase 0 document must also be updated in the same task.
 
 ## Runtime Baseline
 
@@ -83,6 +105,7 @@ It captures:
 ## Phase 0 Exit State
 
 - `A27` is complete as a documentation and tracker baseline task.
+- Phase 0 governance now also includes a tracker-backed freeze rule, an architecture gate, and a reusable task template for later migration slices.
 - The active runtime is still `local-backend/` plus `unity-client/`.
 - `A28` and later modularization slices remain planned work.
 - The repo should not be described as having shipped module folders or a root-layout move yet.

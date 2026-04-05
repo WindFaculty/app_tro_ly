@@ -48,12 +48,13 @@ Unity client
 ### Screen flow and controllers
 
 - `IShellModule` and `AppShellState` manage four-zone shell state such as planner-sheet expansion, chat visibility, and settings drawer visibility.
-- `HomeScreenController` renders the orbit-style center stage, task summary, quick-add input, focus lanes, and stage-status copy.
+- `HomeModule` now owns the center-stage Home boundary while `HomeScreenController` stays presentation-only for the orbit-style stage, task summary, quick-add input, focus lanes, and stage-status copy.
 - `ScheduleScreenController` renders today, week, inbox, and completed planner views into the bottom-sheet schedule canvas with date navigation and direct task actions.
 - `SettingsScreenController` binds backend-backed toggles and save or reload actions inside the drawer.
+- `SettingsModule` now owns the Unity-side settings snapshot, dirty-state tracking, and settings drawer event boundary before `AssistantApp` calls backend settings APIs.
 - `ChatPanelController` binds the text input, send button, mic button, and transcript rendering.
 - `AppShellController` renders health and stage status in the shell rail and stage header areas.
-- `AssistantApp` now routes planner screen or date or task-action requests through shared event contracts before they reach planner mutations and shell-region updates.
+- `AssistantApp` now routes planner screen or date or task-action requests through shared event contracts before they reach planner mutations and shell-region updates, and it now consumes feature application services for quick-add wording, chat-turn request planning, and planner task-mutation summaries instead of formatting those flows inline.
 
 ### Network integration
 
@@ -61,19 +62,23 @@ Unity client
 - `EventsClient` consumes `WS /v1/events`.
 - `AssistantStreamClient` consumes `WS /v1/assistant/stream`.
 - `AssistantApp` prefers the streaming path and falls back to compatibility chat when the stream is unavailable.
-- `AssistantApp` now feeds compatibility replies and assistant-stream transcript or route or chunk or final events into `ChatModule` APIs so transcript and diagnostics state stay chat-owned before shell refresh or audio playback.
+- `AssistantApp` now feeds compatibility replies and assistant-stream transcript or route or chunk or final events into `ChatModule` APIs so transcript and diagnostics state stay chat-owned before shell refresh or audio playback, while `ChatTurnApplicationService` builds the request plan for streaming versus compatibility transport.
 
 ### Client-side state
 
 - `TaskViewModelStore` keeps today, week, inbox, and completed snapshots.
 - `ChatViewModelStore` keeps transcript, assistant draft, transcript preview, routing diagnostics, system-status copy, and task-action summaries for both compatibility and streaming chat paths.
-- `SettingsViewModelStore` keeps the backend-backed settings snapshot currently used by the client.
+- `SettingsViewModelStore` keeps the backend-backed settings snapshot currently used by the client, and it is now owned through `SettingsModule` instead of being mutated directly by `AssistantApp`.
+- `HomeQuickAddApplicationService` owns quick-add command wording and quick-add status wording for the Home surface.
+- `PlannerTaskCommandApplicationService` owns planner task-mutation summaries for complete-task and inbox-schedule flows.
 
 ### Avatar and presentation
 
 - `AvatarStateMachine` drives placeholder state visuals.
 - `AudioPlaybackController` manages spoken reply playback while subtitle visibility and avatar-state transitions are now triggered from shared event contracts in `AssistantApp`.
 - `LipSyncController` applies amplitude-based lip sync to a fallback face mesh or transform.
+- `AvatarOutfitApplicationService` now exposes a placeholder-safe application contract over `AvatarEquipmentManager` and `AvatarPresetManager`, but no shell-facing wardrobe UI is shipped yet.
+- `AvatarAssetRegistryDefinition` now defines the registry shape for allowed outfit items, cross-slot rules, and presets so future customization flows do not need to scan folders or pass ad-hoc item lists.
 - `Assets/AvatarSystem/` contains the production-avatar groundwork:
   - `AvatarConversationBridge`
   - `AvatarAnimatorBridge`
@@ -162,6 +167,8 @@ SQLite stores:
 
 - The current client still contains placeholder or shell-owned helper content in the Home avatar stage and the schedule-side panel.
 - The schedule surface is list-first, not a finished calendar-grid module.
+- The Phase 2 layering slice is partial: `AssistantApp` still remains the top-level coordinator and the new application services are consumed from there instead of a separate application-composition root.
+- No wardrobe or accessory UI exists in the shell yet; only the outfit application contract is present.
 - The default LLM route is not fully local.
 - Production-avatar runtime behavior still needs scene-level integration and manual validation.
 - Latest backend terminal verification is not fully green because `tests/test_tts_service.py::test_chattts_synthesize_writes_cached_wav` failed on 2026-04-04 during the Phase 0 rerun.

@@ -97,5 +97,15 @@ namespace AvatarSystem
 
             return equipped;
         }
+
+        /// <summary>
+        /// Load a saved outfit from PlayerPrefs using the registered item catalog.
+        /// Returns the number of items successfully equipped.
+        /// </summary>
+        public int LoadSavedOutfit(AvatarAssetRegistryDefinition registry, string saveKey = "AvatarOutfit")
+        {
+            if (registry == null) return 0;
+            return LoadSavedOutfit(registry.Items, saveKey);
+        }
     }
 }

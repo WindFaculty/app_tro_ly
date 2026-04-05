@@ -9,7 +9,9 @@ namespace AvatarSystem.Data
     [CreateAssetMenu(fileName = "NewOutfitPreset", menuName = "AvatarSystem/Outfit Preset")]
     public sealed class OutfitPresetDefinition : ScriptableObject
     {
+        public string presetId;
         public string presetName;
+        public string requiredBaseVersion = "v001";
         public Sprite thumbnail;
 
         [Header("Slot Assignments")]

@@ -74,21 +74,24 @@ Current implementation flow:
 - Main files:
   - `unity-client/Assets/Scripts/Avatar/AvatarStateMachine.cs`
   - `unity-client/Assets/Scripts/Avatar/LipSyncController.cs`
+  - `unity-client/Assets/Scripts/Avatar/AvatarOutfitApplicationService.cs`
   - `unity-client/Assets/AvatarSystem/Core/Scripts/AvatarConversationBridge.cs`
+  - `unity-client/Assets/AvatarSystem/Core/Scripts/Data/AvatarAssetRegistryDefinition.cs`
   - `unity-client/Assets/AvatarSystem/AvatarProduction/`
 - Status: `partial`
-  Current notes: shell presentation is still placeholder-driven, and the production avatar path still depends on scene setup plus manual validation
+  Current notes: shell presentation is still placeholder-driven, the production avatar path still depends on scene setup plus manual validation, and placeholder-safe outfit metadata now has a registry catalog type even though no shell-facing wardrobe UI is shipped yet
 
 ### Settings
 
 - Purpose: load, edit, and persist user-facing runtime settings through backend-owned storage
 - Main files:
+  - `unity-client/Assets/Scripts/Features/Settings/SettingsModule.cs`
   - `unity-client/Assets/Scripts/Features/Settings/SettingsScreenController.cs`
   - `unity-client/Assets/Scripts/Core/SettingsViewModelStore.cs`
   - `local-backend/app/services/settings.py`
   - `local-backend/app/api/routes.py`
 - Status: `implemented`
-  Current notes: backend stores more settings groups than the current client exposes for editing
+  Current notes: backend stores more settings groups than the current client exposes for editing, and the Unity client now owns settings UI mutations through `ISettingsModule` before calling backend save or reload flows
 
 ## 4. Directory Reading Guide
 
@@ -189,16 +192,34 @@ Manual validation required:
 - Code truth:
   - backend behavior: `local-backend/app/api/routes.py`, `local-backend/app/services/`, `local-backend/app/models/`, `local-backend/app/core/`
   - Unity behavior: `unity-client/Assets/Resources/UI/MainUI.uxml`, `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`, `unity-client/Assets/Resources/UI/Styles/`, `unity-client/Assets/Scripts/`
+- Documentation hierarchy:
+  - repo entry: `README.md`
+  - architecture docs: `docs/architecture/`
+  - feature docs: `docs/features/`
+  - operations and governance docs: `docs/operations/`
 - Design target:
   - `unity-client/Assets/Resources/UI/ui_feature_map.md`
 - Current implementation docs:
   - `docs/02-architecture.md`
+  - `docs/architecture/domain-map.md`
+  - `docs/architecture/dependency-rules.md`
+  - `docs/architecture/phase1-audit.md`
+  - `docs/architecture/phase2-layering.md`
   - `docs/03-api.md`
   - `docs/04-ui.md`
+  - `docs/features/avatar-asset-spec.md`
+  - `docs/features/avatar-asset-intake-checklist.md`
   - `docs/05-test-plan.md`
   - `docs/09-runbook.md`
+- Docs governance:
+  - `docs/operations/agent-workflow.md`
+  - `docs/operations/documentation-governance.md`
+  - `docs/operations/doc-audit-checklist.md`
+  - `docs/architecture/adr/`
 - Migration baseline:
   - `docs/migration/phase0.md`
+- Phase 0 task template and completion checklist:
+  - `tasks/task-template.md`
 - Active AI queue:
   - `tasks/task-queue.md`
 - Manual or off-repo gates:
@@ -229,6 +250,8 @@ Manual validation required:
 - Avatar:
   - `unity-client/Assets/Scripts/Avatar/`
   - `unity-client/Assets/AvatarSystem/Core/Scripts/`
+  - `unity-client/Assets/AvatarSystem/Core/Scripts/Data/`
+  - `docs/features/avatar-asset-spec.md`
   - `docs/avatar-spec.md`
   - `docs/avatar-rig-cleanup.md`
 

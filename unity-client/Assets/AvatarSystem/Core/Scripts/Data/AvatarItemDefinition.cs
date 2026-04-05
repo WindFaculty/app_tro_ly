@@ -13,6 +13,10 @@ namespace AvatarSystem.Data
         public string itemId;
         public string displayName;
         public SlotType slotType;
+        [Tooltip("Registry-level base avatar version this item expects, for example v001.")]
+        public string requiredBaseVersion = "v001";
+        [Tooltip("Logical body type identifier for compatibility checks, for example base or petite.")]
+        public string bodyTypeId = "base";
 
         [Header("Visuals")]
         public GameObject prefab;
