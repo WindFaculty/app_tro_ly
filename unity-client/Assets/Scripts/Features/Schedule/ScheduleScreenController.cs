@@ -20,6 +20,8 @@ namespace LocalAssistant.Features.Schedule
         public event Action TodayRequested;
         public event Action<int> DateOffsetRequested;
         public event Action<string> DaySelected;
+        public event Action TodayViewRequested;
+        public event Action WeekViewRequested;
         public event Action InboxRequested;
         public event Action CompletedRequested;
         public event Action<string> CompleteTaskRequested;
@@ -27,6 +29,8 @@ namespace LocalAssistant.Features.Schedule
 
         public void Bind()
         {
+            UiButtonActionBinder.Bind(schedule.TodayViewButton, RequestTodayView);
+            UiButtonActionBinder.Bind(schedule.WeekViewButton, RequestWeekView);
             UiButtonActionBinder.Bind(schedule.ScheduleTodayButton, RequestToday);
             UiButtonActionBinder.Bind(schedule.SchedulePrevButton, () => RequestDateOffset(-1));
             UiButtonActionBinder.Bind(schedule.ScheduleNextButton, () => RequestDateOffset(1));
@@ -34,11 +38,13 @@ namespace LocalAssistant.Features.Schedule
             UiButtonActionBinder.Bind(schedule.CompletedTab, RequestCompleted);
         }
 
-        public void Render(TaskViewModelStore taskStore, AppScreen currentScreen, string selectedDate)
+        public void Render(IPlannerTaskSnapshotSource taskStore, AppScreen currentScreen, string selectedDate)
         {
             ApplyButtonState(schedule.ScheduleTodayButton, taskActionsEnabled);
             ApplyButtonState(schedule.SchedulePrevButton, taskActionsEnabled);
             ApplyButtonState(schedule.ScheduleNextButton, taskActionsEnabled);
+            ApplyButtonState(schedule.TodayViewButton, taskActionsEnabled);
+            ApplyButtonState(schedule.WeekViewButton, taskActionsEnabled);
             ApplyButtonState(schedule.InboxTab, taskActionsEnabled);
             ApplyButtonState(schedule.CompletedTab, taskActionsEnabled);
 
@@ -46,6 +52,7 @@ namespace LocalAssistant.Features.Schedule
             {
                 schedule.TaskSheetHeaderTitle.text = currentScreen switch
                 {
+                    AppScreen.Today => "Today focus",
                     AppScreen.Inbox => "Inbox triage",
                     AppScreen.Completed => "Completed review",
                     _ => "Week schedule",
@@ -81,8 +88,26 @@ namespace LocalAssistant.Features.Schedule
             ApplyButtonState(schedule.ScheduleTodayButton, isEnabled);
             ApplyButtonState(schedule.SchedulePrevButton, isEnabled);
             ApplyButtonState(schedule.ScheduleNextButton, isEnabled);
+            ApplyButtonState(schedule.TodayViewButton, isEnabled);
+            ApplyButtonState(schedule.WeekViewButton, isEnabled);
             ApplyButtonState(schedule.InboxTab, isEnabled);
             ApplyButtonState(schedule.CompletedTab, isEnabled);
+        }
+
+        public void RequestTodayView()
+        {
+            if (taskActionsEnabled)
+            {
+                TodayViewRequested?.Invoke();
+            }
+        }
+
+        public void RequestWeekView()
+        {
+            if (taskActionsEnabled)
+            {
+                WeekViewRequested?.Invoke();
+            }
         }
 
         public void RequestToday() => TodayRequested?.Invoke();
@@ -107,7 +132,7 @@ namespace LocalAssistant.Features.Schedule
         public void RequestCompleteTask(string taskId) => CompleteTaskRequested?.Invoke(taskId);
         public void RequestScheduleTask(string taskId, string selectedDate) => ScheduleTaskRequested?.Invoke(taskId, selectedDate);
 
-        private bool RenderItems(TaskViewModelStore taskStore, AppScreen currentScreen, string selectedDate)
+        private bool RenderItems(IPlannerTaskSnapshotSource taskStore, AppScreen currentScreen, string selectedDate)
         {
             if (schedule.ScheduleListContainer == null)
             {
@@ -118,28 +143,29 @@ namespace LocalAssistant.Features.Schedule
 
             return currentScreen switch
             {
-                AppScreen.Inbox => RenderTaskList(taskStore.Inbox.items, "Inbox item", currentScreen, selectedDate),
-                AppScreen.Completed => RenderTaskList(taskStore.Completed.items, "Completed task", currentScreen, selectedDate),
+                AppScreen.Today => RenderTaskList(taskStore.Today.Items, "Today task", currentScreen, selectedDate),
+                AppScreen.Inbox => RenderTaskList(taskStore.Inbox.Items, "Inbox item", currentScreen, selectedDate),
+                AppScreen.Completed => RenderTaskList(taskStore.Completed.Items, "Completed task", currentScreen, selectedDate),
                 _ => RenderWeek(taskStore.Week, currentScreen, selectedDate),
             };
         }
 
-        private bool RenderWeek(WeekTasksResponse week, AppScreen currentScreen, string selectedDate)
+        private bool RenderWeek(PlannerWeekSnapshot week, AppScreen currentScreen, string selectedDate)
         {
             var hasItems = false;
-            if (week?.days == null || week.days.Count == 0)
+            if (week?.Days == null || week.Days.Count == 0)
             {
                 return false;
             }
 
-            foreach (var bucket in week.days)
+            foreach (var bucket in week.Days)
             {
                 if (bucket == null)
                 {
                     continue;
                 }
 
-                if (bucket.items != null && bucket.items.Count > 0)
+                if (bucket.Items != null && bucket.Items.Count > 0)
                 {
                     hasItems = true;
                 }
@@ -150,7 +176,7 @@ namespace LocalAssistant.Features.Schedule
             return hasItems;
         }
 
-        private bool RenderTaskList(List<TaskRecord> items, string cardTitle, AppScreen currentScreen, string selectedDate)
+        private bool RenderTaskList(List<PlannerTaskItem> items, string cardTitle, AppScreen currentScreen, string selectedDate)
         {
             if (items == null || items.Count == 0)
             {
@@ -170,12 +196,12 @@ namespace LocalAssistant.Features.Schedule
             return true;
         }
 
-        private VisualElement CreateDayCard(WeekDayBucket bucket, AppScreen currentScreen, string selectedDate)
+        private VisualElement CreateDayCard(PlannerDayBucketSnapshot bucket, AppScreen currentScreen, string selectedDate)
         {
             var card = new VisualElement();
             card.AddToClassList("shell-card");
             card.AddToClassList("schedule-day-card");
-            if (string.Equals(bucket.date, selectedDate, StringComparison.Ordinal))
+            if (string.Equals(bucket.Date, selectedDate, StringComparison.Ordinal))
             {
                 card.AddToClassList("schedule-day-card-selected");
             }
@@ -183,43 +209,43 @@ namespace LocalAssistant.Features.Schedule
             var header = new VisualElement();
             header.AddToClassList("schedule-day-header");
 
-            var selectButton = new Button(() => RequestDaySelected(bucket.date))
+            var selectButton = new Button(() => RequestDaySelected(bucket.Date))
             {
-                text = FormatDayTitle(bucket.date),
+                text = FormatDayTitle(bucket.Date),
             };
             selectButton.AddToClassList("schedule-day-select-btn");
             selectButton.AddToClassList("schedule-day-title");
             selectButton.SetEnabled(taskActionsEnabled);
             header.Add(selectButton);
-            header.Add(CreateLabel($"{CountOf(bucket.items)} tasks", "schedule-day-count"));
+            header.Add(CreateLabel($"{CountOf(bucket.Items)} tasks", "schedule-day-count"));
             card.Add(header);
 
-            if (bucket.high_priority_count > 0)
+            if (bucket.HighPriorityCount > 0)
             {
-                card.Add(CreateLabel($"High priority: {bucket.high_priority_count}", "schedule-day-meta"));
+                card.Add(CreateLabel($"High priority: {bucket.HighPriorityCount}", "schedule-day-meta"));
             }
 
-            if (bucket.items == null || bucket.items.Count == 0)
+            if (bucket.Items == null || bucket.Items.Count == 0)
             {
                 card.Add(CreateLabel("No scheduled work for this day.", "schedule-task-empty"));
                 return card;
             }
 
-            var limit = Math.Min(bucket.items.Count, 4);
+            var limit = Math.Min(bucket.Items.Count, 4);
             for (var index = 0; index < limit; index++)
             {
-                card.Add(CreateTaskRow(bucket.items[index], currentScreen, selectedDate));
+                card.Add(CreateTaskRow(bucket.Items[index], currentScreen, selectedDate));
             }
 
-            if (bucket.items.Count > limit)
+            if (bucket.Items.Count > limit)
             {
-                card.Add(CreateLabel($"+{bucket.items.Count - limit} more items", "schedule-task-more"));
+                card.Add(CreateLabel($"+{bucket.Items.Count - limit} more items", "schedule-task-more"));
             }
 
             return card;
         }
 
-        private VisualElement CreateTaskRow(TaskRecord task, AppScreen currentScreen, string selectedDate)
+        private VisualElement CreateTaskRow(PlannerTaskItem task, AppScreen currentScreen, string selectedDate)
         {
             var row = new VisualElement();
             row.AddToClassList("schedule-task-row");
@@ -229,7 +255,7 @@ namespace LocalAssistant.Features.Schedule
 
             var content = new VisualElement();
             content.AddToClassList("schedule-task-content");
-            content.Add(CreateLabel(task.title, "schedule-task-title"));
+            content.Add(CreateLabel(task.Title, "schedule-task-title"));
             content.Add(CreateLabel(BuildTaskMeta(task), "schedule-task-meta"));
             layout.Add(content);
 
@@ -243,7 +269,7 @@ namespace LocalAssistant.Features.Schedule
             return row;
         }
 
-        private VisualElement CreateTaskActions(TaskRecord task, AppScreen currentScreen, string selectedDate)
+        private VisualElement CreateTaskActions(PlannerTaskItem task, AppScreen currentScreen, string selectedDate)
         {
             if (currentScreen == AppScreen.Completed)
             {
@@ -255,7 +281,7 @@ namespace LocalAssistant.Features.Schedule
 
             if (currentScreen == AppScreen.Inbox)
             {
-                var scheduleButton = new Button(() => RequestScheduleTask(task.id, selectedDate))
+                var scheduleButton = new Button(() => RequestScheduleTask(task.Id, selectedDate))
                 {
                     text = $"Schedule to {FormatActionDate(selectedDate)}",
                 };
@@ -266,13 +292,13 @@ namespace LocalAssistant.Features.Schedule
                 return actions;
             }
 
-            var completeButton = new Button(() => RequestCompleteTask(task.id))
+            var completeButton = new Button(() => RequestCompleteTask(task.Id))
             {
                 text = "Complete",
             };
             completeButton.AddToClassList("btn-secondary");
             completeButton.AddToClassList("schedule-task-action-btn");
-            completeButton.SetEnabled(taskActionsEnabled && !string.Equals(task.status, "done", StringComparison.OrdinalIgnoreCase));
+            completeButton.SetEnabled(taskActionsEnabled && !string.Equals(task.Status, "done", StringComparison.OrdinalIgnoreCase));
             actions.Add(completeButton);
             return actions;
         }
@@ -284,24 +310,26 @@ namespace LocalAssistant.Features.Schedule
             return label;
         }
 
-        private static string BuildSummary(TaskViewModelStore taskStore, AppScreen currentScreen)
+        private static string BuildSummary(IPlannerTaskSnapshotSource taskStore, AppScreen currentScreen)
         {
             return currentScreen switch
             {
-                AppScreen.Inbox => $"{CountOf(taskStore.Inbox.items)} inbox items are waiting for scheduling.",
-                AppScreen.Completed => $"{CountOf(taskStore.Completed.items)} completed tasks are ready for review.",
-                _ => $"{CountWeekTasks(taskStore.Week)} tasks across {CountDaysWithItems(taskStore.Week)} active days. Conflicts: {CountOf(taskStore.Week.conflicts)}.",
+                AppScreen.Today => $"{CountOf(taskStore.Today.Items)} today tasks, {CountOf(taskStore.Today.DueSoon)} due soon, and {CountOf(taskStore.Today.Overdue)} overdue.",
+                AppScreen.Inbox => $"{CountOf(taskStore.Inbox.Items)} inbox items are waiting for scheduling.",
+                AppScreen.Completed => $"{CountOf(taskStore.Completed.Items)} completed tasks are ready for review.",
+                _ => $"{CountWeekTasks(taskStore.Week)} tasks across {CountDaysWithItems(taskStore.Week)} active days. Conflicts: {CountOf(taskStore.Week.Conflicts)}.",
             };
         }
 
-        private static string BuildMeta(TaskViewModelStore taskStore, AppScreen currentScreen, string selectedDate)
+        private static string BuildMeta(IPlannerTaskSnapshotSource taskStore, AppScreen currentScreen, string selectedDate)
         {
             var displayDate = string.IsNullOrWhiteSpace(selectedDate) ? "auto" : selectedDate;
             return currentScreen switch
             {
+                AppScreen.Today => $"Selected date {displayDate}. Use Today focus to work the selected day without leaving the avatar stage.",
                 AppScreen.Inbox => $"Selected date {displayDate}. Inbox items can be scheduled directly to the selected day.",
                 AppScreen.Completed => $"Selected date {displayDate}. Review completed tasks for follow-up or missed documentation.",
-                _ => $"Selected date {displayDate}. Overdue this week: {taskStore.Week.overdue_count}. Select a day card to move the shell context.",
+                _ => $"Selected date {displayDate}. Overdue this week: {taskStore.Week.OverdueCount}. Select a day card to move the shell context.",
             };
         }
 
@@ -309,20 +337,21 @@ namespace LocalAssistant.Features.Schedule
         {
             return currentScreen switch
             {
+                AppScreen.Today => "No tasks are scheduled for the selected day yet. Add work from the stage quick-add or ask chat to capture something.",
                 AppScreen.Inbox => "Inbox is clear. New quick captures will show here before they are scheduled.",
                 AppScreen.Completed => "No completed tasks yet. Finished work will show here for review.",
                 _ => "No tasks are scheduled for this week yet. Add something from Home or chat to populate the calendar.",
             };
         }
 
-        private static string BuildMonthLabel(TaskViewModelStore taskStore, AppScreen currentScreen, string selectedDate)
+        private static string BuildMonthLabel(IPlannerTaskSnapshotSource taskStore, AppScreen currentScreen, string selectedDate)
         {
             if (DateTime.TryParse(selectedDate, out var parsed))
             {
                 return parsed.ToString("MMMM yyyy");
             }
 
-            if (currentScreen == AppScreen.Week && DateTime.TryParse(taskStore.Week.start_date, out parsed))
+            if (currentScreen == AppScreen.Week && DateTime.TryParse(taskStore.Week.StartDate, out parsed))
             {
                 return parsed.ToString("MMMM yyyy");
             }
@@ -337,12 +366,12 @@ namespace LocalAssistant.Features.Schedule
                 : value;
         }
 
-        private static string BuildTaskMeta(TaskRecord task)
+        private static string BuildTaskMeta(PlannerTaskItem task)
         {
-            var timeBlock = string.IsNullOrWhiteSpace(task.start_at) ? "No start time" : $"Starts {task.start_at}";
-            var dueBlock = string.IsNullOrWhiteSpace(task.due_at) ? "No due time" : $"Due {task.due_at}";
-            var category = string.IsNullOrWhiteSpace(task.category) ? "general" : task.category;
-            return $"Priority {task.priority} | {timeBlock} | {dueBlock} | {category}";
+            var timeBlock = string.IsNullOrWhiteSpace(task.StartAt) ? "No start time" : $"Starts {task.StartAt}";
+            var dueBlock = string.IsNullOrWhiteSpace(task.DueAt) ? "No due time" : $"Due {task.DueAt}";
+            var category = string.IsNullOrWhiteSpace(task.Category) ? "general" : task.Category;
+            return $"Priority {task.Priority} | {timeBlock} | {dueBlock} | {category}";
         }
 
         private static string FormatActionDate(string selectedDate)
@@ -352,33 +381,33 @@ namespace LocalAssistant.Features.Schedule
                 : "selected day";
         }
 
-        private static int CountWeekTasks(WeekTasksResponse response)
+        private static int CountWeekTasks(PlannerWeekSnapshot response)
         {
-            if (response?.days == null)
+            if (response?.Days == null)
             {
                 return 0;
             }
 
             var total = 0;
-            foreach (var bucket in response.days)
+            foreach (var bucket in response.Days)
             {
-                total += CountOf(bucket?.items);
+                total += CountOf(bucket?.Items);
             }
 
             return total;
         }
 
-        private static int CountDaysWithItems(WeekTasksResponse response)
+        private static int CountDaysWithItems(PlannerWeekSnapshot response)
         {
-            if (response?.days == null)
+            if (response?.Days == null)
             {
                 return 0;
             }
 
             var total = 0;
-            foreach (var bucket in response.days)
+            foreach (var bucket in response.Days)
             {
-                if (CountOf(bucket?.items) > 0)
+                if (CountOf(bucket?.Items) > 0)
                 {
                     total++;
                 }

@@ -1,8 +1,5 @@
 using System.Collections;
 using System;
-using LocalAssistant.Avatar;
-using LocalAssistant.Chat;
-using LocalAssistant.Core;
 using UnityEngine;
 
 namespace LocalAssistant.Audio
@@ -24,25 +21,21 @@ namespace LocalAssistant.Audio
             }
         }
 
-        public Coroutine Play(AudioClip clip, string subtitle, SubtitlePresenter subtitlePresenter, AvatarStateMachine avatar)
+        public Coroutine Play(AudioClip clip)
         {
-            return StartCoroutine(PlayRoutine(clip, subtitle, subtitlePresenter, avatar));
+            return StartCoroutine(PlayRoutine(clip));
         }
 
-        private IEnumerator PlayRoutine(AudioClip clip, string subtitle, SubtitlePresenter subtitlePresenter, AvatarStateMachine avatar)
+        private IEnumerator PlayRoutine(AudioClip clip)
         {
             if (clip == null)
             {
                 yield break;
             }
 
-            subtitlePresenter.Show(subtitle);
-            avatar.SetState(AvatarState.Talking);
             audioSource.clip = clip;
             audioSource.Play();
             yield return new WaitWhile(() => audioSource.isPlaying);
-            subtitlePresenter.Hide();
-            avatar.SetState(AvatarState.Idle);
             PlaybackCompleted?.Invoke();
         }
     }

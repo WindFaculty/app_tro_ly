@@ -1,23 +1,23 @@
 # Task Queue - Local Desktop Assistant
 
-Updated: 2026-03-29
+Updated: 2026-04-05
 Status values: TODO | DOING | DONE | BLOCKED
 Ownership: `Axx` = AI-executable repo work | `Pxx` = manual or off-repo work tracked in `tasks/task-people.md`
 
 ## How To Use This File
 
 - Track only work that can be done directly in this repo.
-- Use `tasks/task-people.md` for Unity Editor checks, machine setup, external assets, approvals, or target-machine validation.
-- Keep this file current-state focused.
-- Move completed work to `tasks/done.md` rather than leaving stale DOING items behind.
+- Keep this file focused on the current AI queue: `TODO`, `DOING`, or `BLOCKED` work only.
+- Move completed work to `tasks/done.md` instead of leaving stale done items in the active queue.
+- Use `tasks/task-people.md` for Unity Editor smoke, target-machine checks, external assets, approvals, or credentials.
+- Use `tasks/module-migration-backlog.md` for phased modularization planning; it is not the active queue.
 
-## Current AI Themes
+## Current Focus
 
-- Unity degraded-mode and recovery UX polish
-- regression coverage and validation evidence
-- optional runtime hardening for speech and related diagnostics
-- UI polish toward the design target without pretending the target is already implemented
-- production-avatar integration planning
+- Keep the current `unity-client/` plus `local-backend/` runtime stable while modularization continues inside the existing tree.
+- Close the remaining live-smoke gates under `P02` without rewriting current implementation history.
+- Continue phased module-boundary work only where repo-side evidence already exists.
+- Keep docs and task governance aligned with landed code so design-target material is not mistaken for shipped behavior.
 
 ## Milestone Snapshot
 
@@ -29,58 +29,75 @@ Ownership: `Axx` = AI-executable repo work | `Pxx` = manual or off-repo work tra
 - `M5 - Reminder and planner`: DONE
 - `M6 - Polish and Windows packaging`: DOING
 
-## Done Recently
+## Active UI Workstreams
 
-These items are closed and should not stay in the active queue:
+The 4-lane split below supersedes the historical `UI-01` through `UI-09` slice map. Those older UI slices are history only and should now be read through `tasks/done.md`.
 
-- `A01`: Windows preflight hardening
-- `A02`: setup or run or package script hardening
-- `A03`: repeatable backend smoke automation
-- `A06`: runbook completion
-- `A25`: Windows GUI agent MVP under `ai-dev-system/app/`
+### UI-1 | Shell + Shared UX
 
-See `tasks/done.md` for historical details.
+- Objective: keep shell navigation, degraded-mode messaging, packaged startup surfaces, and shared shell-state copy understandable while the module boundary work settles.
+- Completed groundwork reference: `A30` shell module extraction is done and now lives in `tasks/done.md` plus `tasks/module-migration-backlog.md`.
+- Active tasks:
+  - `A04 | DOING | Polish Unity degraded-mode, recovery, and backend-unavailable UX so the shell stays understandable when health is partial or error. | Current state: health banners, recovery guidance, interaction gating, and shell-side status copy exist in repo; remaining work is live-client and packaged-client validation under the current shell boundary. | Manual gate: P02`
+  - `A07 | DOING | Refine the existing UI Toolkit shell toward the design target without claiming the design target is already shipped. | Current state: the runtime shell now uses a four-zone layout with a left control rail, center avatar stage, bottom planner sheet, right chat panel, and drawer-based settings; remaining work is final smoke and polish against the current runtime. | Manual gate: P02`
+- Shared dependency: `A05` owns cross-cutting regression coverage and supplies UI-facing evidence to this lane without being lane-owned here.
+- Planned next: close the remaining shell-side `P02` smoke, confirm packaged unavailable or partial or ready startup surfaces remain readable, and keep shell-owned copy aligned with the `IShellModule` boundary.
+- Live manual gate: `P02`
+- Lane acceptance: shell navigation and degraded or recovery UX stay readable in real Unity and packaged-client smoke after the current module-boundary refactors.
 
-## Active AI Queue
+### UI-2 | Planner + Center Screens
 
-- `A04 | DOING | Polish Unity degraded-mode, recovery, and backend-unavailable UX so the shell stays understandable when health is partial or error. | Current state: health banners, recovery guidance, interaction gating, and shell-side status copy now exist in repo, and the updated shell passed Unity PlayMode re-verification on 2026-03-27; remaining work is real client and packaged-client validation. | Manual dependency: P02`
-- `A05 | DOING | Expand or maintain regression coverage for settings, reminders, subtitles, startup health, assistant streaming, and runtime fallback behavior. | Current state: backend automated coverage is present and verified; Unity EditMode coverage was re-verified on 2026-03-28 with `21 passed`, and Unity PlayMode coverage was re-verified on 2026-03-28 with `33 passed` after the runtime interaction pass that added keyboard submit, schedule date navigation, direct task actions, loading-state wiring, and updated shell refs. Broader target-machine evidence still remains. | Manual dependency: None`
-- `A07 | DOING | Refine the existing UI Toolkit shell toward the design target in ui_feature_map.md without rewriting history about what already exists. | Current state: shared shell tokens, reusable card or button classes, clearer shell copy, a live schedule-side insight panel, structured home or schedule or settings center screens, boot-state messaging, top-chip runtime status, read-only replacements for dead shell controls, and a new orbit-style Home composition that centers the avatar stage with floating task and assistant status cards now exist in repo. The repo-side follow-up for the top-level `Settings` tab regression also landed on 2026-03-29: shell-tab navigation now uses a more resilient runtime button binder, schedule sub-navigation ownership is no longer mixed into the shell router, and Unity PlayMode was re-verified the same day with `35 passed` before returning this area to manual P02 rerun work. | Manual dependency: P02`
-- `A09 | DOING | Improve task interaction UX in the Unity client, including quick-add clarity, text rendering, empty states, and better schedule presentation. | Current state: home quick-add guidance now includes enter-to-submit and inline feedback, schedule supports selected-date navigation plus direct complete or inbox-schedule actions through the runtime shell, and the runtime UI loader now clones `PanelTextSettings`, validates or regenerates runtime font fallback, and no longer depends on the unsupported HomeScreen `:last-child` selector. The repo-side follow-up for the Schedule `Inbox` regression also landed on 2026-03-29: schedule-owned `Inbox` or `Completed` navigation is now bound inside the schedule controller through the same resilient runtime button binder used by the shell tabs, and Unity PlayMode was re-verified the same day with `35 passed`. Closure still depends on a fresh P02 pass with stable partial rendering, reload or restart text visibility, and updated manual entries in `tasks/p02-manual-checklist.md`. | Manual dependency: P02`
-- `A10 | DOING | Improve chat UX with clearer transcript preview, action confirmations, and richer thinking or listening or talking feedback. | Current state: the Unity chat panel now separates conversation, runtime status, transcript preview, and task-action confirmation into dedicated surfaces; route or provider or fallback diagnostics now sit in a status card instead of the transcript body; talking or listening or thinking feedback now render through explicit chat-state copy; enter-to-send is now wired for chat input; boot or degraded or unavailable runtime state now reuses the status card instead of polluting the transcript; and Unity verification on 2026-03-28 passed with `LocalAssistant.Tests.EditMode.ChatViewModelStoreTests` reporting `3 passed` and `LocalAssistant.PlayModeTests` reporting `33 passed`. Remaining work is manual client smoke under P02 and target-machine speech-runtime validation under P03. | Manual dependency: P02 P03`
-- `A11 | DOING | Harden reminder, subtitle, avatar-state, and reconnect behavior under real client runs. | Current state: core event wiring exists; remaining work is live validation and polish across reconnect and degraded conditions. | Manual dependency: P02 P03`
-- `A12 | DOING | Continue optional runtime hardening for faster-whisper, whisper.cpp, Piper, ChatTTS, and Ollama-adjacent preflight diagnostics. | Current state: repo-side speech health now probes configured STT or TTS paths more honestly with cached endpoint-style checks, so `/v1/health` should stop reporting false `ready` when ChatTTS or faster-whisper fail during real runtime initialization or minimal inference. Remaining work is machine-level validation, operator guidance, and any follow-up fixes from target-machine evidence under P03. | Manual dependency: P03`
-- `A13 | TODO | Improve audio cache or temp cleanup, speech retry diagnostics, and related logging where runtime evidence shows gaps. | Current state: baseline cleanup exists in backend code, but longer-lived target-machine behavior still needs observation. | Manual dependency: P03`
-- `A14 | TODO | Formalize the production-avatar integration contract between the assistant shell and `Assets/AvatarSystem/`. | Current state: the repo has avatar runtime controllers, prototype assets, validators, animation assets, and dedicated avatar probe scenes under `Assets/AvatarSystem/AvatarProduction/Scenes/`, but the shell still needs a signed-off scene integration path. | Manual dependency: P02 P04`
-- `A15 | TODO | Prepare the final avatar replacement path so a signed-off avatar can replace placeholder presentation without broad shell rewrites. | Current state: avatar-specific groundwork exists, but live shell integration is still partial. | Manual dependency: P02 P04`
-- `A24 | DOING | Build and harden the MCP-driven Unity automation workflow under `ai-dev-system/` so AI can plan, execute, verify, and iterate on bounded Unity tasks. | Current state: the repo now has a local MCP scaffold, live stdio connection to Unity is verified, the simple 3D demo scene can be created and re-verified with generated scripts and screenshots, runtime UI settings now generate or backfill `PanelTextSettings` so demo-shell labels do not disappear when UI Toolkit loads, the workflow now emits a concise run report alongside the raw summary so console counts, failed steps, failure classifications, verification status, and screenshot evidence are easier to inspect after each run, step failures now stop the workflow instead of blindly continuing, transport-style retry responses are retried for scene loading and playmode exit, workflow-level MCP reconnects now retry initial metadata fetches and step execution after transport-style dropouts, MCP console suppression is narrower so unexpected package-side errors are not auto-hidden, the planner now supports a verification-only `scene_smoke_check` flow in addition to the starter demo build flow, and the task library now includes non-demo smoke definitions for `SampleScene` plus avatar-production scenes already present in the repo. Evidence includes the Unity menu regeneration log on 2026-03-28, the targeted PlayMode test `UiDocumentLoaderPlayModeTests.LoadBuildsTypedRefsForShellScreensAndOverlays` passing after the fix, `ai-dev-system\.venv\Scripts\python.exe -m unittest discover ai-dev-system\tests` passing on 2026-03-28 with `15` tests, `ai-dev-system\verify_connection.py` reporting `39 tools and 18 resources`, `ai-dev-system\run_demo.py` completing with `Failed steps: 0` and screenshot evidence at `unity-client/Assets/Screenshots/ai-dev-demo-6.png`, and `ai-dev-system\run_demo.py --task ai-dev-system\tasks\demo_scene_smoke_check.json` completing with `Failed steps: 0`, expected-object matches, successful playmode exit retry, and screenshot evidence at `unity-client/Assets/Screenshots/ai-demo-scene-smoke-1.png`. | Remaining work: broader live-run evidence across the non-demo smoke tasks and any follow-up recovery polish if real reconnect storms expose new gaps. | Manual dependency: None`
-- `A26 | DOING | Upgrade `ai-dev-system/app/` from a GUI-only Unity Editor profile to a hybrid Unity control plane that routes MCP-first and falls back to pinned-layout GUI editor macros only where needed. | Current state: the repo now has a hybrid `unity-editor` profile with a per-run Unity MCP runtime, a live capability matrix, MCP-backed capability routing across scene or gameobject or component or prefab or asset or material or UI or animation or graphics or package or test or build or camera operations, retained GUI editor capabilities for layout or window or console or surface tasks, structured `actions[]` plus `verify[]` task specs, narrow NL-to-capability parsing, hybrid preflight, per-run `unity-summary.json`, a self-healing stage wired between structured UI automation and visual fallbacks, provider-agnostic Vision LLM locator wiring, action-level `heal_hints` and `execution` metadata, background MCP job tracking for pending test or build or package work, MCP-backed `editor.layout.normalize`, and surfaced `shader.manage`, `texture.manage`, `vfx.manage`, `animator.graph.manage`, and planned graph capability statuses for Shader Graph or VFX Graph or Timeline. Repo-side verification on 2026-03-29 now also includes `ai-dev-system\.venv\Scripts\python.exe -m pytest app\tests\unit -q` reporting `65 passed`, `ai-dev-system\.venv\Scripts\python.exe -m pytest app\tests -q` reporting `67 passed`, `ai-dev-system\.venv\Scripts\python.exe -m pytest tests -q` reporting `15 passed`, and `ai-dev-system\.venv\Scripts\python.exe -m app.main list-capabilities --profile unity-editor` returning the expanded live capability matrix from the current Unity session. Remaining work is still target-desktop manual validation of GUI self-healing or vision fallback behavior, broader live smoke coverage across the manual-validation-required capability groups, and any future backend work needed to move planned graph capabilities such as Timeline out of `unsupported`. | Manual dependency: P09 P10`
+- Objective: keep planner-owned views, task interactions, and center-screen routing inside the schedule feature boundary while the list-first schedule experience remains the current implementation baseline.
+- Completed groundwork reference: `A32` planner-facing backend integration is done and now lives in `tasks/done.md` plus `tasks/module-migration-backlog.md`.
+- Active tasks:
+  - `A09 | DOING | Improve task interaction UX in the Unity client, including quick-add clarity, text rendering, empty states, and better schedule presentation. | Current state: quick add guidance, selected-date navigation, direct complete or inbox-schedule actions, and runtime font-fallback hardening already landed; closure still depends on a fresh `P02` pass. | Manual gate: P02`
+  - `A31 | DOING | Harden the planner module boundary so schedule refs, controller wiring, and planner route ownership live under `unity-client/Assets/Scripts/Features/Schedule/`. | Current state: `PlannerModule` and `IPlannerModule` now wrap the existing schedule controller, planner-owned refs moved under the schedule feature boundary, and repo-side Unity verification on 2026-04-04 refreshed coverage with EditMode `26 passed`, PlayMode `41 passed`, and zero project-code console errors. Remaining work is live smoke before closure. | Manual gate: P02`
+- Future link: `A16` calendar sync scaffolding stays in the roadmap and remains blocked by `P06`; it is not lane-active work today.
+- Planned next: finish the `P02` rerun for Today or Week or Inbox or Completed flows, then carry later planner or chat follow-up work on top of the landed planner backend-integration boundary.
+- Live manual gate: `P02`
+- Lane acceptance: Today or Week or Inbox or Completed remain planner-owned, interactive, and consistent under repo-side tests plus live manual smoke.
 
-## UI Workstream Split
+### UI-3 | Chat + Runtime Feedback
 
-These are execution slices for the current Unity shell work. They map mainly to `A07`, `A09`, `A10`, `A11`, `A14`, and `A05`, and are intended to let multiple AI branches or people work with minimal overlap.
+- Objective: keep transcript UX, runtime diagnostics, reminder or subtitle behavior, and event-driven chat flow improving without regressing the already landed chat module boundary.
+- Completed groundwork reference: `A29` chat boundary setup and `A33` chat-owned turn-state isolation are done and now live in `tasks/done.md` plus `tasks/module-migration-backlog.md`.
+- Active tasks:
+  - `A10 | DOING | Improve chat UX with clearer transcript preview, action confirmations, and richer thinking or listening or talking feedback. | Current state: the panel now separates transcript, status, transcript preview, and task confirmation surfaces; remaining work is live smoke against the current shell and planner boundaries. | Manual gate: P02`
+  - `A11 | DOING | Harden reminder, subtitle, avatar-state, and reconnect behavior under real client runs. | Current state: core event wiring exists; remaining work is live validation and any follow-up polish exposed by those runs. | Manual gate: P02`
+  - `A12 | DOING | Continue optional runtime hardening for faster-whisper, whisper.cpp, Piper, ChatTTS, and Ollama-adjacent preflight diagnostics. | Current state: repo-side speech health probes are more honest about failed runtime initialization; follow-up work should come only from new runtime evidence.`
+  - `A13 | TODO | Improve audio cache or temp cleanup, speech retry diagnostics, and related logging where runtime evidence shows gaps. | Current state: baseline cleanup exists; keep this evidence-driven and do not reopen it without a concrete observed gap.`
+  - `A34 | DOING | Move chat, planner, subtitle, speech, and avatar-state handoff onto explicit shared event flow instead of direct feature coupling. | Current state: planner screen or date or task-action requests, subtitle visibility, and local or backend avatar-state handoff now publish through shared event contracts in the Unity client; remaining closure work is the `P02` live smoke rerun for chat, overlays, reconnect, and shell-visible avatar-state behavior. | Manual gate when landed: P02`
+- Historical evidence note: `P03` is already done and remains an evidence record, not a current blocker.
+- Planned next: close current `P02` smoke for chat, overlays, reconnect behavior, and planner-to-shell handoff on top of the landed `A34` repo-side event flow.
+- Live manual gate: `P02`
+- Lane acceptance: chat and runtime-feedback behavior remain event-safe, readable, and regression-covered while module-owned boundaries continue to harden.
 
-- `UI-01 | DOING | Shell + navigation. | Scope: `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`, `unity-client/Assets/Scripts/App/AppShellController.cs`, `unity-client/Assets/Scripts/App/AppRouter.cs`, `unity-client/Assets/Scripts/Core/AppShellRefs.cs`, `unity-client/Assets/Scripts/Core/UiElementNames.cs`, and router or shell PlayMode tests. | Current state: shell copy, shared stage-status rendering, schedule-side shell insight cards, and null-safe tab binding landed on 2026-03-27. The 2026-03-29 follow-up for the top-level `Settings` tab regression moved shell-tab binding onto a more resilient runtime button binder and kept schedule sub-navigation ownership out of the router; Unity PlayMode was re-verified the same day with `35 passed`. | Keep screen-specific rendering out of this slice once mount points are stable.`
-- `UI-02 | DONE | Home screen. | Scope: `unity-client/Assets/Resources/UI/Screens/HomeScreen.uxml`, `unity-client/Assets/Resources/UI/Styles/HomeScreen.uss`, `unity-client/Assets/Scripts/Core/HomeScreenRefs.cs`, `unity-client/Assets/Scripts/Features/Home/HomeScreenController.cs`, and related PlayMode tests. | Current state: the home center panel now renders workload cards, quick-add guidance, a list-based today queue, focus lanes, and repo-side empty states, and Unity PlayMode was re-verified on 2026-03-28 as part of the `25 passed` run. | Depends on the shell mount point from UI-01 and shared style primitives from UI-08.`
-- `UI-03 | DOING | Schedule screen. | Scope: `unity-client/Assets/Resources/UI/Screens/ScheduleScreen.uxml`, schedule-specific shared style hooks, `unity-client/Assets/Scripts/Core/ScheduleScreenRefs.cs`, `unity-client/Assets/Scripts/Features/Schedule/ScheduleScreenController.cs`, and related PlayMode tests. | Current state: week or inbox or completed now render through structured list cards, schedule summaries, and empty-state copy inside the schedule-owned canvas. The 2026-03-29 follow-up for the `Inbox` regression moved `Inbox` or `Completed` button ownership into the schedule controller and bound those buttons through a more resilient runtime button binder; Unity PlayMode was re-verified the same day with `35 passed`. | If the current `ScheduleSideView` needs more than cosmetic changes, extract it into a schedule-owned template instead of expanding shell ownership.`
-- `UI-04 | DOING | Settings screen. | Scope: `unity-client/Assets/Resources/UI/Screens/SettingsScreen.uxml`, `unity-client/Assets/Resources/UI/Styles/Forms.uss`, `unity-client/Assets/Scripts/Core/SettingsScreenRefs.cs`, `unity-client/Assets/Scripts/Features/Settings/SettingsScreenController.cs`, and related PlayMode tests. | Current state: settings now render grouped toggles, backend-backed summaries, action guidance, and cleaner detail cards, and Unity PlayMode was re-verified on 2026-03-28 as part of the `25 passed` run, but live Unity smoke on 2026-03-29 found the shell `Settings` tab did not switch screens, so this slice is reopened. | Backend settings behavior remains in existing API and store code unless proven wrong by code.`
-- `UI-05 | DONE | Chat panel. | Scope: `unity-client/Assets/Resources/UI/Panels/ChatPanel.uxml`, `unity-client/Assets/Resources/UI/Styles/ChatPanel.uss`, `unity-client/Assets/Scripts/Core/ChatPanelRefs.cs`, `unity-client/Assets/Scripts/Features/Chat/ChatPanelController.cs`, and chat PlayMode tests. | Owns transcript presentation, composer layout, mic or send affordances, and chat-side empty or degraded states. | Avoid routing changes here except visibility hooks already owned by UI-01.`
-- `UI-06 | DONE | Subtitle + reminder overlay. | Scope: `unity-client/Assets/Resources/UI/Overlays/SubtitleOverlay.uxml`, `unity-client/Assets/Resources/UI/Overlays/ReminderOverlay.uxml`, `unity-client/Assets/Scripts/Core/SubtitleOverlayRefs.cs`, `unity-client/Assets/Scripts/Core/ReminderOverlayRefs.cs`, `unity-client/Assets/Scripts/Chat/SubtitlePresenter.cs`, `unity-client/Assets/Scripts/Notifications/ReminderPresenter.cs`, `unity-client/Assets/Scripts/Notifications/ReminderOverlayController.cs`, and related PlayMode tests. | Owns overlay placement, readability, queueing visuals, and hide or show transitions. | Shell only mounts these overlays; presentation logic lives here.`
-- `UI-07 | DONE | Avatar stage binding. | Scope: `unity-client/Assets/Scripts/Core/AssistantApp.cs`, `unity-client/Assets/Scripts/App/AppShellController.cs`, `unity-client/Assets/Scripts/Avatar/`, and `unity-client/Assets/AvatarSystem/` only where shell binding needs it. | Owns binding the real avatar stage to UI state, replacing placeholder stage copy, and keeping avatar state readable from the shell. | Manual dependency: P02 P04.`
-- `UI-08 | DONE | Style tokens + reusable components. | Scope: `unity-client/Assets/Resources/UI/Styles/Tokens.uss`, `unity-client/Assets/Resources/UI/Styles/Layout.uss`, `unity-client/Assets/Resources/UI/Styles/Buttons.uss`, `unity-client/Assets/Resources/UI/Styles/Cards.uss`, `unity-client/Assets/Resources/UI/Styles/Forms.uss`, and any new shared UI Toolkit templates introduced to reduce duplication. | Current state: shared spacing, surface, pill, card, and shell button conventions landed on 2026-03-27 and are now consumed by the shell. | Prefer landing class names and shared tokens before deep screen polish to reduce merge churn.`
-- `UI-09 | DOING | Test smoke flow after refactor. | Scope: `unity-client/Assets/Tests/PlayMode/AppRouterPlayModeTests.cs`, `unity-client/Assets/Tests/PlayMode/ScreenControllersPlayModeTests.cs`, `unity-client/Assets/Tests/PlayMode/ChatPanelControllerPlayModeTests.cs`, `unity-client/Assets/Tests/PlayMode/SubtitlePresenterPlayModeTests.cs`, `unity-client/Assets/Tests/PlayMode/ReminderOverlayControllerPlayModeTests.cs`, `unity-client/Assets/Tests/PlayMode/UiDocumentLoaderPlayModeTests.cs`, `unity-client/Assets/Tests/PlayMode/AssistantAppPlayModeTests.cs`, plus supporting EditMode store tests when UI-facing state helpers change. | Owns regression coverage for navigation, screen wiring, overlays, runtime interaction actions, and refactor-safe boot flow. | Current state: the EditMode suite was re-verified on 2026-03-28 with `21 passed`, the PlayMode suite was re-verified on 2026-03-28 with `33 passed` after the runtime UI interaction pass added keyboard submit, selected-date navigation, direct schedule task actions, settings dirty-state checks, and status-card overrides, the targeted 2026-03-29 PlayMode rerun of `LocalAssistant.Tests.PlayMode.UiDocumentLoaderPlayModeTests.LoadBuildsTypedRefsForShellScreensAndOverlays` passed after the runtime text-settings clone plus font-fallback change, and the follow-up router or schedule regression pass on 2026-03-29 re-verified the full PlayMode suite with `35 passed` after adding coverage for schedule-owned nav gating and settings-state toolbar clearing. Future UI refactors still need reruns and manual smoke under P02. | Manual dependency: P02.`
+### UI-4 | Avatar + Customization
 
-## Recommended Parallel Order
+- Objective: prepare the shell-to-avatar and future wardrobe path without pretending the production avatar handoff already exists.
+- Current queue:
+  - `A14 | TODO | Formalize the production-avatar integration contract between the assistant shell and `Assets/AvatarSystem/`. | Current state: avatar runtime controllers, prototype assets, validators, and probe scenes exist, but the shell still needs a signed-off scene integration path. | Manual gate: P04`
+  - `A15 | TODO | Prepare the final avatar replacement path so a signed-off avatar can replace placeholder presentation without broad shell rewrites. | Current state: avatar groundwork exists, but live shell integration is still partial. | Manual gates: P02 P04`
+  - `A35 | BLOCKED | Implement the avatar-experience module boundary while preserving placeholder fallback until approved assets arrive. | Current state: blocked planned work; do not claim production avatar completion before the asset handoff exists. | Manual gate: P04`
+  - `A36 | TODO | Implement the wardrobe plus asset-data foundation so placeholder or sample customization can exist before final production content arrives. | Current state: planned modularization work only and still downstream from the avatar contract.`
+- Legacy evidence note: `tasks/avatar-system-tasks.md` remains a legacy evidence file for prototype avatar groundwork and is not the active source of truth for this lane.
+- Future link: `A19` multiple-avatar support stays in the roadmap and remains blocked by `P04`; it is not lane-active work today.
+- Planned next: keep placeholder-safe avatar integration planning moving, finish any remaining shell-side smoke under `P02`, and wait for `P04` before calling production avatar or wardrobe work implementation-ready.
+- Live manual gates: `P02` for shell smoke, `P04` for production asset handoff
+- Lane acceptance: avatar-related work stays honest about placeholder versus production state, and future customization work hangs off an explicit shell-to-avatar contract instead of a second competing tracker.
 
-- `Lane 1 foundation`: UI-08 then UI-01
-- `Lane 2 center screens`: UI-02 UI-03 UI-04 in parallel after UI-01 mount points are stable
-- `Lane 3 right or overlay surfaces`: UI-05 and UI-06 in parallel
-- `Lane 4 integration`: UI-07 after the home-stage contract is stable enough to bind against
-- `Lane 5 validation`: UI-09 after any merged batch, and again before closing A07 A09 A10 A11 A14
+## Cross-Cutting / Non-UI
 
-## Future AI Roadmap
+- `A05 | DOING | Expand or maintain regression coverage for settings, reminders, subtitles, startup health, assistant streaming, and runtime fallback behavior. | Current state: backend automated coverage exists, Unity EditMode was re-verified on 2026-04-05 with `30 passed`, and Unity PlayMode was re-verified on 2026-04-05 with `43 passed`; future reruns still belong here as cross-cutting evidence.`
+- `A24 | DOING | Build and harden the MCP-driven Unity automation workflow under `ai-dev-system/`. | Current state: local MCP scaffold, stdio connection, smoke tasks, screenshot evidence, and workflow reporting already exist; remaining work is broader live-run evidence and reconnect hardening follow-up.`
+- `A26 | DOING | Upgrade `ai-dev-system/app/` from a GUI-only Unity Editor profile to a hybrid Unity control plane. | Current state: the hybrid profile, live capability matrix, MCP-first routing, GUI fallback, and repo-side tests exist; remaining work is target-desktop manual validation under `P09` and `P10`. | Manual gates: P09 P10`
+- `A37 | DOING | Execute the docs rewrite for landed modules and migration phases so current implementation and planned work stay clearly separated. | Current state: `docs/roadmap.md` and `docs/index.md` are being added as navigation entry points, and README-level navigation is being aligned with the current runtime and migration baseline. Remaining work is the broader follow-through that keeps module docs current as later modularization slices land.`
+- `A38 | TODO | Execute the task-governance rewrite for phased modularization tracking while staying compatible with this repo's tracker rules.`
+- `A40 | TODO | Add repeatable validation automation that catches task or doc drift during migration.`
 
-- `A08 | TODO | Build a compact mini-assistant mode once product direction and manual validation time are available. | Manual dependency: P02`
+## Future Roadmap
+
+- `A08 | TODO | Build a compact mini-assistant mode once product direction and manual validation time are available. | Manual gate when started: P02`
 - `A16 | TODO | Build Google Calendar sync scaffolding when credentials and project setup exist. | Blocked by: P06`
 - `A17 | TODO | Build a bounded browser or web-automation layer when environments and permissions exist. | Blocked by: P07`
 - `A18 | TODO | Build a plugin system skeleton for optional capability registration.`
@@ -89,16 +106,19 @@ These are execution slices for the current Unity shell work. They map mainly to 
 - `A21 | TODO | Build a desktop control command layer with explicit permission gates and audit trail. | Blocked by: P07`
 - `A22 | TODO | Design cross-device sync architecture that preserves the local-first baseline. | Blocked by: P08`
 - `A23 | TODO | Build the first sync transport and status surface after the topology is fixed. | Blocked by: P08`
+- `A39 | BLOCKED | Evaluate any root-level repo structure move, including a possible `clients/unity/` path, only after later modularization slices and manual smoke justify the churn. | Blocked by: A31 A33 A35 A37 A38 P02`
 
-## Dependency Notes
+## Active Manual Gates
 
-- `P01` and `P02` are the main blockers for Unity-side validation work.
-- `P03` is the main blocker for speech-runtime and target-machine runtime validation.
-- `P04` is the main blocker for final production-avatar integration work.
-- `P05` is historical done work, not an active blocker.
+- `P02` is the main live gate for Unity and packaged-client smoke across `UI-1`, `UI-2`, `UI-3`, and the smoke portion of `UI-4`.
+- `P04` is the main production-content gate for `UI-4`.
+- `P06` through `P10` remain future prerequisites and should not be treated as active blockers until their roadmap items are pulled forward.
+- `P01`, `P03`, and `P05` are historical done records and should no longer be described as active blockers.
 
 ## Implementation Notes
 
-- Do not describe the current shell as a missing three-column migration. That structure already exists in code.
-- Do not reference `UiFactory.cs` as current code. The active loader is `UiDocumentLoader.cs`.
+- The active assistant runtime still lives in `unity-client/` plus `local-backend/`.
+- Current implementation uses a four-zone shell with a left control rail, center stage, bottom planner sheet, and right chat column.
+- Do not reference `UiFactory.cs` as current implementation; the active loader is `UiDocumentLoader.cs`.
 - Treat `unity-client/Assets/Resources/UI/ui_feature_map.md` as a design target, not implementation truth.
+- Treat `tasks/module-migration-backlog.md` as planned phased work; it does not replace the active runtime paths until verified code changes land.

@@ -8,6 +8,7 @@ namespace LocalAssistant.Core
         public Label ChatStateBadge;
         public Label ChatStateTitle;
         public Label ChatStateDetail;
+        public Label ChatRouteBadge;
         public Label ChatTranscriptPreviewTitle;
         public Label ChatTranscriptPreviewText;
         public Label ChatActionSummaryTitle;
@@ -27,6 +28,7 @@ namespace LocalAssistant.Core
             ChatStateBadge = root.Q<Label>(UiElementNames.Chat.ChatStateBadge);
             ChatStateTitle = root.Q<Label>(UiElementNames.Chat.ChatStateTitle);
             ChatStateDetail = root.Q<Label>(UiElementNames.Chat.ChatStateDetail);
+            ChatRouteBadge = root.Q<Label>(UiElementNames.Chat.ChatRouteBadge);
             ChatTranscriptPreviewTitle = root.Q<Label>(UiElementNames.Chat.ChatTranscriptPreviewTitle);
             ChatTranscriptPreviewText = root.Q<Label>(UiElementNames.Chat.ChatTranscriptPreviewText);
             ChatActionSummaryTitle = root.Q<Label>(UiElementNames.Chat.ChatActionSummaryTitle);

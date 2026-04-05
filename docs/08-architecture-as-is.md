@@ -1,6 +1,6 @@
 # Architecture As-Is
 
-Updated: 2026-03-26
+Updated: 2026-04-04
 
 This document is the implementation snapshot for the repo as it exists now.
 
@@ -30,7 +30,7 @@ This document is the implementation snapshot for the repo as it exists now.
 
 - UI Toolkit shell loaded from `Assets/Resources/UI/MainUI.uxml`
 - `AppShell.uxml` with Home, Schedule, and Settings content areas
-- chat panel, subtitle overlay, reminder overlay, health display, and backend-backed settings
+- orbit-style Home shell, list-first Schedule canvas, chat status cards, subtitle overlay, reminder overlay, health display, and backend-backed settings
 - REST and WebSocket clients for backend integration
 - placeholder avatar-state handling, audio playback, and lip-sync fallback behavior
 
@@ -42,16 +42,18 @@ This document is the implementation snapshot for the repo as it exists now.
 
 ## What Is Still Partial
 
-- The schedule center panel is still a placeholder text surface rather than a real calendar UI.
-- The schedule-side panel is largely static placeholder content.
-- The top-level chat panel contains some placeholder copy such as the fixed model badge.
+- The schedule center panel is list-first and interactive, but it is still not a real calendar-grid UI.
+- The schedule-side panel is still a shell-owned helper surface with mostly static advisory content.
+- The Home avatar stage still uses placeholder presentation until a production scene binding is finalized.
 - Production-avatar integration still depends on Unity scene setup and manual validation.
 - A compact mini-assistant mode is not implemented.
 
 ## Verification Snapshot
 
-- Backend tests were executed on 2026-03-26 in `local-backend/` and passed: `62 passed`.
-- Unity test files exist, but Unity Editor or built-client execution was not re-run in this terminal session.
+- Historical backend verification was executed on 2026-03-26 in `local-backend/` with `pytest -q`: `62 passed`.
+- Latest backend terminal rerun for the Phase 0 baseline was executed on 2026-04-04 in `local-backend/` with `python -m pytest -q`: `69 passed, 1 failed`.
+- The current failing test is `tests/test_tts_service.py::test_chattts_synthesize_writes_cached_wav`.
+- Latest Unity verification notes remain tracker-backed evidence from 2026-03-28 and 2026-03-29; Unity Editor or built-client execution was not re-run in this terminal session.
 
 ## Adjacent Or Optional Code
 

@@ -212,6 +212,53 @@ namespace LocalAssistant.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator AssistantAppPlannerScreenRequestsNavigateThroughSharedEventFlow()
+        {
+            var api = new FakeApiClient
+            {
+                Health = CreateHealth(
+                    status: "ready",
+                    databaseAvailable: true,
+                    sttAvailable: true,
+                    ttsAvailable: true,
+                    llmAvailable: true,
+                    recoveryActions: Array.Empty<string>()),
+                Inbox = new TaskListResponse
+                {
+                    items = new List<TaskRecord>
+                    {
+                        new() { id = "task-inbox", title = "Inbox follow-up", status = "planned" },
+                    },
+                    count = 1,
+                },
+                Completed = new TaskListResponse
+                {
+                    items = new List<TaskRecord>
+                    {
+                        new() { id = "task-done", title = "Wrapped review", status = "done" },
+                    },
+                    count = 1,
+                },
+            };
+            var app = CreateApp(api, new FakeEventsClient());
+
+            yield return null;
+            yield return null;
+
+            RequestInbox(app);
+            yield return null;
+
+            Assert.AreEqual(LocalAssistant.App.AppScreen.Inbox, GetCurrentPlannerScreen(app));
+            StringAssert.Contains("Inbox triage", FindLabel("TaskSheetHeaderTitle").text);
+
+            RequestCompleted(app);
+            yield return null;
+
+            Assert.AreEqual(LocalAssistant.App.AppScreen.Completed, GetCurrentPlannerScreen(app));
+            StringAssert.Contains("Completed review", FindLabel("TaskSheetHeaderTitle").text);
+        }
+
+        [UnityTest]
         public IEnumerator AssistantAppSettingsToggleMarksUnsavedChanges()
         {
             var api = new FakeApiClient
@@ -321,6 +368,77 @@ namespace LocalAssistant.Tests.PlayMode
                 observedStates);
         }
 
+        [UnityTest]
+        public IEnumerator AssistantAppStreamingReplyUpdatesTranscriptDiagnosticsAndPlannerSummary()
+        {
+            var api = new FakeApiClient
+            {
+                Health = CreateHealth(
+                    status: "ready",
+                    databaseAvailable: true,
+                    sttAvailable: true,
+                    ttsAvailable: true,
+                    llmAvailable: true,
+                    recoveryActions: Array.Empty<string>()),
+            };
+            var streamClient = new FakeStreamClient { ConnectedAfterConnect = true };
+            CreateApp(api, new FakeEventsClient(), streamClient);
+
+            yield return null;
+            yield return null;
+
+            streamClient.EnqueueMessage(UnityJson.Serialize(new TranscriptEvent
+            {
+                type = "transcript_partial",
+                text = "nhac toi",
+            }));
+            streamClient.EnqueueMessage(UnityJson.Serialize(new TranscriptEvent
+            {
+                type = "transcript_final",
+                text = "nhac toi hop nhom ngay mai",
+            }));
+            streamClient.EnqueueMessage(UnityJson.Serialize(new RouteSelectedEvent
+            {
+                type = "route_selected",
+                route = "hybrid_plan_then_groq",
+                provider = "groq",
+            }));
+            streamClient.EnqueueMessage(UnityJson.Serialize(new AssistantChunkEvent
+            {
+                type = "assistant_chunk",
+                text = "Da tao",
+            }));
+            streamClient.EnqueueMessage(UnityJson.Serialize(new AssistantFinalEvent
+            {
+                type = "assistant_final",
+                conversation_id = "conv-stream",
+                session_id = "session-stream",
+                reply_text = "Da tao nhac viec cho hop nhom ngay mai.",
+                route = "hybrid_plan_then_groq",
+                provider = "groq",
+                latency_ms = 287,
+                fallback_used = true,
+                task_actions = new List<TaskActionReport>
+                {
+                    new()
+                    {
+                        type = "create_task",
+                        title = "hop nhom",
+                        detail = "Task created from stream reply",
+                    },
+                },
+            }));
+
+            yield return null;
+            yield return null;
+
+            Assert.AreEqual("hybrid_plan_then_groq / groq", FindLabel("ChatRouteBadge").text);
+            Assert.AreEqual("nhac toi hop nhom ngay mai", FindLabel("ChatTranscriptPreviewText").text);
+            StringAssert.Contains("hop nhom", FindLabel("ChatActionSummaryText").text);
+            StringAssert.Contains("Da tao nhac viec cho hop nhom ngay mai.", FindLabel("ChatLogText").text);
+            StringAssert.Contains("Fallbacks 1", FindLabel("ChatStateDetail").text);
+        }
+
         private static AssistantApp CreateApp(FakeApiClient api, FakeEventsClient eventsClient, FakeStreamClient streamClient = null)
         {
             var root = new GameObject("AssistantAppTestRoot");
@@ -406,32 +524,59 @@ namespace LocalAssistant.Tests.PlayMode
 
         private static void SubmitCurrentInput(AssistantApp app)
         {
-            var field = typeof(AssistantApp).GetField("chatPanelController", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.NotNull(field, "AssistantApp chatPanelController field was not found.");
+            var field = typeof(AssistantApp).GetField("chatModule", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp chatModule field was not found.");
 
-            var controller = field.GetValue(app) as ChatPanelController;
-            Assert.NotNull(controller, "AssistantApp chatPanelController was not initialized.");
-            controller.SubmitCurrentInput();
+            var module = field.GetValue(app) as IChatModule;
+            Assert.NotNull(module, "AssistantApp chatModule was not initialized.");
+            module.SubmitCurrentInput();
         }
 
         private static void RequestCompleteTask(AssistantApp app, string taskId)
         {
-            var field = typeof(AssistantApp).GetField("scheduleScreenController", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.NotNull(field, "AssistantApp scheduleScreenController field was not found.");
+            var field = typeof(AssistantApp).GetField("plannerModule", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp plannerModule field was not found.");
 
-            var controller = field.GetValue(app) as LocalAssistant.Features.Schedule.ScheduleScreenController;
-            Assert.NotNull(controller, "AssistantApp scheduleScreenController was not initialized.");
-            controller.RequestCompleteTask(taskId);
+            var module = field.GetValue(app) as LocalAssistant.Features.Schedule.IPlannerModule;
+            Assert.NotNull(module, "AssistantApp plannerModule was not initialized.");
+            module.RequestCompleteTask(taskId);
         }
 
         private static void RequestScheduleTask(AssistantApp app, string taskId, string selectedDate)
         {
-            var field = typeof(AssistantApp).GetField("scheduleScreenController", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.NotNull(field, "AssistantApp scheduleScreenController field was not found.");
+            var field = typeof(AssistantApp).GetField("plannerModule", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp plannerModule field was not found.");
 
-            var controller = field.GetValue(app) as LocalAssistant.Features.Schedule.ScheduleScreenController;
-            Assert.NotNull(controller, "AssistantApp scheduleScreenController was not initialized.");
-            controller.RequestScheduleTask(taskId, selectedDate);
+            var module = field.GetValue(app) as LocalAssistant.Features.Schedule.IPlannerModule;
+            Assert.NotNull(module, "AssistantApp plannerModule was not initialized.");
+            module.RequestScheduleTask(taskId, selectedDate);
+        }
+
+        private static void RequestInbox(AssistantApp app)
+        {
+            var field = typeof(AssistantApp).GetField("plannerModule", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp plannerModule field was not found.");
+
+            var module = field.GetValue(app) as LocalAssistant.Features.Schedule.IPlannerModule;
+            Assert.NotNull(module, "AssistantApp plannerModule was not initialized.");
+            module.RequestInbox();
+        }
+
+        private static void RequestCompleted(AssistantApp app)
+        {
+            var field = typeof(AssistantApp).GetField("plannerModule", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp plannerModule field was not found.");
+
+            var module = field.GetValue(app) as LocalAssistant.Features.Schedule.IPlannerModule;
+            Assert.NotNull(module, "AssistantApp plannerModule was not initialized.");
+            module.RequestCompleted();
+        }
+
+        private static LocalAssistant.App.AppScreen GetCurrentPlannerScreen(AssistantApp app)
+        {
+            var field = typeof(AssistantApp).GetField("currentPlannerScreen", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, "AssistantApp currentPlannerScreen field was not found.");
+            return (LocalAssistant.App.AppScreen)field.GetValue(app);
         }
 
         private static AvatarStateMachine FindAvatarStateMachine()

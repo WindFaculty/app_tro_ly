@@ -5,17 +5,25 @@ using LocalAssistant.Core;
 
 namespace LocalAssistant.Tasks
 {
-    public sealed class TaskViewModelStore
+    public sealed class TaskViewModelStore : IPlannerTaskSnapshotSource
     {
-        public TodayTasksResponse Today { get; private set; } = new();
-        public WeekTasksResponse Week { get; private set; } = new();
-        public TaskListResponse Inbox { get; private set; } = new();
-        public TaskListResponse Completed { get; private set; } = new();
+        public PlannerTodaySnapshot Today { get; private set; } = new();
+        public PlannerWeekSnapshot Week { get; private set; } = new();
+        public PlannerTaskListSnapshot Inbox { get; private set; } = new();
+        public PlannerTaskListSnapshot Completed { get; private set; } = new();
 
-        public void ApplyToday(TodayTasksResponse payload) => Today = payload ?? new TodayTasksResponse();
-        public void ApplyWeek(WeekTasksResponse payload) => Week = payload ?? new WeekTasksResponse();
-        public void ApplyInbox(TaskListResponse payload) => Inbox = payload ?? new TaskListResponse();
-        public void ApplyCompleted(TaskListResponse payload) => Completed = payload ?? new TaskListResponse();
+        public void ApplySnapshot(PlannerTaskSnapshot snapshot)
+        {
+            Today = snapshot?.Today ?? new PlannerTodaySnapshot();
+            Week = snapshot?.Week ?? new PlannerWeekSnapshot();
+            Inbox = snapshot?.Inbox ?? new PlannerTaskListSnapshot();
+            Completed = snapshot?.Completed ?? new PlannerTaskListSnapshot();
+        }
+
+        public void ApplyToday(TodayTasksResponse payload) => Today = PlannerTaskMapper.MapToday(payload);
+        public void ApplyWeek(WeekTasksResponse payload) => Week = PlannerTaskMapper.MapWeek(payload);
+        public void ApplyInbox(TaskListResponse payload) => Inbox = PlannerTaskMapper.MapTaskList(payload);
+        public void ApplyCompleted(TaskListResponse payload) => Completed = PlannerTaskMapper.MapTaskList(payload);
 
         public string BuildTabText(string tabName)
         {
@@ -23,8 +31,8 @@ namespace LocalAssistant.Tasks
             {
                 "Today" => BuildTodayText(),
                 "Week" => BuildWeekText(),
-                "Inbox" => BuildListText("Inbox", Inbox.items),
-                "Completed" => BuildListText("Completed", Completed.items),
+                "Inbox" => BuildListText("Inbox", Inbox.Items),
+                "Completed" => BuildListText("Completed", Completed.Items),
                 "Settings" => "Settings are loaded from the local backend.\nToggle speech and mini mode from backend-backed settings.",
                 _ => string.Empty,
             };
@@ -33,12 +41,12 @@ namespace LocalAssistant.Tasks
         public string BuildOverviewText()
         {
             return
-                $"Today {CountOf(Today.items)}  |  Due soon {CountOf(Today.due_soon)}  |  Overdue {CountOf(Today.overdue)}  |  Inbox {CountOf(Inbox.items)}  |  Completed {CountOf(Completed.items)}  |  Conflicts {CountOf(Week.conflicts)}";
+                $"Today {CountOf(Today.Items)}  |  Due soon {CountOf(Today.DueSoon)}  |  Overdue {CountOf(Today.Overdue)}  |  Inbox {CountOf(Inbox.Items)}  |  Completed {CountOf(Completed.Items)}  |  Conflicts {CountOf(Week.Conflicts)}";
         }
 
-        public static Dictionary<string, List<TaskRecord>> GroupWeekByDay(WeekTasksResponse response)
+        public static Dictionary<string, List<PlannerTaskItem>> GroupWeekByDay(PlannerWeekSnapshot response)
         {
-            return response.days.ToDictionary(bucket => bucket.date, bucket => bucket.items ?? new List<TaskRecord>());
+            return response.Days.ToDictionary(bucket => bucket.Date, bucket => bucket.Items ?? new List<PlannerTaskItem>());
         }
 
         private string BuildTodayText()
@@ -46,9 +54,9 @@ namespace LocalAssistant.Tasks
             var builder = new StringBuilder();
             builder.AppendLine("Today");
             builder.AppendLine();
-            AppendList(builder, "Scheduled", Today.items);
-            AppendList(builder, "Due Soon", Today.due_soon);
-            AppendList(builder, "Overdue", Today.overdue);
+            AppendList(builder, "Scheduled", Today.Items);
+            AppendList(builder, "Due Soon", Today.DueSoon);
+            AppendList(builder, "Overdue", Today.Overdue);
             return builder.ToString().Trim();
         }
 
@@ -57,31 +65,31 @@ namespace LocalAssistant.Tasks
             var builder = new StringBuilder();
             builder.AppendLine("Week");
             builder.AppendLine();
-            foreach (var bucket in Week.days)
+            foreach (var bucket in Week.Days)
             {
-                builder.AppendLine($"{bucket.date} ({bucket.task_count})");
-                if (bucket.items == null || bucket.items.Count == 0)
+                builder.AppendLine($"{bucket.Date} ({bucket.TaskCount})");
+                if (bucket.Items == null || bucket.Items.Count == 0)
                 {
                     builder.AppendLine("  - No tasks");
                     continue;
                 }
 
-                foreach (var task in bucket.items)
+                foreach (var task in bucket.Items)
                 {
-                    builder.AppendLine($"  - [{task.priority}] {task.title}");
+                    builder.AppendLine($"  - [{task.Priority}] {task.Title}");
                 }
             }
 
-            if (Week.conflicts != null && Week.conflicts.Count > 0)
+            if (Week.Conflicts != null && Week.Conflicts.Count > 0)
             {
                 builder.AppendLine();
-                builder.AppendLine($"Conflicts: {Week.conflicts.Count}");
+                builder.AppendLine($"Conflicts: {Week.Conflicts.Count}");
             }
 
             return builder.ToString().Trim();
         }
 
-        private string BuildListText(string title, List<TaskRecord> items)
+        private string BuildListText(string title, List<PlannerTaskItem> items)
         {
             var builder = new StringBuilder();
             builder.AppendLine(title);
@@ -90,7 +98,7 @@ namespace LocalAssistant.Tasks
             return builder.ToString().Trim();
         }
 
-        private static void AppendList(StringBuilder builder, string title, List<TaskRecord> items)
+        private static void AppendList(StringBuilder builder, string title, List<PlannerTaskItem> items)
         {
             builder.AppendLine(title + ":");
             if (items == null || items.Count == 0)
@@ -102,8 +110,8 @@ namespace LocalAssistant.Tasks
 
             foreach (var task in items)
             {
-                var timeBlock = string.IsNullOrEmpty(task.start_at) ? string.Empty : $" @ {task.start_at}";
-                builder.AppendLine($"- [{task.priority}] {task.title}{timeBlock}");
+                var timeBlock = string.IsNullOrEmpty(task.StartAt) ? string.Empty : $" @ {task.StartAt}";
+                builder.AppendLine($"- [{task.Priority}] {task.Title}{timeBlock}");
             }
 
             builder.AppendLine();

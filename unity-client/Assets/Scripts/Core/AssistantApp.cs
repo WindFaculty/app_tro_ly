@@ -30,12 +30,14 @@ namespace LocalAssistant.Core
 
         private AssistantUiRefs ui;
         private IAssistantApiClient apiClient;
+        private IPlannerBackendIntegration plannerBackend;
         private IAssistantEventsClient eventsClient;
         private IAssistantStreamClient assistantStreamClient;
         private CancellationTokenSource cancellationTokenSource;
         private readonly TaskViewModelStore taskStore = new();
-        private readonly ChatViewModelStore chatStore = new();
         private readonly SettingsViewModelStore settingsStore = new();
+        private readonly IAssistantEventBus sharedEventBus = new AssistantEventBus();
+        private readonly List<IDisposable> eventSubscriptions = new();
         private readonly Queue<TtsSentenceReadyEvent> speechQueue = new();
 
         private AvatarStateMachine avatarStateMachine;
@@ -44,15 +46,14 @@ namespace LocalAssistant.Core
         private AudioPlaybackController audioPlaybackController;
         private SubtitlePresenter subtitlePresenter;
         private ReminderPresenter reminderPresenter;
-        private AppRouter appRouter;
-        private AppShellController appShellController;
+        private IShellModule shellModule;
         private HomeScreenController homeScreenController;
-        private ScheduleScreenController scheduleScreenController;
+        private IPlannerModule plannerModule;
         private SettingsScreenController settingsScreenController;
-        private ChatPanelController chatPanelController;
+        private IChatModule chatModule;
 
         private HealthResponse currentHealth = new();
-        private AppScreen currentScreen = AppScreen.Week;
+        private AppScreen currentPlannerScreen = AppScreen.Week;
         private string selectedDate = string.Empty;
         private bool isBindingSettingsUi;
         private bool continuousVoiceEnabled;
@@ -67,6 +68,7 @@ namespace LocalAssistant.Core
         private bool isSettingsRequestInFlight;
         private bool awaitingQuickAddResult;
         private AudioClip recordingClip;
+        private AvatarState conversationVisualState = AvatarState.Idle;
 
         // UI init
         private void Awake()
@@ -83,43 +85,41 @@ namespace LocalAssistant.Core
             reminderPresenter = composition.ReminderPresenter;
             avatarStateMachine.StateChanged += OnAvatarStateChanged;
             audioPlaybackController.PlaybackCompleted += OnAudioPlaybackCompleted;
-            appShellController = new AppShellController(ui.Shell);
-            appRouter = new AppRouter(ui.Shell, ui.Schedule, ui.Settings, ui.Chat, OnScreenChanged);
+            shellModule = new ShellModule(ui.Shell);
             homeScreenController = new HomeScreenController(ui.Home);
-            scheduleScreenController = new ScheduleScreenController(ui.Schedule);
+            plannerModule = new PlannerModule(ui.Schedule);
             settingsScreenController = new SettingsScreenController(ui.Settings);
-            chatPanelController = new ChatPanelController(ui.Chat);
-            appShellController.Bind();
-            appRouter.BindTabs();
+            chatModule = new ChatModule(ui.Chat);
+            shellModule.Bind();
             homeScreenController.Bind();
-            scheduleScreenController.Bind();
+            plannerModule.Bind();
             settingsScreenController.Bind();
-            chatPanelController.Bind();
-            appShellController.RefreshRequested += RefreshWorkspace;
+            chatModule.Bind();
+            RegisterSharedEventFlow();
+            shellModule.RefreshRequested += RefreshWorkspace;
             homeScreenController.QuickAddRequested += SubmitQuickAddMessage;
-            scheduleScreenController.TodayRequested += ResetSelectedDateToToday;
-            scheduleScreenController.DateOffsetRequested += ShiftSelectedDate;
-            scheduleScreenController.DaySelected += SelectDate;
-            scheduleScreenController.InboxRequested += () => appRouter.Navigate(AppScreen.Inbox);
-            scheduleScreenController.CompletedRequested += () => appRouter.Navigate(AppScreen.Completed);
-            scheduleScreenController.CompleteTaskRequested += CompleteTaskFromSchedule;
-            scheduleScreenController.ScheduleTaskRequested += ScheduleTaskFromInbox;
+            plannerModule.TodayRequested += PublishPlannerTodayRequested;
+            plannerModule.DateOffsetRequested += PublishPlannerDateOffsetRequested;
+            plannerModule.DaySelected += PublishPlannerDaySelected;
+            plannerModule.ScreenRequested += PublishPlannerScreenRequested;
+            plannerModule.CompleteTaskRequested += PublishPlannerTaskCompletionRequested;
+            plannerModule.ScheduleTaskRequested += PublishPlannerTaskSchedulingRequested;
             settingsScreenController.ReloadRequested += ReloadSettings;
             settingsScreenController.SaveRequested += SaveSettings;
             settingsScreenController.SpeakRepliesChanged += OnSpeakRepliesChanged;
             settingsScreenController.TranscriptPreviewChanged += OnTranscriptPreviewChanged;
             settingsScreenController.MiniAssistantChanged += OnMiniAssistantChanged;
             settingsScreenController.ReminderSpeechChanged += OnReminderSpeechChanged;
-            chatPanelController.SendRequested += SubmitFromMessage;
-            chatPanelController.MicRequested += ToggleVoiceSession;
+            chatModule.SendRequested += SubmitFromMessage;
+            chatModule.MicRequested += ToggleVoiceSession;
 
-            chatStore.SetThinking(true);
-            chatStore.SetSystemStatus("LOADING", "Loading local workspace", "Connecting to the backend and preparing Home, Schedule, Settings, and Chat.");
-            appShellController.RenderBootState("Loading runtime", "Connecting to the local backend and preparing shell screens...", LoadingColor);
+            PublishConversationVisualState(AvatarState.Thinking);
+            chatModule.SetSystemStatus("LOADING", "Loading local workspace", "Connecting to the backend and preparing stage, planner, settings, and chat.");
+            shellModule.RenderBootState("Loading runtime", "Connecting to the local backend and preparing the four-zone shell...", LoadingColor);
             homeScreenController.SetQuickAddStatus("Quick add becomes available after the workspace loads.", InfoColor);
             SetSettingsStatus("Loading settings...", InfoColor);
 
-            appRouter.Navigate(currentScreen);
+            plannerModule.ShowScreen(currentPlannerScreen);
             RefreshTaskView();
             RefreshChatPanel();
             RefreshStagePanel();
@@ -138,6 +138,12 @@ namespace LocalAssistant.Core
         {
             if (avatarStateMachine != null) avatarStateMachine.StateChanged -= OnAvatarStateChanged;
             if (audioPlaybackController != null) audioPlaybackController.PlaybackCompleted -= OnAudioPlaybackCompleted;
+            foreach (var subscription in eventSubscriptions)
+            {
+                subscription?.Dispose();
+            }
+
+            eventSubscriptions.Clear();
             cancellationTokenSource?.Cancel();
             cancellationTokenSource?.Dispose();
             eventsClient?.Dispose();
@@ -147,12 +153,37 @@ namespace LocalAssistant.Core
         public void ConfigureClientsForTests(IAssistantApiClient injectedApiClient, IAssistantEventsClient injectedEventsClient, IAssistantStreamClient injectedStreamClient = null)
         {
             apiClient = injectedApiClient;
+            plannerBackend = null;
             eventsClient = injectedEventsClient;
             assistantStreamClient = injectedStreamClient;
         }
 
         public async void BeginPushToTalk() => await BeginListeningAsync();
         public async void EndPushToTalk() => await FinishVoiceCaptureAsync(false);
+
+        private void RegisterSharedEventFlow()
+        {
+            eventSubscriptions.Add(sharedEventBus.Subscribe<PlannerTodayRequestedEvent>(_ => ResetSelectedDateToToday()));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<PlannerDateOffsetRequestedEvent>(evt => ShiftSelectedDate(evt.DayOffset)));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<PlannerDaySelectedEvent>(evt => SelectDate(evt.SelectedDate)));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<PlannerScreenRequestedEvent>(HandlePlannerScreenRequested));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<PlannerTaskCompletionRequestedEvent>(evt => CompleteTaskFromSchedule(evt.TaskId)));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<PlannerTaskSchedulingRequestedEvent>(evt => ScheduleTaskFromInbox(evt.TaskId, evt.TargetDate)));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<SubtitleVisibilityChangedEvent>(HandleSubtitleVisibilityChanged));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<ConversationVisualStateChangedEvent>(HandleConversationVisualStateChanged));
+            eventSubscriptions.Add(sharedEventBus.Subscribe<BackendAssistantStateChangedEvent>(HandleBackendAssistantStateChanged));
+        }
+
+        private void PublishPlannerTodayRequested() => sharedEventBus.Publish(new PlannerTodayRequestedEvent());
+        private void PublishPlannerDateOffsetRequested(int dayOffset) => sharedEventBus.Publish(new PlannerDateOffsetRequestedEvent(dayOffset));
+        private void PublishPlannerDaySelected(string selectedDate) => sharedEventBus.Publish(new PlannerDaySelectedEvent(selectedDate));
+        private void PublishPlannerScreenRequested(AppScreen screen) => sharedEventBus.Publish(new PlannerScreenRequestedEvent(screen));
+        private void PublishPlannerTaskCompletionRequested(string taskId) => sharedEventBus.Publish(new PlannerTaskCompletionRequestedEvent(taskId));
+        private void PublishPlannerTaskSchedulingRequested(string taskId, string targetDate) => sharedEventBus.Publish(new PlannerTaskSchedulingRequestedEvent(taskId, targetDate));
+        private void PublishSubtitleShown(string text) => sharedEventBus.Publish(new SubtitleVisibilityChangedEvent(text, true));
+        private void PublishSubtitleHidden() => sharedEventBus.Publish(new SubtitleVisibilityChangedEvent(string.Empty, false));
+        private void PublishConversationVisualState(AvatarState state) => sharedEventBus.Publish(new ConversationVisualStateChangedEvent(state));
+        private void PublishBackendAssistantState(string state, string animationHint) => sharedEventBus.Publish(new BackendAssistantStateChangedEvent(state, animationHint));
 
         private async Task InitializeAsync()
         {
@@ -171,9 +202,9 @@ namespace LocalAssistant.Core
 
                 await LoadSettingsAsync("Settings loaded from local backend.");
                 await ReloadAllAsync();
-                chatStore.SetThinking(false);
+                PublishConversationVisualState(AvatarState.Idle);
                 SyncHealthStatusToChat(currentHealth);
-                chatStore.AddAssistant("Hybrid assistant is ready. Ask about today, planning, or start voice mode.");
+                chatModule.AddAssistant("Hybrid assistant is ready. Ask about today, planning, or start voice mode.");
                 RefreshChatPanel();
                 eventsClient ??= new EventsClient(apiClient.EventsUrl);
                 await eventsClient.ConnectAsync(cancellationTokenSource.Token);
@@ -182,11 +213,9 @@ namespace LocalAssistant.Core
             catch (Exception exception)
             {
                 ApplyHealth(new HealthResponse { status = "error" });
-                chatStore.SetThinking(false);
-                chatStore.AddAssistant("Cannot reach the local backend: " + exception.Message);
+                chatModule.AddAssistant("Cannot reach the local backend: " + exception.Message);
                 HandleBackendUnavailableState();
                 RefreshChatPanel();
-                avatarStateMachine.SetState(AvatarState.Warning);
             }
             finally
             {
@@ -199,10 +228,7 @@ namespace LocalAssistant.Core
 
         private async Task ReloadAllAsync()
         {
-            taskStore.ApplyToday(await apiClient.GetTodayAsync(selectedDate));
-            taskStore.ApplyWeek(await apiClient.GetWeekAsync(selectedDate));
-            taskStore.ApplyInbox(await apiClient.GetInboxAsync());
-            taskStore.ApplyCompleted(await apiClient.GetCompletedAsync());
+            taskStore.ApplySnapshot(await GetPlannerBackend().LoadSnapshotAsync(selectedDate));
             RefreshTaskView();
         }
 
@@ -212,14 +238,14 @@ namespace LocalAssistant.Core
             {
                 assistantStreamClient ??= new AssistantStreamClient(apiClient.AssistantStreamUrl);
                 await assistantStreamClient.ConnectAsync(cancellationTokenSource.Token);
-                chatStore.SessionId = string.IsNullOrEmpty(chatStore.SessionId) ? Guid.NewGuid().ToString("N") : chatStore.SessionId;
-                await SendStreamAsync(new AssistantStreamRequestPayload { type = "session_start", session_id = chatStore.SessionId, selected_date = selectedDate });
+                chatModule.SessionId = string.IsNullOrEmpty(chatModule.SessionId) ? Guid.NewGuid().ToString("N") : chatModule.SessionId;
+                await SendStreamAsync(new AssistantStreamRequestPayload { type = "session_start", session_id = chatModule.SessionId, selected_date = selectedDate });
             }
             catch (Exception exception)
             {
                 assistantStreamClient?.Dispose();
                 assistantStreamClient = null;
-                chatStore.AddAssistant("Assistant stream unavailable, using compatibility mode: " + exception.Message);
+                chatModule.AddAssistant("Assistant stream unavailable, using compatibility mode: " + exception.Message);
                 RefreshChatPanel();
             }
         }
@@ -238,8 +264,8 @@ namespace LocalAssistant.Core
             }
 
             isRefreshingWorkspace = true;
-            chatStore.SetSystemStatus("LOADING", "Refreshing workspace", "Pulling health, settings, and task data from the local backend.");
-            appShellController.RenderBootState("Refreshing workspace", "Synchronizing runtime health, settings, and task views...", LoadingColor);
+            chatModule.SetSystemStatus("LOADING", "Refreshing workspace", "Pulling health, settings, and task data from the local backend.");
+            shellModule.RenderBootState("Refreshing workspace", "Synchronizing runtime health, settings, and task views...", LoadingColor);
             SetSettingsStatus("Refreshing settings...", InfoColor);
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
@@ -260,8 +286,8 @@ namespace LocalAssistant.Core
             }
             catch (Exception exception)
             {
-                chatStore.AddAssistant("Refresh failed: " + exception.Message);
-                chatStore.SetSystemStatus("ERROR", "Workspace refresh failed", "Check the backend process and try refresh again.");
+                chatModule.AddAssistant("Refresh failed: " + exception.Message);
+                chatModule.SetSystemStatus("ERROR", "Workspace refresh failed", "Check the backend process and try refresh again.");
                 SetSettingsStatus("Refresh failed.", ErrorColor);
                 RefreshChatPanel();
             }
@@ -291,19 +317,9 @@ namespace LocalAssistant.Core
                 homeScreenController.SetQuickAddStatus("Sending quick add to the assistant...", LoadingColor);
             }
 
-            chatStore.ClearSystemStatus();
-            chatStore.AddUser(message);
-            chatStore.SetListening(false);
-            chatStore.SetThinking(true);
-            chatStore.SetTalking(false);
-            chatStore.SetTaskActions(Array.Empty<TaskActionReport>());
-            chatStore.ResetAssistantDraft();
-            if (fromVoice && settingsStore.Current.voice.show_transcript_preview)
-            {
-                chatStore.SetTranscriptPreview(message);
-            }
+            chatModule.BeginTurn(message, fromVoice, settingsStore.Current.voice.show_transcript_preview);
 
-            avatarStateMachine.SetState(AvatarState.Thinking);
+            PublishConversationVisualState(AvatarState.Thinking);
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
             try
@@ -313,8 +329,8 @@ namespace LocalAssistant.Core
                     await SendStreamAsync(new AssistantStreamRequestPayload
                     {
                         type = "text_turn",
-                        session_id = chatStore.SessionId,
-                        conversation_id = chatStore.ConversationId,
+                        session_id = chatModule.SessionId,
+                        conversation_id = chatModule.ConversationId,
                         message = message,
                         selected_date = selectedDate,
                         voice_mode = fromVoice,
@@ -323,15 +339,12 @@ namespace LocalAssistant.Core
                 }
 
                 await ApplyCompatibilityChatResponseAsync(await apiClient.SendChatAsync(
-                    ChatViewModelStore.CreateRequest(message, chatStore.ConversationId, selectedDate, settingsStore.Current.voice.speak_replies)));
+                    ChatRequestFactory.CreateTextRequest(message, chatModule.ConversationId, selectedDate, settingsStore.Current.voice.speak_replies)));
                 CompleteChatTurn();
             }
             catch (Exception exception)
             {
-                chatStore.SetThinking(false);
-                chatStore.SetTalking(false);
-                chatStore.AddAssistant("Request failed: " + exception.Message);
-                chatStore.SetSystemStatus("ERROR", "Chat request failed", "Check the backend and try the request again.");
+                chatModule.ApplyRequestFailure("Request failed: " + exception.Message, "Check the backend and try the request again.");
                 ResolvePendingQuickAdd(Array.Empty<TaskActionReport>(), "Quick add failed. Check the backend and try again.", ErrorColor);
                 RefreshChatPanel();
                 CompleteChatTurn();
@@ -340,12 +353,8 @@ namespace LocalAssistant.Core
 
         private async Task ApplyCompatibilityChatResponseAsync(ChatResponsePayload response)
         {
-            chatStore.ConversationId = response.conversation_id;
-            chatStore.AddAssistant(response.reply_text);
-            chatStore.SetThinking(false);
-            chatStore.SetDiagnostics(response.route, response.provider, response.latency_ms, response.fallback_used);
-            chatStore.SetTaskActions(response.task_actions);
-            avatarStateMachine.ApplyBackendState("talking", response.animation_hint);
+            chatModule.ApplyCompatibilityResponse(response);
+            PublishBackendAssistantState("talking", response.animation_hint);
             ResolvePendingQuickAdd(response.task_actions, "Quick add reached the assistant, but no task was created. Try a shorter task title.", WarningColor);
             RefreshChatPanel();
             if (response.task_actions != null && response.task_actions.Count > 0)
@@ -359,7 +368,7 @@ namespace LocalAssistant.Core
             }
             else
             {
-                subtitlePresenter.Show(response.reply_text);
+                PublishSubtitleShown(response.reply_text);
                 Invoke(nameof(ClearSubtitleAndIdle), 2.2f);
             }
         }
@@ -391,20 +400,15 @@ namespace LocalAssistant.Core
 
             if (Microphone.devices.Length == 0)
             {
-                chatStore.AddAssistant("Microphone is not available.");
+                chatModule.AddAssistant("Microphone is not available.");
                 RefreshChatPanel();
                 return;
             }
 
             recordingClip = Microphone.Start(null, false, 30, 16000);
             isRecording = true;
-            chatStore.SetListening(true);
-            chatStore.SetThinking(false);
-            chatStore.SetTalking(false);
-            avatarStateMachine.SetState(AvatarState.Listening);
-            avatarConversationBridge?.OnListeningStart();
+            PublishConversationVisualState(AvatarState.Listening);
             await Task.CompletedTask;
-            RefreshChatPanel();
         }
 
         private async Task FinishVoiceCaptureAsync(bool sendStop)
@@ -413,20 +417,15 @@ namespace LocalAssistant.Core
             var position = Microphone.GetPosition(null);
             Microphone.End(null);
             isRecording = false;
-            chatStore.SetListening(false);
-            chatStore.SetThinking(true);
-            chatStore.SetTalking(false);
-            avatarStateMachine.SetState(AvatarState.Thinking);
-            avatarConversationBridge?.OnListeningEnd();
-            RefreshChatPanel();
+            PublishConversationVisualState(AvatarState.Thinking);
             if (recordingClip == null || position <= 0) return;
             if (assistantStreamClient != null && assistantStreamClient.IsConnected)
             {
                 await SendStreamAsync(new AssistantStreamRequestPayload
                 {
                     type = "voice_end",
-                    session_id = chatStore.SessionId,
-                    conversation_id = chatStore.ConversationId,
+                    session_id = chatModule.SessionId,
+                    conversation_id = chatModule.ConversationId,
                     selected_date = selectedDate,
                     voice_mode = true,
                     audio_base64 = Convert.ToBase64String(WavEncoder.Encode(TrimClip(recordingClip, position))),
@@ -435,7 +434,7 @@ namespace LocalAssistant.Core
             else
             {
                 var transcript = await apiClient.SendSpeechToTextAsync(WavEncoder.Encode(TrimClip(recordingClip, position)));
-                chatStore.SetTranscriptPreview(settingsStore.Current.voice.show_transcript_preview ? transcript.text : string.Empty);
+                chatModule.SetTranscriptPreview(settingsStore.Current.voice.show_transcript_preview ? transcript.text : string.Empty);
                 RefreshChatPanel();
                 await SubmitChatAsync(transcript.text, true, false);
             }
@@ -465,7 +464,7 @@ namespace LocalAssistant.Core
                     var assistantState = UnityJson.Deserialize<AssistantStateChangedEvent>(payload);
                     if (assistantState != null)
                     {
-                        avatarStateMachine.ApplyBackendState(assistantState.state, assistantState.animation_hint);
+                        PublishBackendAssistantState(assistantState.state, assistantState.animation_hint);
                     }
                 }
             }
@@ -481,9 +480,9 @@ namespace LocalAssistant.Core
                 {
                     case "transcript_partial":
                         var partial = UnityJson.Deserialize<TranscriptEvent>(payload);
-                        if (partial != null && settingsStore.Current.voice.show_transcript_preview)
+                        if (partial != null)
                         {
-                            chatStore.SetTranscriptPreview(partial.text);
+                            chatModule.ApplyTranscriptPartial(partial.text, settingsStore.Current.voice.show_transcript_preview);
                             RefreshChatPanel();
                         }
                         break;
@@ -491,10 +490,7 @@ namespace LocalAssistant.Core
                         var transcript = UnityJson.Deserialize<TranscriptEvent>(payload);
                         if (transcript != null && !string.IsNullOrWhiteSpace(transcript.text))
                         {
-                            chatStore.SetTranscriptPreview(settingsStore.Current.voice.show_transcript_preview ? transcript.text : string.Empty);
-                            chatStore.AddUser(transcript.text);
-                            chatStore.SetThinking(true);
-                            chatStore.ResetAssistantDraft();
+                            chatModule.ApplyTranscriptFinal(transcript.text, settingsStore.Current.voice.show_transcript_preview);
                             RefreshChatPanel();
                         }
                         break;
@@ -502,7 +498,7 @@ namespace LocalAssistant.Core
                         var route = UnityJson.Deserialize<RouteSelectedEvent>(payload);
                         if (route != null)
                         {
-                            chatStore.SetDiagnostics(route.route, route.provider, 0, false);
+                            chatModule.ApplyRouteSelection(route.route, route.provider);
                             RefreshChatPanel();
                         }
                         break;
@@ -510,7 +506,7 @@ namespace LocalAssistant.Core
                         var chunk = UnityJson.Deserialize<AssistantChunkEvent>(payload);
                         if (chunk != null)
                         {
-                            chatStore.AppendAssistantDraft(chunk.text + " ");
+                            chatModule.ApplyAssistantChunk(chunk.text);
                             RefreshChatPanel();
                         }
                         break;
@@ -518,12 +514,7 @@ namespace LocalAssistant.Core
                         var finalReply = UnityJson.Deserialize<AssistantFinalEvent>(payload);
                         if (finalReply != null)
                         {
-                            chatStore.ConversationId = finalReply.conversation_id;
-                            chatStore.SessionId = finalReply.session_id;
-                            chatStore.FinalizeAssistantDraft(finalReply.reply_text);
-                            chatStore.SetThinking(false);
-                            chatStore.SetDiagnostics(finalReply.route, finalReply.provider, finalReply.latency_ms, finalReply.fallback_used);
-                            chatStore.SetTaskActions(finalReply.task_actions);
+                            chatModule.ApplyStreamingFinal(finalReply);
                             ResolvePendingQuickAdd(finalReply.task_actions, "Quick add reached the assistant, but no task was created. Try a shorter task title.", WarningColor);
                             RefreshChatPanel();
                             if (finalReply.task_actions != null && finalReply.task_actions.Count > 0)
@@ -533,7 +524,7 @@ namespace LocalAssistant.Core
 
                             if (!settingsStore.Current.voice.speak_replies)
                             {
-                                subtitlePresenter.Show(finalReply.reply_text);
+                                PublishSubtitleShown(finalReply.reply_text);
                                 Invoke(nameof(ClearSubtitleAndIdle), 2.2f);
                             }
 
@@ -552,7 +543,7 @@ namespace LocalAssistant.Core
                         break;
                     case "assistant_state_changed":
                         var state = UnityJson.Deserialize<AssistantStateChangedEvent>(payload);
-                        if (state != null) avatarStateMachine.ApplyBackendState(state.state, state.animation_hint);
+                        if (state != null) PublishBackendAssistantState(state.state, state.animation_hint);
                         break;
                 }
             }
@@ -565,41 +556,109 @@ namespace LocalAssistant.Core
             isPlayingSpeechQueue = true;
             try
             {
-                chatStore.SetTalking(true);
-                chatStore.SetThinking(false);
-                RefreshChatPanel();
-                avatarConversationBridge?.OnSpeakingStart();
+                PublishConversationVisualState(AvatarState.Talking);
                 while (speechQueue.Count > 0)
                 {
                     var sentence = speechQueue.Dequeue();
                     var clip = await apiClient.DownloadAudioClipAsync(sentence.audio_url);
-                    subtitlePresenter.Show(sentence.text);
-                    audioPlaybackController.Play(clip, sentence.text, subtitlePresenter, avatarStateMachine);
+                    PublishSubtitleShown(sentence.text);
+                    audioPlaybackController.Play(clip);
                     while (audioPlaybackController.IsPlaying) await Task.Delay(50);
+                    PublishSubtitleHidden();
                 }
-                avatarConversationBridge?.OnSpeakingEnd();
             }
             finally
             {
                 isPlayingSpeechQueue = false;
-                chatStore.SetTalking(false);
-                RefreshChatPanel();
+                PublishSubtitleHidden();
+                PublishConversationVisualState(AvatarState.Idle);
                 if (autoResumeListening && continuousVoiceEnabled) await BeginListeningAsync();
             }
         }
 
-        private void OnScreenChanged(AppScreen screen)
+        private void HandlePlannerScreenRequested(PlannerScreenRequestedEvent evt)
         {
-            currentScreen = screen;
-            RefreshTaskView();
-            RefreshStagePanel();
+            if (evt == null)
+            {
+                return;
+            }
+
+            SetPlannerScreen(evt.Screen, true);
+        }
+
+        private void HandleSubtitleVisibilityChanged(SubtitleVisibilityChangedEvent evt)
+        {
+            if (evt == null || subtitlePresenter == null)
+            {
+                return;
+            }
+
+            if (evt.Visible)
+            {
+                subtitlePresenter.Show(evt.Text);
+                return;
+            }
+
+            subtitlePresenter.Hide();
+        }
+
+        private void HandleConversationVisualStateChanged(ConversationVisualStateChangedEvent evt)
+        {
+            if (evt == null)
+            {
+                return;
+            }
+
+            var nextState = evt.State;
+
+            if (conversationVisualState == AvatarState.Listening && nextState != AvatarState.Listening)
+            {
+                avatarConversationBridge?.OnListeningEnd();
+            }
+
+            if (conversationVisualState == AvatarState.Talking && nextState != AvatarState.Talking)
+            {
+                avatarConversationBridge?.OnSpeakingEnd();
+            }
+
+            if (nextState == AvatarState.Listening && conversationVisualState != AvatarState.Listening)
+            {
+                avatarConversationBridge?.OnListeningStart();
+            }
+
+            if (nextState == AvatarState.Talking && conversationVisualState != AvatarState.Talking)
+            {
+                avatarConversationBridge?.OnSpeakingStart();
+            }
+
+            if (nextState == AvatarState.Idle)
+            {
+                avatarConversationBridge?.OnIdle();
+            }
+
+            conversationVisualState = nextState;
+            chatModule.SetListening(nextState == AvatarState.Listening);
+            chatModule.SetThinking(nextState == AvatarState.Thinking);
+            chatModule.SetTalking(nextState == AvatarState.Talking);
+            avatarStateMachine?.SetState(nextState);
+            RefreshChatPanel();
+        }
+
+        private void HandleBackendAssistantStateChanged(BackendAssistantStateChangedEvent evt)
+        {
+            if (evt == null)
+            {
+                return;
+            }
+
+            avatarStateMachine?.ApplyBackendState(evt.State, evt.AnimationHint);
         }
 
         private void RefreshTaskView()
         {
             if (!HasLiveUi()) return;
-            homeScreenController.Render(taskStore, currentScreen);
-            scheduleScreenController.Render(taskStore, currentScreen, selectedDate);
+            homeScreenController.Render(taskStore);
+            plannerModule.Render(taskStore, selectedDate);
             RefreshStagePanel();
         }
 
@@ -621,8 +680,9 @@ namespace LocalAssistant.Core
             }
 
             selectedDate = nextDate;
+            sharedEventBus.Publish(new PlannerDateChangedEvent(selectedDate));
             isReloadingTaskViews = true;
-            chatStore.SetSystemStatus("LOADING", "Loading selected day", $"Updating Home and Schedule for {selectedDate}.");
+            chatModule.SetSystemStatus("LOADING", "Loading selected day", $"Updating Home and Schedule for {selectedDate}.");
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
             try
@@ -633,8 +693,8 @@ namespace LocalAssistant.Core
             }
             catch (Exception exception)
             {
-                chatStore.AddAssistant("Could not load the selected day: " + exception.Message);
-                chatStore.SetSystemStatus("ERROR", "Selected day failed to load", "Refresh the workspace or pick another date.");
+                chatModule.AddAssistant("Could not load the selected day: " + exception.Message);
+                chatModule.SetSystemStatus("ERROR", "Selected day failed to load", "Refresh the workspace or pick another date.");
                 RefreshChatPanel();
             }
             finally
@@ -652,31 +712,21 @@ namespace LocalAssistant.Core
             }
 
             isMutatingTask = true;
-            chatStore.SetSystemStatus("UPDATING", "Completing task", "Applying the change and refreshing task lists.");
+            chatModule.SetSystemStatus("UPDATING", "Completing task", "Applying the change and refreshing task lists.");
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
             try
             {
-                var updatedTask = await apiClient.CompleteTaskAsync(taskId, new CompleteTaskRequestPayload());
-                chatStore.SetTaskActions(new[]
-                {
-                    new TaskActionReport
-                    {
-                        type = "complete_task",
-                        status = "applied",
-                        task_id = updatedTask.id,
-                        title = updatedTask.title,
-                        detail = "Updated directly from the Schedule screen.",
-                    },
-                });
+                var updatedTask = await GetPlannerBackend().CompleteTaskAsync(taskId);
+                chatModule.ApplyPlannerActionResult("complete_task", updatedTask.TaskId, updatedTask.Title, "Updated directly from the Schedule screen.");
                 await ReloadAllAsync();
                 SyncHealthStatusToChat(currentHealth);
                 RefreshChatPanel();
             }
             catch (Exception exception)
             {
-                chatStore.AddAssistant("Could not complete the task: " + exception.Message);
-                chatStore.SetSystemStatus("ERROR", "Task update failed", "Check the backend and try again.");
+                chatModule.AddAssistant("Could not complete the task: " + exception.Message);
+                chatModule.SetSystemStatus("ERROR", "Task update failed", "Check the backend and try again.");
                 RefreshChatPanel();
             }
             finally
@@ -694,34 +744,21 @@ namespace LocalAssistant.Core
             }
 
             isMutatingTask = true;
-            chatStore.SetSystemStatus("UPDATING", "Scheduling inbox task", $"Moving the item onto {targetDate}.");
+            chatModule.SetSystemStatus("UPDATING", "Scheduling inbox task", $"Moving the item onto {targetDate}.");
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
             try
             {
-                var updatedTask = await apiClient.RescheduleTaskAsync(taskId, new RescheduleTaskRequestPayload
-                {
-                    scheduled_date = targetDate,
-                });
-                chatStore.SetTaskActions(new[]
-                {
-                    new TaskActionReport
-                    {
-                        type = "reschedule_task",
-                        status = "applied",
-                        task_id = updatedTask.id,
-                        title = updatedTask.title,
-                        detail = $"Scheduled to {targetDate} from the Schedule inbox view.",
-                    },
-                });
+                var updatedTask = await GetPlannerBackend().ScheduleInboxTaskAsync(taskId, targetDate);
+                chatModule.ApplyPlannerActionResult("reschedule_task", updatedTask.TaskId, updatedTask.Title, $"Scheduled to {targetDate} from the Schedule inbox view.");
                 await ReloadAllAsync();
                 SyncHealthStatusToChat(currentHealth);
                 RefreshChatPanel();
             }
             catch (Exception exception)
             {
-                chatStore.AddAssistant("Could not schedule the inbox task: " + exception.Message);
-                chatStore.SetSystemStatus("ERROR", "Scheduling failed", "Check the backend and try again.");
+                chatModule.AddAssistant("Could not schedule the inbox task: " + exception.Message);
+                chatModule.SetSystemStatus("ERROR", "Scheduling failed", "Check the backend and try again.");
                 RefreshChatPanel();
             }
             finally
@@ -746,7 +783,7 @@ namespace LocalAssistant.Core
             }
             catch (Exception exception)
             {
-                chatStore.AddAssistant("Task refresh failed: " + exception.Message);
+                chatModule.AddAssistant("Task refresh failed: " + exception.Message);
                 RefreshChatPanel();
             }
             finally
@@ -760,8 +797,7 @@ namespace LocalAssistant.Core
         {
             if (HasLiveUi())
             {
-                var snapshot = chatStore.BuildPanelSnapshot(settingsStore.Current.voice.show_transcript_preview);
-                chatPanelController.Render(snapshot);
+                var snapshot = chatModule.Render(settingsStore.Current.voice.show_transcript_preview);
                 homeScreenController?.RenderAssistantOrbit(snapshot);
             }
         }
@@ -770,7 +806,7 @@ namespace LocalAssistant.Core
         {
             if (!HasLiveUi()) return;
             currentHealth = HealthResponseNormalizer.Normalize(health);
-            appShellController.RenderHealth(currentHealth);
+            shellModule.RenderHealth(currentHealth);
             SyncHealthStatusToChat(currentHealth);
             ApplyInteractionState(currentHealth);
             RefreshStagePanel();
@@ -880,7 +916,7 @@ namespace LocalAssistant.Core
                 settingsStore.SetTranscriptPreview(value);
                 if (!value)
                 {
-                    chatStore.SetTranscriptPreview(string.Empty);
+                    chatModule.SetTranscriptPreview(string.Empty);
                 }
                 RefreshChatPanel();
                 OnSettingsChanged();
@@ -946,10 +982,10 @@ namespace LocalAssistant.Core
                 && !isRefreshingWorkspace
                 && !isSubmittingChatTurn
                 && !isMutatingTask;
-            chatPanelController.SetInteractable(enableChatText, enableMic);
+            chatModule.SetInteractable(enableChatText, enableMic);
             homeScreenController.SetTaskActionsEnabled(enableTaskActions);
-            scheduleScreenController.SetTaskActionsEnabled(enableTaskActions);
-            appShellController.SetRefreshEnabled(!isInitializing && !isRefreshingWorkspace && !isSubmittingChatTurn && !isMutatingTask && !isSettingsRequestInFlight);
+            plannerModule.SetTaskActionsEnabled(enableTaskActions);
+            shellModule.SetRefreshEnabled(!isInitializing && !isRefreshingWorkspace && !isSubmittingChatTurn && !isMutatingTask && !isSettingsRequestInFlight);
             settingsScreenController.SetEditable(HealthRecoveryAdvisor.CanEditSettings(health) && !isInitializing && !isRefreshingWorkspace && !isSettingsRequestInFlight);
         }
 
@@ -959,7 +995,7 @@ namespace LocalAssistant.Core
             var message = HealthRecoveryAdvisor.BuildMessage(health);
             if (!string.IsNullOrEmpty(message))
             {
-                chatStore.AddAssistant(message);
+                chatModule.AddAssistant(message);
                 RefreshChatPanel();
             }
         }
@@ -978,19 +1014,19 @@ namespace LocalAssistant.Core
 
             if (health.status == "error")
             {
-                chatStore.SetSystemStatus("ERROR", "Backend unavailable", "Only refresh remains available until local services recover.");
+                chatModule.SetSystemStatus("ERROR", "Backend unavailable", "Only refresh remains available until local services recover.");
                 return;
             }
 
             if (health.status == "partial")
             {
-                chatStore.SetSystemStatus("DEGRADED", "Runtime degraded", "Some voice or model features are unavailable, but task and settings flows can still continue.");
+                chatModule.SetSystemStatus("DEGRADED", "Runtime degraded", "Some voice or model features are unavailable, but task and settings flows can still continue.");
                 return;
             }
 
             if (!isSubmittingChatTurn && !isMutatingTask)
             {
-                chatStore.ClearSystemStatus();
+                chatModule.ClearSystemStatus();
             }
         }
 
@@ -1014,10 +1050,16 @@ namespace LocalAssistant.Core
             homeScreenController.SetQuickAddStatus(fallbackMessage, fallbackColor);
         }
 
+        private IPlannerBackendIntegration GetPlannerBackend()
+        {
+            plannerBackend ??= new PlannerBackendIntegration(apiClient);
+            return plannerBackend;
+        }
+
         private void CompleteChatTurn()
         {
             isSubmittingChatTurn = false;
-            chatStore.SetThinking(false);
+            chatModule.SetThinking(false);
             SyncHealthStatusToChat(currentHealth);
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
@@ -1037,25 +1079,43 @@ namespace LocalAssistant.Core
         private void RefreshStagePanel()
         {
             if (!HasLiveUi() || avatarStateMachine == null) return;
-            appShellController.RenderStage(avatarStateMachine.CurrentState, currentHealth, currentScreen, selectedDate, settingsStore, chatStore);
+            shellModule.RenderStage(
+                ShellStageSnapshotBuilder.Build(
+                    avatarStateMachine.CurrentState,
+                    currentHealth,
+                    currentPlannerScreen,
+                    selectedDate,
+                    settingsStore,
+                    chatModule));
             homeScreenController?.RenderStage(avatarStateMachine.CurrentState);
         }
 
         private void ClearSubtitleAndIdle()
         {
-            subtitlePresenter.Hide();
-            avatarStateMachine.SetState(AvatarState.Idle);
-            avatarConversationBridge?.OnIdle();
+            PublishSubtitleHidden();
+            PublishConversationVisualState(AvatarState.Idle);
         }
 
         private void HandleBackendUnavailableState()
         {
             SetSettingsStatus("Backend unavailable.", ErrorColor);
-            chatStore.SetThinking(false);
-            chatStore.SetSystemStatus("ERROR", "Backend unavailable", "Only refresh remains available until local services recover.");
-            avatarStateMachine?.SetState(AvatarState.Warning);
+            chatModule.SetSystemStatus("ERROR", "Backend unavailable", "Only refresh remains available until local services recover.");
+            PublishConversationVisualState(AvatarState.Warning);
             ApplyInteractionState(currentHealth);
             RefreshChatPanel();
+        }
+
+        private void SetPlannerScreen(AppScreen screen, bool expandCalendar)
+        {
+            currentPlannerScreen = screen;
+            plannerModule.ShowScreen(screen);
+            if (expandCalendar)
+            {
+                shellModule.SetCalendarExpanded(true);
+            }
+
+            RefreshTaskView();
+            RefreshStagePanel();
         }
 
         private static AudioClip TrimClip(AudioClip source, int samples)

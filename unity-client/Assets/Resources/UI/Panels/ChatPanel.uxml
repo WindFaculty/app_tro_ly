@@ -11,7 +11,7 @@
                 <ui:Label text="Luminal Assistant" class="chat-title" />
                 <ui:Label text="SYSTEM CORE ONLINE" class="chat-subtitle" />
             </ui:VisualElement>
-            <ui:Label text="Hybrid route" class="chat-model-badge" />
+            <ui:Label name="ChatRouteBadge" text="Route pending" class="chat-model-badge" />
         </ui:VisualElement>
 
         <ui:VisualElement class="chat-status-strip">

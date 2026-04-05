@@ -19,126 +19,88 @@
     <ui:Template name="SubtitleOverlayTemplate" src="../Overlays/SubtitleOverlay.uxml" />
     <ui:Template name="ReminderOverlayTemplate" src="../Overlays/ReminderOverlay.uxml" />
 
-    <ui:VisualElement class="layout-container shell-root">
-        <ui:VisualElement class="top-bar shell-surface">
-            <ui:VisualElement class="brand-container">
-                <ui:VisualElement class="brand-mark"><ui:Label text="TL" /></ui:VisualElement>
-                <ui:VisualElement class="brand-copy">
-                    <ui:Label text="Tro Ly Local" class="brand-title" />
-                    <ui:Label text="Desktop assistant shell" class="brand-subtitle" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-
-            <ui:VisualElement class="top-tabs">
-                <ui:Button name="TodayTab" text="Home" class="tab-button active" />
-                <ui:Button name="WeekTab" text="Schedule" class="tab-button" />
-                <ui:Button name="SettingsTab" text="Settings" class="tab-button" />
-            </ui:VisualElement>
-
-            <ui:VisualElement class="top-actions">
-                <ui:VisualElement class="top-status-chip">
-                    <ui:Label name="TopStatusChipLabel" text="Loading runtime" class="top-status-chip-label" />
-                </ui:VisualElement>
-                <ui:VisualElement class="top-status-chip top-status-chip-secondary">
-                    <ui:Label text="Runtime shell" class="top-status-chip-label" />
-                </ui:VisualElement>
-                <ui:VisualElement class="user-avatar"><ui:Label text="TL" /></ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <ui:VisualElement class="main-content">
-            <ui:VisualElement class="sidebar left-sidebar">
-                <ui:VisualElement class="shell-card sidebar-identity sidebar-hero">
-                    <ui:Label text="Current implementation" class="health-title" />
-                    <ui:Label text="Three-panel shell with backend-aware recovery guidance." class="sidebar-identity-title" />
-                    <ui:Label text="Manual avatar and packaged-client validation stay tracked in P02 and P04." class="sidebar-identity-subtitle shell-muted-label" />
+    <ui:VisualElement class="layout-container shell-root shell-four-zone">
+        <ui:VisualElement class="shell-main-row">
+            <ui:VisualElement class="control-rail shell-surface">
+                <ui:VisualElement class="rail-brand">
+                    <ui:VisualElement class="brand-mark"><ui:Label text="TL" /></ui:VisualElement>
+                    <ui:Label text="Tro Ly" class="rail-brand-title" />
+                    <ui:Label text="Local shell" class="rail-brand-subtitle" />
                 </ui:VisualElement>
 
-                <ui:VisualElement class="shell-card health-banner">
-                    <ui:Label text="System health" class="health-title" />
-                    <ui:Label name="HealthBanner" text="Ready runtime" class="health-value" />
-                    <ui:Label name="StageStatusText" text="Loading runtime status..." class="health-desc" />
-                </ui:VisualElement>
+                <ui:VisualElement class="rail-status-stack">
+                    <ui:VisualElement class="rail-status-card">
+                        <ui:Label text="Runtime" class="sidebar-section-title" />
+                        <ui:Label name="TopStatusChipLabel" text="Loading runtime" class="health-value" />
+                    </ui:VisualElement>
 
-                <ui:VisualElement class="sidebar-section">
-                    <ui:Label text="Workspace" class="sidebar-section-title" />
-                    <ui:VisualElement class="sidebar-status-row">
-                        <ui:VisualElement class="sidebar-status-copy">
-                            <ui:Label text="Assistant state" class="sidebar-status-label" />
-                            <ui:Label text="Avatar runtime and chat state stay visible here." class="sidebar-status-help" />
-                        </ui:VisualElement>
+                    <ui:VisualElement class="rail-status-card">
+                        <ui:Label text="Health" class="sidebar-section-title" />
+                        <ui:Label name="HealthBanner" text="Loading runtime" class="health-value" />
                         <ui:Label name="AvatarStateText" text="Idle" class="sidebar-status-value" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="sidebar-status-row">
-                        <ui:VisualElement class="sidebar-status-copy">
-                            <ui:Label text="Recovery mode" class="sidebar-status-label" />
-                            <ui:Label text="When health degrades, only safe controls remain enabled." class="sidebar-status-help" />
-                        </ui:VisualElement>
-                        <ui:Label text="Auto" class="sidebar-status-value" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="sidebar-status-row">
-                        <ui:VisualElement class="sidebar-status-copy">
-                            <ui:Label text="Notification queue" class="sidebar-status-label" />
-                            <ui:Label text="Reminder overlay and speech events continue to surface here." class="sidebar-status-help" />
-                        </ui:VisualElement>
-                        <ui:Label text="Live" class="sidebar-status-value" />
-                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="rail-control-stack">
+                    <ui:Button name="FocusStageButton" text="Stage" class="rail-action-button active" />
+                    <ui:Button name="ToggleCalendarButton" text="Planner" class="rail-action-button" />
+                    <ui:Button name="ToggleChatButton" text="Chat" class="rail-action-button active" />
+                    <ui:Button name="ToggleSettingsButton" text="Settings" class="rail-action-button" />
                 </ui:VisualElement>
 
                 <ui:VisualElement class="shell-spacer" />
 
-                <ui:VisualElement class="shell-card shell-help-card">
-                    <ui:Label text="Operator actions" class="sidebar-section-title" />
-                    <ui:Label text="Use refresh after backend restarts or runtime changes. Packaged-client behavior still needs manual validation." class="shell-help-text" />
-                    <ui:Button name="RefreshButton" text="Refresh workspace" class="btn-secondary" />
+                <ui:VisualElement class="shell-card shell-help-card rail-footer-card">
+                    <ui:Label text="Refresh workspace after backend restarts or runtime changes." class="shell-help-text" />
+                    <ui:Button name="RefreshButton" text="Refresh" class="btn-secondary" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement class="center-stage stage-shell">
-                <ui:Instance template="HomeScreenTemplate" />
-                <ui:Instance template="ScheduleScreenTemplate" />
-                <ui:Instance template="SettingsScreenTemplate" />
-                <ui:Instance template="SubtitleOverlayTemplate" />
-            </ui:VisualElement>
-
-            <ui:VisualElement class="right-panel">
-                <ui:Instance template="ChatPanelTemplate" class="view-container" />
-
-                <ui:VisualElement name="ScheduleSideView" class="view-container hidden schedule-side-panel">
-                    <ui:VisualElement class="panel-section-heading">
-                        <ui:Label text="Schedule focus" class="panel-kicker" />
+            <ui:VisualElement class="stage-column">
+                <ui:VisualElement class="stage-header shell-surface">
+                    <ui:VisualElement class="stage-header-copy">
                         <ui:Label name="ScheduleInsightTitle" text="Week overview" class="panel-title" />
-                        <ui:Label name="ScheduleInsightSummary" text="Keep the week visible while the assistant collects routing and reminder updates in the background." class="panel-body" />
+                        <ui:Label name="ScheduleInsightSummary" text="Keep the planner sheet close while the assistant routes chat, voice, and reminders." class="panel-body" />
                     </ui:VisualElement>
-
-                    <ui:VisualElement class="shell-card accent-card">
-                        <ui:Label text="Live routing" class="panel-kicker" />
-                        <ui:Label name="ScheduleInsightMeta" text="Date auto&#10;Route planner | Provider local&#10;Voice Off | Transcript Off | Fallbacks 0" class="panel-meta" />
-                    </ui:VisualElement>
-
-                    <ui:VisualElement class="stack-card-list">
-                        <ui:VisualElement class="shell-card assistant-mini-card">
-                            <ui:Label text="Next pass" class="assistant-mini-time" />
-                            <ui:Label text="Review calendar friction" class="assistant-mini-title" />
-                            <ui:Label text="Use this slot to spot crowded days, long meeting runs, or tasks that still live only as placeholder copy." class="assistant-mini-copy" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="shell-card assistant-mini-card">
-                            <ui:Label text="Recovery check" class="assistant-mini-time" />
-                            <ui:Label text="Keep degraded mode readable" class="assistant-mini-title" />
-                            <ui:Label text="When health is partial or error, the shell should still explain what can continue and what needs manual follow-up." class="assistant-mini-copy" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="shell-card assistant-mini-card">
-                            <ui:Label text="Manual follow-up" class="assistant-mini-time" />
-                            <ui:Label text="Package and avatar sign-off" class="assistant-mini-title" />
-                            <ui:Label text="Final behavior for packaged client and production avatar remains tracked in the manual queue before closure." class="assistant-mini-copy" />
-                        </ui:VisualElement>
+                    <ui:VisualElement class="stage-header-status">
+                        <ui:Label text="Assistant state" class="sidebar-section-title" />
+                        <ui:Label name="StageStatusText" text="Loading runtime status..." class="panel-meta" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <ui:Instance template="ReminderOverlayTemplate" />
+                <ui:VisualElement class="center-stage stage-shell">
+                    <ui:Instance template="HomeScreenTemplate" />
+                    <ui:Instance template="SubtitleOverlayTemplate" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="CalendarSheetHost" class="calendar-sheet shell-surface calendar-sheet-collapsed">
+                    <ui:VisualElement class="calendar-sheet-header">
+                        <ui:VisualElement class="calendar-sheet-header-copy">
+                            <ui:Label text="Planner sheet" class="panel-kicker" />
+                            <ui:Label name="ScheduleInsightMeta" text="Date auto&#10;Route planner | Provider local&#10;Voice Off | Transcript Off | Fallbacks 0" class="panel-meta" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Instance template="ScheduleScreenTemplate" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="ChatPanelHost" class="right-panel shell-surface">
+                <ui:Instance template="ChatPanelTemplate" class="view-container" />
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <ui:VisualElement name="SettingsScrim" class="settings-scrim hidden" />
+        <ui:VisualElement name="SettingsDrawer" class="settings-drawer hidden">
+            <ui:VisualElement class="settings-drawer-header">
+                <ui:VisualElement>
+                    <ui:Label text="Settings drawer" class="panel-kicker" />
+                    <ui:Label text="Tune runtime behavior without leaving the four-zone shell." class="panel-body" />
+                </ui:VisualElement>
+                <ui:Button name="CloseSettingsButton" text="Close" class="btn-secondary" />
+            </ui:VisualElement>
+            <ui:Instance template="SettingsScreenTemplate" />
+        </ui:VisualElement>
+
+        <ui:Instance template="ReminderOverlayTemplate" />
     </ui:VisualElement>
 </ui:UXML>

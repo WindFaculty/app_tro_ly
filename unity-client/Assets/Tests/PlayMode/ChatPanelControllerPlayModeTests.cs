@@ -34,6 +34,7 @@ namespace LocalAssistant.Tests.PlayMode
                 StatusBadge = "THINKING",
                 StatusTitle = "Planning the next response",
                 StatusDetail = "Route planner | Provider local | Latency 40 ms",
+                RouteBadgeText = "planner / local",
                 TranscriptPreviewTitle = "Transcript preview",
                 TranscriptPreviewText = "lap ke hoach ngay mai",
                 ActionSummaryTitle = "Last task action",
@@ -47,6 +48,7 @@ namespace LocalAssistant.Tests.PlayMode
             Assert.AreEqual("THINKING", refs.ChatStateBadge.text);
             Assert.AreEqual("Planning the next response", refs.ChatStateTitle.text);
             Assert.AreEqual("Route planner | Provider local | Latency 40 ms", refs.ChatStateDetail.text);
+            Assert.AreEqual("planner / local", refs.ChatRouteBadge.text);
             Assert.AreEqual("lap ke hoach ngay mai", refs.ChatTranscriptPreviewText.text);
             Assert.AreEqual("Created 'hop nhom'.", refs.ChatActionSummaryText.text);
             Assert.AreEqual("AI\nDang xu ly", refs.ChatLogText.text);
@@ -77,6 +79,7 @@ namespace LocalAssistant.Tests.PlayMode
                 ChatStateBadge = new Label(),
                 ChatStateTitle = new Label(),
                 ChatStateDetail = new Label(),
+                ChatRouteBadge = new Label(),
                 ChatTranscriptPreviewTitle = new Label(),
                 ChatTranscriptPreviewText = new Label(),
                 ChatActionSummaryTitle = new Label(),

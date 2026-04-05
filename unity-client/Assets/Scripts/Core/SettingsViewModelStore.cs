@@ -2,7 +2,7 @@ using System.Text;
 
 namespace LocalAssistant.Core
 {
-    public sealed class SettingsViewModelStore
+    public sealed class SettingsViewModelStore : ISettingsStateSource
     {
         public SettingsPayload Current { get; private set; } = new();
         private SettingsPayload baseline = new();

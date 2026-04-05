@@ -6,7 +6,7 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 
 - The active product in this repo is the local desktop assistant.
 - The backend in `local-backend/` is implemented and tested.
-- The Unity client in `unity-client/` is implemented as a UI Toolkit shell with task, chat, settings, subtitle, reminder, and voice wiring.
+- The Unity client in `unity-client/` is implemented as a UI Toolkit shell with an orbit-style Home screen, a list-first Schedule screen, chat, settings, subtitle, reminder, and voice wiring.
 - `agent-platform/` exists next to the assistant repo but is optional and not required for the assistant runtime.
 - A production-ready avatar experience is not fully wired end-to-end yet. The repo contains avatar groundwork and prototype assets under `unity-client/Assets/AvatarSystem/`, but live behavior still depends on Unity scene setup and manual validation.
 
@@ -47,7 +47,7 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 
 - The default LLM path is API-backed through Groq and Gemini. A fully local LLM path is not implemented.
 - Unity visual behavior still requires Unity Editor or a built client for full verification.
-- Some UI areas are still placeholder-driven, especially the schedule center panel and the schedule-side assistant panel.
+- Some UI areas are still placeholder-driven, especially the Home avatar stage, the lack of a real calendar grid, and the shell-owned schedule-side helper panel.
 - The mini-assistant window described in design docs is not implemented.
 - Speech quality and availability still depend on machine-local runtime setup.
 
@@ -111,20 +111,29 @@ Ollama-related settings still exist for preflight and future work, but Ollama is
 
 ## Verification Status
 
-- Backend automated tests were verified locally on 2026-03-26 with `pytest -q`: `62 passed`.
-- Unity EditMode and PlayMode test files exist in `unity-client/Assets/Tests/`, but they were not executed from this terminal session.
+- Historical backend verification was recorded on 2026-03-26 with `pytest -q`: `62 passed`.
+- Latest backend terminal rerun on 2026-04-04 reported `69 passed, 1 failed`; the failing test is `tests/test_tts_service.py::test_chattts_synthesize_writes_cached_wav`.
+- Latest Unity verification notes are tracked in `tasks/task-people.md`, including 2026-03-28 EditMode `21 passed`, 2026-03-28 PlayMode `33 passed`, and a 2026-03-29 PlayMode rerun with `35 passed`.
+
+## Project Structure Overview
+
+Start with [docs/roadmap.md](docs/roadmap.md) for the quickest repo map.
+It summarizes the active runtime, main flow, module ownership, status labels, and where to change UI, backend, planner, chat, and avatar code.
+Use it before diving into the deeper architecture, API, UI, runbook, or task-tracking docs.
 
 ## Documentation Index
 
-- `docs/00-context.md`
-- `docs/01-scope.md`
-- `docs/02-architecture.md`
-- `docs/03-api.md`
-- `docs/04-ui.md`
-- `docs/05-test-plan.md`
-- `docs/07-ai-runtime.md`
-- `docs/08-architecture-as-is.md`
-- `docs/09-runbook.md`
+- [docs/index.md](docs/index.md)
+- [docs/roadmap.md](docs/roadmap.md)
+- [docs/00-context.md](docs/00-context.md)
+- [docs/01-scope.md](docs/01-scope.md)
+- [docs/02-architecture.md](docs/02-architecture.md)
+- [docs/03-api.md](docs/03-api.md)
+- [docs/04-ui.md](docs/04-ui.md)
+- [docs/05-test-plan.md](docs/05-test-plan.md)
+- [docs/07-ai-runtime.md](docs/07-ai-runtime.md)
+- [docs/08-architecture-as-is.md](docs/08-architecture-as-is.md)
+- [docs/09-runbook.md](docs/09-runbook.md)
 
 ## Task Tracking
 

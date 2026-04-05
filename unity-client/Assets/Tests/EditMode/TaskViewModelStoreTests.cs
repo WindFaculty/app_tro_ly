@@ -26,7 +26,7 @@ namespace LocalAssistant.Tests.EditMode
 
             var grouped = TaskViewModelStore.GroupWeekByDay(store.Week);
             Assert.That(grouped.ContainsKey("2026-03-14"));
-            Assert.AreEqual("Bao cao", grouped["2026-03-14"][0].title);
+            Assert.AreEqual("Bao cao", grouped["2026-03-14"][0].Title);
         }
 
         [Test]

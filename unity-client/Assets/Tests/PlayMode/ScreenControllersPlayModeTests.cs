@@ -14,7 +14,7 @@ namespace LocalAssistant.Tests.PlayMode
     public class ScreenControllersPlayModeTests
     {
         [Test]
-        public void HomeScreenControllerRendersOverviewAndHomeVisibility()
+        public void HomeScreenControllerRendersOverviewInAlwaysVisibleStage()
         {
             var refs = CreateHomeRefs();
             var store = new TaskViewModelStore();
@@ -29,7 +29,7 @@ namespace LocalAssistant.Tests.PlayMode
             });
 
             var controller = new HomeScreenController(refs);
-            controller.Render(store, AppScreen.Today);
+            controller.Render(store);
             controller.RenderAssistantOrbit(new ChatPanelSnapshot
             {
                 StatusBadge = "READY",
@@ -102,11 +102,15 @@ namespace LocalAssistant.Tests.PlayMode
             var todayRequested = false;
             int observedOffset = 0;
             string selectedDay = null;
+            var todayViewRequested = false;
+            var weekViewRequested = false;
             var inboxRequested = false;
             var completedRequested = false;
             string completedTaskId = null;
             string scheduledTaskId = null;
             string scheduledDate = null;
+            controller.TodayViewRequested += () => todayViewRequested = true;
+            controller.WeekViewRequested += () => weekViewRequested = true;
             controller.TodayRequested += () => todayRequested = true;
             controller.DateOffsetRequested += value => observedOffset = value;
             controller.DaySelected += value => selectedDay = value;
@@ -119,6 +123,8 @@ namespace LocalAssistant.Tests.PlayMode
                 scheduledDate = date;
             };
 
+            controller.RequestTodayView();
+            controller.RequestWeekView();
             controller.RequestToday();
             controller.RequestDateOffset(-1);
             controller.RequestDaySelected("2026-03-26");
@@ -127,6 +133,8 @@ namespace LocalAssistant.Tests.PlayMode
             controller.RequestCompleteTask("task-1");
             controller.RequestScheduleTask("task-2", "2026-03-27");
 
+            Assert.IsTrue(todayViewRequested);
+            Assert.IsTrue(weekViewRequested);
             Assert.IsTrue(todayRequested);
             Assert.AreEqual(-1, observedOffset);
             Assert.AreEqual("2026-03-26", selectedDay);
@@ -144,13 +152,17 @@ namespace LocalAssistant.Tests.PlayMode
             var controller = new ScheduleScreenController(refs);
             var inboxRequested = false;
             var completedRequested = false;
+            var todayViewRequested = false;
             controller.InboxRequested += () => inboxRequested = true;
             controller.CompletedRequested += () => completedRequested = true;
+            controller.TodayViewRequested += () => todayViewRequested = true;
 
             controller.SetTaskActionsEnabled(false);
+            controller.RequestTodayView();
             controller.RequestInbox();
             controller.RequestCompleted();
 
+            Assert.IsFalse(todayViewRequested);
             Assert.IsFalse(inboxRequested);
             Assert.IsFalse(completedRequested);
         }
@@ -250,6 +262,8 @@ namespace LocalAssistant.Tests.PlayMode
                 ScheduleTodayButton = new Button(),
                 SchedulePrevButton = new Button(),
                 ScheduleNextButton = new Button(),
+                TodayViewButton = new Button(),
+                WeekViewButton = new Button(),
                 InboxTab = new Button(),
                 CompletedTab = new Button(),
                 TaskSheetHeaderTitle = new Label(),

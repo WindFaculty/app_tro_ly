@@ -34,6 +34,13 @@ namespace LocalAssistant.Tests.PlayMode
                 Assert.NotNull(refs.Subtitle);
                 Assert.NotNull(refs.Reminder);
                 Assert.NotNull(refs.Shell.HealthBanner);
+                Assert.NotNull(refs.Shell.FocusStageButton);
+                Assert.NotNull(refs.Shell.ToggleCalendarButton);
+                Assert.NotNull(refs.Shell.ToggleChatButton);
+                Assert.NotNull(refs.Shell.ToggleSettingsButton);
+                Assert.NotNull(refs.Shell.CalendarSheetHost);
+                Assert.NotNull(refs.Shell.ChatPanelHost);
+                Assert.NotNull(refs.Shell.SettingsDrawer);
                 Assert.NotNull(refs.Shell.ScheduleInsightTitle);
                 Assert.NotNull(refs.Shell.ScheduleInsightSummary);
                 Assert.NotNull(refs.Shell.ScheduleInsightMeta);

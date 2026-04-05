@@ -1,4 +1,5 @@
 using UnityEngine.UIElements;
+using LocalAssistant.Features.Schedule;
 
 namespace LocalAssistant.Core
 {

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.TextCore.LowLevel;
 using UnityEngine.TextCore.Text;
+using LocalAssistant.Features.Schedule;
 
 namespace LocalAssistant.Core
 {

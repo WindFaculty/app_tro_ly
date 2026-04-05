@@ -12,12 +12,15 @@ namespace LocalAssistant.Core
         public Label ScheduleInsightSummary;
         public Label ScheduleInsightMeta;
         public Button RefreshButton;
-        public Button TodayTab;
-        public Button WeekTab;
-        public Button SettingsTab;
-        public VisualElement HomeViewContainer;
-        public VisualElement ScheduleViewContainer;
-        public VisualElement ScheduleSideView;
+        public Button FocusStageButton;
+        public Button ToggleCalendarButton;
+        public Button ToggleChatButton;
+        public Button ToggleSettingsButton;
+        public Button CloseSettingsButton;
+        public VisualElement CalendarSheetHost;
+        public VisualElement ChatPanelHost;
+        public VisualElement SettingsDrawer;
+        public VisualElement SettingsScrim;
 
         public AppShellRefs()
         {
@@ -33,12 +36,15 @@ namespace LocalAssistant.Core
             ScheduleInsightSummary = root.Q<Label>(UiElementNames.Shell.ScheduleInsightSummary);
             ScheduleInsightMeta = root.Q<Label>(UiElementNames.Shell.ScheduleInsightMeta);
             RefreshButton = root.Q<Button>(UiElementNames.Shell.RefreshButton);
-            TodayTab = root.Q<Button>(UiElementNames.Shell.TodayTab);
-            WeekTab = root.Q<Button>(UiElementNames.Shell.WeekTab);
-            SettingsTab = root.Q<Button>(UiElementNames.Shell.SettingsTab);
-            HomeViewContainer = root.Q<VisualElement>(UiElementNames.Shell.HomeViewContainer);
-            ScheduleViewContainer = root.Q<VisualElement>(UiElementNames.Shell.ScheduleViewContainer);
-            ScheduleSideView = root.Q<VisualElement>(UiElementNames.Shell.ScheduleSideView);
+            FocusStageButton = root.Q<Button>(UiElementNames.Shell.FocusStageButton);
+            ToggleCalendarButton = root.Q<Button>(UiElementNames.Shell.ToggleCalendarButton);
+            ToggleChatButton = root.Q<Button>(UiElementNames.Shell.ToggleChatButton);
+            ToggleSettingsButton = root.Q<Button>(UiElementNames.Shell.ToggleSettingsButton);
+            CloseSettingsButton = root.Q<Button>(UiElementNames.Shell.CloseSettingsButton);
+            CalendarSheetHost = root.Q<VisualElement>(UiElementNames.Shell.CalendarSheetHost);
+            ChatPanelHost = root.Q<VisualElement>(UiElementNames.Shell.ChatPanelHost);
+            SettingsDrawer = root.Q<VisualElement>(UiElementNames.Shell.SettingsDrawer);
+            SettingsScrim = root.Q<VisualElement>(UiElementNames.Shell.SettingsScrim);
         }
     }
 }

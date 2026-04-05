@@ -5,7 +5,7 @@
     xmlns:editor="UnityEditor.UIElements"
     xsi:noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd"
 >
-    <ui:VisualElement name="SettingsPanel" class="view-container hidden settings-panel">
+    <ui:VisualElement name="SettingsPanel" class="view-container settings-panel">
         <ui:VisualElement class="settings-screen-shell">
             <ui:Label text="Settings" class="panel-kicker" />
             <ui:Label text="Assistant preferences" class="settings-header" />

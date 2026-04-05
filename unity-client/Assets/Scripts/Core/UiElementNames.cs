@@ -12,12 +12,15 @@ namespace LocalAssistant.Core
             public const string ScheduleInsightSummary = "ScheduleInsightSummary";
             public const string ScheduleInsightMeta = "ScheduleInsightMeta";
             public const string RefreshButton = "RefreshButton";
-            public const string TodayTab = "TodayTab";
-            public const string WeekTab = "WeekTab";
-            public const string SettingsTab = "SettingsTab";
-            public const string HomeViewContainer = "HomeViewContainer";
-            public const string ScheduleViewContainer = "ScheduleViewContainer";
-            public const string ScheduleSideView = "ScheduleSideView";
+            public const string FocusStageButton = "FocusStageButton";
+            public const string ToggleCalendarButton = "ToggleCalendarButton";
+            public const string ToggleChatButton = "ToggleChatButton";
+            public const string ToggleSettingsButton = "ToggleSettingsButton";
+            public const string CloseSettingsButton = "CloseSettingsButton";
+            public const string CalendarSheetHost = "CalendarSheetHost";
+            public const string ChatPanelHost = "ChatPanelHost";
+            public const string SettingsDrawer = "SettingsDrawer";
+            public const string SettingsScrim = "SettingsScrim";
         }
 
         public static class Home
@@ -48,6 +51,8 @@ namespace LocalAssistant.Core
             public const string ScheduleTodayButton = "ScheduleTodayButton";
             public const string SchedulePrevButton = "SchedulePrevButton";
             public const string ScheduleNextButton = "ScheduleNextButton";
+            public const string TodayViewButton = "TodayViewButton";
+            public const string WeekViewButton = "WeekViewButton";
             public const string InboxButton = "InboxButton";
             public const string DoneButton = "DoneButton";
             public const string CalendarArea = "CalendarArea";
@@ -83,6 +88,7 @@ namespace LocalAssistant.Core
             public const string ChatStateBadge = "ChatStateBadge";
             public const string ChatStateTitle = "ChatStateTitle";
             public const string ChatStateDetail = "ChatStateDetail";
+            public const string ChatRouteBadge = "ChatRouteBadge";
             public const string ChatTranscriptPreviewTitle = "ChatTranscriptPreviewTitle";
             public const string ChatTranscriptPreviewText = "ChatTranscriptPreviewText";
             public const string ChatActionSummaryTitle = "ChatActionSummaryTitle";

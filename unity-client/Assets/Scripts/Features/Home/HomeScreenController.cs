@@ -1,4 +1,3 @@
-using LocalAssistant.App;
 using LocalAssistant.Avatar;
 using LocalAssistant.Chat;
 using LocalAssistant.Core;
@@ -37,14 +36,13 @@ namespace LocalAssistant.Features.Home
             }
         }
 
-        public void Render(TaskViewModelStore taskStore, AppScreen currentScreen)
+        public void Render(IPlannerTaskSnapshotSource taskStore)
         {
-            var isHome = currentScreen == AppScreen.Today;
-            var scheduledCount = CountOf(taskStore.Today.items);
-            var dueSoonCount = CountOf(taskStore.Today.due_soon);
-            var overdueCount = CountOf(taskStore.Today.overdue);
-            var inboxCount = CountOf(taskStore.Inbox.items);
-            var completedCount = CountOf(taskStore.Completed.items);
+            var scheduledCount = CountOf(taskStore.Today.Items);
+            var dueSoonCount = CountOf(taskStore.Today.DueSoon);
+            var overdueCount = CountOf(taskStore.Today.Overdue);
+            var inboxCount = CountOf(taskStore.Inbox.Items);
+            var completedCount = CountOf(taskStore.Completed.Items);
             var hasAnyHomeTasks = scheduledCount + dueSoonCount + overdueCount + inboxCount > 0;
 
             SetLabel(home.TaskSummaryText, BuildHomeSummary(scheduledCount, dueSoonCount, overdueCount, inboxCount, completedCount));
@@ -57,14 +55,14 @@ namespace LocalAssistant.Features.Home
             SetLabel(home.OverdueCountText, overdueCount.ToString());
             SetLabel(home.InboxCountText, inboxCount.ToString());
             SetLabel(home.CompletedCountText, completedCount.ToString());
-            SetLabel(home.FocusText, BuildLaneText(taskStore.Today.in_progress, taskStore.Today.items, "No active focus yet."));
-            SetLabel(home.DueSoonText, BuildLaneText(taskStore.Today.due_soon, null, "No due-soon tasks."));
-            SetLabel(home.OverdueText, BuildLaneText(taskStore.Today.overdue, null, "Nothing overdue."));
+            SetLabel(home.FocusText, BuildLaneText(taskStore.Today.InProgress, taskStore.Today.Items, "No active focus yet."));
+            SetLabel(home.DueSoonText, BuildLaneText(taskStore.Today.DueSoon, null, "No due-soon tasks."));
+            SetLabel(home.OverdueText, BuildLaneText(taskStore.Today.Overdue, null, "Nothing overdue."));
             SetLabel(home.StagePlaceholderText, BuildStagePlaceholderText(taskStore));
 
             if (home.TaskContentText != null)
             {
-                home.TaskContentText.style.display = isHome && hasAnyHomeTasks ? DisplayStyle.Flex : DisplayStyle.None;
+                home.TaskContentText.style.display = hasAnyHomeTasks ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             if (home.TaskEmptyStateText != null)
@@ -75,19 +73,19 @@ namespace LocalAssistant.Features.Home
 
             if (home.QuickAddInput != null)
             {
-                home.QuickAddInput.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
+                home.QuickAddInput.style.display = DisplayStyle.Flex;
             }
 
             if (home.QuickAddButton != null)
             {
-                home.QuickAddButton.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
+                home.QuickAddButton.style.display = DisplayStyle.Flex;
             }
 
             if (home.QuickAddStatusText != null)
             {
                 home.QuickAddStatusText.text = quickAddStatusText;
                 home.QuickAddStatusText.style.color = new StyleColor(quickAddStatusColor);
-                home.QuickAddStatusText.style.display = isHome && !string.IsNullOrWhiteSpace(quickAddStatusText)
+                home.QuickAddStatusText.style.display = !string.IsNullOrWhiteSpace(quickAddStatusText)
                     ? DisplayStyle.Flex
                     : DisplayStyle.None;
             }
@@ -170,15 +168,15 @@ namespace LocalAssistant.Features.Home
                 $"Inbox has {inboxCount} items and completed holds {completedCount}.";
         }
 
-        private static string BuildTodayQueueText(TaskViewModelStore taskStore)
+        private static string BuildTodayQueueText(IPlannerTaskSnapshotSource taskStore)
         {
-            var scheduled = BuildTaskSection("Scheduled", taskStore.Today.items, 3);
-            var dueSoon = BuildTaskSection("Due soon", taskStore.Today.due_soon, 2);
-            var overdue = BuildTaskSection("Overdue", taskStore.Today.overdue, 1);
+            var scheduled = BuildTaskSection("Scheduled", taskStore.Today.Items, 3);
+            var dueSoon = BuildTaskSection("Due soon", taskStore.Today.DueSoon, 2);
+            var overdue = BuildTaskSection("Overdue", taskStore.Today.Overdue, 1);
             return $"{scheduled}\n\n{dueSoon}\n\n{overdue}".Trim();
         }
 
-        private static string BuildTaskSection(string title, List<TaskRecord> items, int maxItems)
+        private static string BuildTaskSection(string title, List<PlannerTaskItem> items, int maxItems)
         {
             if (items == null || items.Count == 0)
             {
@@ -189,7 +187,7 @@ namespace LocalAssistant.Features.Home
             var limit = Math.Min(items.Count, maxItems);
             for (var index = 0; index < limit; index++)
             {
-                result += $"- {items[index].title}{BuildTimeSuffix(items[index])}\n";
+                result += $"- {items[index].Title}{BuildTimeSuffix(items[index])}\n";
             }
 
             if (items.Count > limit)
@@ -200,7 +198,7 @@ namespace LocalAssistant.Features.Home
             return result.TrimEnd();
         }
 
-        private static string BuildLaneText(List<TaskRecord> primary, List<TaskRecord> fallback, string emptyText)
+        private static string BuildLaneText(List<PlannerTaskItem> primary, List<PlannerTaskItem> fallback, string emptyText)
         {
             var task = FirstOrDefault(primary) ?? FirstOrDefault(fallback);
             if (task == null)
@@ -215,38 +213,38 @@ namespace LocalAssistant.Features.Home
             }
 
             var suffix = additionalCount > 0 ? $" +{additionalCount} more" : string.Empty;
-            return $"{task.title}{BuildTimeSuffix(task)}{suffix}";
+            return $"{task.Title}{BuildTimeSuffix(task)}{suffix}";
         }
 
-        private static string BuildStagePlaceholderText(TaskViewModelStore taskStore)
+        private static string BuildStagePlaceholderText(IPlannerTaskSnapshotSource taskStore)
         {
             return
                 "Avatar stage placeholder with an orbit-style shell.\n" +
                 "Hybrid streaming remains active while task, chat, and health signals float around the center stage.\n" +
-                $"Today {CountOf(taskStore.Today.items)} | Due soon {CountOf(taskStore.Today.due_soon)} | Overdue {CountOf(taskStore.Today.overdue)}";
+                $"Today {CountOf(taskStore.Today.Items)} | Due soon {CountOf(taskStore.Today.DueSoon)} | Overdue {CountOf(taskStore.Today.Overdue)}";
         }
 
-        private static string BuildTimeSuffix(TaskRecord task)
+        private static string BuildTimeSuffix(PlannerTaskItem task)
         {
             if (task == null)
             {
                 return string.Empty;
             }
 
-            if (!string.IsNullOrWhiteSpace(task.start_at))
+            if (!string.IsNullOrWhiteSpace(task.StartAt))
             {
-                return $" @ {task.start_at}";
+                return $" @ {task.StartAt}";
             }
 
-            if (!string.IsNullOrWhiteSpace(task.due_at))
+            if (!string.IsNullOrWhiteSpace(task.DueAt))
             {
-                return $" due {task.due_at}";
+                return $" due {task.DueAt}";
             }
 
             return string.Empty;
         }
 
-        private static TaskRecord FirstOrDefault(List<TaskRecord> items)
+        private static PlannerTaskItem FirstOrDefault(List<PlannerTaskItem> items)
         {
             return items != null && items.Count > 0 ? items[0] : null;
         }

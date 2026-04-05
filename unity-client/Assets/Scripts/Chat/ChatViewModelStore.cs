@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using LocalAssistant.Core;
@@ -10,13 +11,14 @@ namespace LocalAssistant.Chat
         public string StatusBadge = "READY";
         public string StatusTitle = "Ready for the next turn";
         public string StatusDetail = string.Empty;
+        public string RouteBadgeText = "Route pending";
         public string TranscriptPreviewTitle = "Transcript preview";
         public string TranscriptPreviewText = string.Empty;
         public string ActionSummaryTitle = "Action confirmation";
         public string ActionSummaryText = string.Empty;
     }
 
-    public sealed class ChatViewModelStore
+    public sealed class ChatViewModelStore : IChatStatusSource
     {
         public sealed class ChatLine
         {
@@ -41,6 +43,21 @@ namespace LocalAssistant.Chat
         public string SystemStatusDetail { get; private set; } = string.Empty;
         public string LastActionTitle { get; private set; } = "Action confirmation";
         public string LastActionSummary { get; private set; } = "Task changes triggered from chat will appear here.";
+
+        public void BeginTurn(string message, bool fromVoice, bool transcriptPreviewEnabled)
+        {
+            ClearSystemStatus();
+            AddUser(message);
+            SetListening(false);
+            SetThinking(true);
+            SetTalking(false);
+            SetTaskActions(Array.Empty<TaskActionReport>());
+            ResetAssistantDraft();
+            if (fromVoice && transcriptPreviewEnabled)
+            {
+                SetTranscriptPreview(message);
+            }
+        }
 
         public void AddUser(string text)
         {
@@ -72,6 +89,7 @@ namespace LocalAssistant.Chat
 
         public void ResetAssistantDraft() => AssistantDraft = string.Empty;
         public void AppendAssistantDraft(string value) => AssistantDraft += value ?? string.Empty;
+        public void ApplyAssistantChunk(string value) => AppendAssistantDraft(string.IsNullOrWhiteSpace(value) ? string.Empty : value + " ");
 
         public void FinalizeAssistantDraft(string fallbackText = null)
         {
@@ -82,6 +100,84 @@ namespace LocalAssistant.Chat
             }
 
             AssistantDraft = string.Empty;
+        }
+
+        public void ApplyCompatibilityResponse(ChatResponsePayload response)
+        {
+            ApplyFinalReply(
+                response?.conversation_id,
+                null,
+                response?.reply_text,
+                response?.route,
+                response?.provider,
+                response?.latency_ms ?? 0,
+                response?.fallback_used ?? false,
+                response?.task_actions);
+        }
+
+        public void ApplyTranscriptPartial(string value, bool transcriptPreviewEnabled)
+        {
+            if (!transcriptPreviewEnabled)
+            {
+                return;
+            }
+
+            SetTranscriptPreview(value);
+        }
+
+        public void ApplyTranscriptFinal(string value, bool transcriptPreviewEnabled)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            SetTranscriptPreview(transcriptPreviewEnabled ? value : string.Empty);
+            AddUser(value);
+            SetThinking(true);
+            SetTalking(false);
+            ResetAssistantDraft();
+        }
+
+        public void ApplyRouteSelection(string route, string provider)
+        {
+            SetDiagnostics(route, provider, 0, false);
+        }
+
+        public void ApplyStreamingFinal(AssistantFinalEvent response)
+        {
+            ApplyFinalReply(
+                response?.conversation_id,
+                response?.session_id,
+                response?.reply_text,
+                response?.route,
+                response?.provider,
+                response?.latency_ms ?? 0,
+                response?.fallback_used ?? false,
+                response?.task_actions);
+        }
+
+        public void ApplyRequestFailure(string assistantMessage, string detail)
+        {
+            SetThinking(false);
+            SetTalking(false);
+            AddAssistant(assistantMessage);
+            SetSystemStatus("ERROR", "Chat request failed", detail);
+        }
+
+        public void ApplyPlannerActionResult(string actionType, string taskId, string title, string detail)
+        {
+            SetTaskActions(new[]
+            {
+                new TaskActionReport
+                {
+                    type = actionType ?? string.Empty,
+                    status = "applied",
+                    task_id = taskId ?? string.Empty,
+                    title = title ?? string.Empty,
+                    detail = detail ?? string.Empty,
+                },
+            });
         }
 
         public void SetDiagnostics(string route, string provider, int latencyMs, bool fallbackUsed)
@@ -161,24 +257,11 @@ namespace LocalAssistant.Chat
                 StatusBadge = BuildStatusBadge(),
                 StatusTitle = BuildStatusTitle(),
                 StatusDetail = BuildStatusDetail(transcriptPreviewEnabled),
+                RouteBadgeText = BuildRouteBadgeText(),
                 TranscriptPreviewTitle = transcriptPreviewEnabled ? "Transcript preview" : "Transcript preview off",
                 TranscriptPreviewText = BuildTranscriptPreviewText(transcriptPreviewEnabled),
                 ActionSummaryTitle = LastActionTitle,
                 ActionSummaryText = LastActionSummary,
-            };
-        }
-
-        public static ChatRequestPayload CreateRequest(string text, string conversationId, string selectedDate, bool includeVoice)
-        {
-            return new ChatRequestPayload
-            {
-                message = text,
-                conversation_id = string.IsNullOrEmpty(conversationId) ? null : conversationId,
-                session_id = null,
-                selected_date = string.IsNullOrEmpty(selectedDate) ? null : selectedDate,
-                mode = "text",
-                include_voice = includeVoice,
-                voice_mode = false,
             };
         }
 
@@ -279,6 +362,26 @@ namespace LocalAssistant.Chat
             return "Start the mic to inspect captured speech before or during a voice turn.";
         }
 
+        private string BuildRouteBadgeText()
+        {
+            if (!string.IsNullOrWhiteSpace(CurrentRoute) && !string.IsNullOrWhiteSpace(CurrentProvider))
+            {
+                return $"{CurrentRoute} / {CurrentProvider}";
+            }
+
+            if (!string.IsNullOrWhiteSpace(CurrentRoute))
+            {
+                return CurrentRoute;
+            }
+
+            if (!string.IsNullOrWhiteSpace(CurrentProvider))
+            {
+                return CurrentProvider;
+            }
+
+            return "Route pending";
+        }
+
         private bool HasRecentAction()
         {
             return !string.IsNullOrWhiteSpace(LastActionSummary)
@@ -289,6 +392,30 @@ namespace LocalAssistant.Chat
         {
             return !string.IsNullOrWhiteSpace(SystemStatusBadge)
                 && !string.IsNullOrWhiteSpace(SystemStatusTitle);
+        }
+
+        private void ApplyFinalReply(
+            string conversationId,
+            string sessionId,
+            string replyText,
+            string route,
+            string provider,
+            int latencyMs,
+            bool fallbackUsed,
+            IReadOnlyList<TaskActionReport> actions)
+        {
+            ConversationId = conversationId ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(sessionId))
+            {
+                SessionId = sessionId;
+            }
+
+            SetListening(false);
+            SetThinking(false);
+            SetTalking(false);
+            FinalizeAssistantDraft(replyText);
+            SetDiagnostics(route, provider, latencyMs, fallbackUsed);
+            SetTaskActions(actions);
         }
 
         private static string FormatAction(TaskActionReport action)

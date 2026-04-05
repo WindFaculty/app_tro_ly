@@ -60,6 +60,11 @@ namespace LocalAssistant.Features.Chat
                 chat.ChatStateDetail.text = snapshot.StatusDetail;
             }
 
+            if (chat.ChatRouteBadge != null)
+            {
+                chat.ChatRouteBadge.text = snapshot.RouteBadgeText;
+            }
+
             if (chat.ChatTranscriptPreviewTitle != null)
             {
                 chat.ChatTranscriptPreviewTitle.text = snapshot.TranscriptPreviewTitle;

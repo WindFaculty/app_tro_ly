@@ -1,6 +1,6 @@
 # Test Plan - Current Validation Strategy
 
-Updated: 2026-03-26
+Updated: 2026-04-05
 
 ## Automated Validation
 
@@ -39,8 +39,8 @@ Unity test files exist under `unity-client/Assets/Tests/` for:
 - PlayMode:
   - `AssistantApp`
   - `UiDocumentLoader`
-  - `AppRouter`
   - `AppShellController`
+  - `ShellModule`
   - screen controllers
   - subtitle presenter
   - reminder presenter
