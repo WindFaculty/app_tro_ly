@@ -61,9 +61,11 @@ function Wait-PortReady {
 $backendProcess = $null
 try {
     $backend = Resolve-BackendDirectory -Root $root
+    $unityProject = Resolve-UnityProjectDirectory -Root $root
     $clientExecutable = Resolve-ClientExecutable -Root $root -ExplicitPath $UnityExecutablePath
 
     Write-AssistantInfo ("Resolved backend path: " + $backend)
+    Write-AssistantInfo ("Resolved Unity project path: " + $unityProject)
     $exitCode = 20
     Invoke-AssistantStep -Name "Resolve backend Python runtime" -Action {
         $script:resolvedBackendPython = Assert-CommandAvailable -Command $BackendPython -Label "Backend Python command"
@@ -131,7 +133,7 @@ try {
         }
     }
     else {
-        Write-AssistantInfo "No packaged client executable found. Open the Unity project from 'unity-client/' or pass -UnityExecutablePath."
+        Write-AssistantInfo ("No packaged client executable found. Open the Unity project from '" + $unityProject + "' or pass -UnityExecutablePath.")
     }
 
     if ($ShutdownBackendOnExit) {

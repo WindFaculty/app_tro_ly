@@ -1,0 +1,46 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "source_runtime_paths": [
+    "ai-dev-system/clients/unity-client/Assets/Scripts/Runtime/RoomRuntime.cs",
+    "ai-dev-system/clients/unity-client/Assets/Scripts/Runtime/SceneStateController.cs"
+  ],
+  "focus_presets": [
+    {
+      "focus": "overview",
+      "orthographic_size": 5.2,
+      "page_contexts": [
+        "dashboard"
+      ]
+    },
+    {
+      "focus": "avatar",
+      "orthographic_size": 3.6,
+      "page_contexts": [
+        "chat"
+      ]
+    },
+    {
+      "focus": "desk",
+      "orthographic_size": 4.2,
+      "page_contexts": [
+        "planner"
+      ]
+    },
+    {
+      "focus": "wardrobe",
+      "orthographic_size": 3.2,
+      "page_contexts": [
+        "wardrobe"
+      ]
+    }
+  ],
+  "default_page_behavior": "unmapped pages fall back to overview in SceneStateController.ApplyPageContext",
+  "direct_runtime_aliases": {
+    "avatar": "avatar",
+    "chat": "avatar",
+    "desk": "desk",
+    "planner": "desk",
+    "wardrobe": "wardrobe"
+  }
+}

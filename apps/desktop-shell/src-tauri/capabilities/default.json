@@ -1,0 +1,17 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for App Trợ Lý desktop shell",
+  "platforms": ["linux", "macOS", "windows"],
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:default",
+    "shell:allow-open",
+    "shell:allow-spawn",
+    "shell:allow-execute",
+    "process:default",
+    "process:allow-exit",
+    "log:default"
+  ]
+}

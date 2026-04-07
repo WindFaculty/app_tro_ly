@@ -6,20 +6,27 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 
 - The active product in this repo is the local desktop assistant.
 - The backend in `local-backend/` is implemented and tested.
-- The Unity client in `unity-client/` is implemented as a UI Toolkit shell with an orbit-style Home screen, a list-first Schedule screen, chat, settings, subtitle, reminder, and voice wiring.
-- `agent-platform/` exists next to the assistant repo but is optional and not required for the assistant runtime.
-- A production-ready avatar experience is not fully wired end-to-end yet. The repo contains avatar groundwork and prototype assets under `unity-client/Assets/AvatarSystem/`, but live behavior still depends on Unity scene setup and manual validation.
+- The Unity client in `ai-dev-system/clients/unity-client/` is implemented as a UI Toolkit shell with an orbit-style Home screen, a list-first Schedule screen, chat, settings, subtitle, reminder, and voice wiring.
+- `agent-platform/` is not present in the current repo snapshot; if used as an adjacent subsystem elsewhere, it remains optional and not required for the assistant runtime.
+- The non-backend unification under `ai-dev-system/` started from the freeze baseline in `docs/migration/ai-dev-system-unification-phase0.md` and now has landed context, client, control-plane, and domain slices.
+- Phase 1 architecture scaffolding for that unification now exists under `ai-dev-system/`, and later phases have already moved current truth into `context/`, `clients/unity-client/`, `control-plane/`, and `domain/`.
+- Phase 2 has now absorbed the former repo AI context root into `ai-dev-system/context/`.
+- Phase 3 has now absorbed the former separate Unity client root into `ai-dev-system/clients/unity-client/`.
+- Phase 4 moved the automation runtime under `ai-dev-system/control-plane/`, and Phase 9 removed the temporary root-level shim packages that had bridged the old import layout.
+- Phase 5 has now established `ai-dev-system/domain/` as the shared contract root for avatar, customization, and room ownership while Unity runtime code remains under `ai-dev-system/clients/unity-client/`.
+- Phase 6 now gives `ai-dev-system/workbench/` and `ai-dev-system/asset-pipeline/` real ownership over authoring inventories, naming guidance, and structure validation, while large authoring files and helper scripts still remain in their current root paths.
+- A production-ready avatar experience is not fully wired end-to-end yet. The repo contains avatar groundwork and prototype assets under `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`, but live behavior still depends on Unity scene setup and manual validation.
 
 ## Repo Layout
 
 ```text
 .
 |- local-backend/   FastAPI backend, SQLite persistence, AI orchestration, speech adapters
-|- unity-client/    Unity client project and UI Toolkit shell
+|- ai-dev-system/   Non-backend integration root in progress; automation subsystem, absorbed AI context, Unity client, and domain contracts
 |- docs/            Product, architecture, API, runtime, test, and runbook docs
 |- tasks/           AI-executable queue, manual blockers, and historical done log
 |- scripts/         Windows setup, startup, packaging, and smoke helpers
-`- agent-platform/  Optional adjacent tooling, not part of the assistant runtime
+`- agent-platform/  Optional adjacent tooling when present; not part of the assistant runtime
 ```
 
 ## Implemented Runtime
@@ -36,8 +43,8 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 
 ### Unity client
 
-- UI Toolkit entrypoint at `unity-client/Assets/Resources/UI/MainUI.uxml`
-- Shell layout in `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
+- UI Toolkit entrypoint at `ai-dev-system/clients/unity-client/Assets/Resources/UI/MainUI.uxml`
+- Shell layout in `ai-dev-system/clients/unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
 - Screen controllers for Home, Schedule, Settings, and Chat
 - REST plus WebSocket clients for health, tasks, settings, reminders, chat, and streaming assistant turns
 - Subtitle overlay, reminder overlay, audio playback, transcript preview, and task summaries
@@ -79,7 +86,7 @@ Default backend URL:
 
 ### Unity client
 
-Open `unity-client/` in Unity and run from the Editor, or pass a built executable to:
+Open `ai-dev-system/clients/unity-client/` in Unity and run from the Editor, or pass a built executable to:
 
 ```powershell
 .\scripts\run_all.ps1 -UnityExecutablePath "D:\Builds\TroLy.exe"
@@ -120,11 +127,31 @@ Ollama-related settings still exist for preflight and future work, but Ollama is
 Start with [docs/roadmap.md](docs/roadmap.md) for the quickest repo map.
 It summarizes the active runtime, main flow, module ownership, status labels, and where to change UI, backend, planner, chat, and avatar code.
 Use it before diving into the deeper architecture, API, UI, runbook, or task-tracking docs.
+If you need the proposed root-level migration plan, read [docs/migration/ai-dev-system-unification-phase0.md](docs/migration/ai-dev-system-unification-phase0.md) as the freeze baseline, not as shipped structure.
+For the next architecture step that establishes the `ai-dev-system/` layer layout, read [docs/migration/ai-dev-system-unification-phase1.md](docs/migration/ai-dev-system-unification-phase1.md).
+For the context-absorption step, read [docs/migration/ai-dev-system-unification-phase2.md](docs/migration/ai-dev-system-unification-phase2.md).
+For the client-absorption step that moves the Unity project under `ai-dev-system/clients/`, read [docs/migration/ai-dev-system-unification-phase3.md](docs/migration/ai-dev-system-unification-phase3.md).
+For the control-plane unification step that makes `ai-dev-system/control-plane/` the current automation runtime home, read [docs/migration/ai-dev-system-unification-phase4.md](docs/migration/ai-dev-system-unification-phase4.md).
+For the domain pass that makes `ai-dev-system/domain/` the shared avatar or customization or room contract root, read [docs/migration/ai-dev-system-unification-phase5.md](docs/migration/ai-dev-system-unification-phase5.md).
+For the workbench and asset-pipeline pass that establishes current inventory and validation ownership, read [docs/migration/ai-dev-system-unification-phase6.md](docs/migration/ai-dev-system-unification-phase6.md).
+For the scripts and tests standardization pass, read [docs/migration/ai-dev-system-unification-phase7.md](docs/migration/ai-dev-system-unification-phase7.md).
+For the docs and task-governance rewrite, read [docs/migration/ai-dev-system-unification-phase8.md](docs/migration/ai-dev-system-unification-phase8.md).
+For the architecture-lock cleanup that removes temporary import shims and stale absorbed-root references, read [docs/migration/ai-dev-system-unification-phase9.md](docs/migration/ai-dev-system-unification-phase9.md).
 
 ## Documentation Index
 
 - [docs/index.md](docs/index.md)
 - [docs/roadmap.md](docs/roadmap.md)
+- [docs/migration/ai-dev-system-unification-phase0.md](docs/migration/ai-dev-system-unification-phase0.md)
+- [docs/migration/ai-dev-system-unification-phase1.md](docs/migration/ai-dev-system-unification-phase1.md)
+- [docs/migration/ai-dev-system-unification-phase2.md](docs/migration/ai-dev-system-unification-phase2.md)
+- [docs/migration/ai-dev-system-unification-phase3.md](docs/migration/ai-dev-system-unification-phase3.md)
+- [docs/migration/ai-dev-system-unification-phase4.md](docs/migration/ai-dev-system-unification-phase4.md)
+- [docs/migration/ai-dev-system-unification-phase5.md](docs/migration/ai-dev-system-unification-phase5.md)
+- [docs/migration/ai-dev-system-unification-phase6.md](docs/migration/ai-dev-system-unification-phase6.md)
+- [docs/migration/ai-dev-system-unification-phase7.md](docs/migration/ai-dev-system-unification-phase7.md)
+- [docs/migration/ai-dev-system-unification-phase8.md](docs/migration/ai-dev-system-unification-phase8.md)
+- [docs/migration/ai-dev-system-unification-phase9.md](docs/migration/ai-dev-system-unification-phase9.md)
 - [docs/00-context.md](docs/00-context.md)
 - [docs/01-scope.md](docs/01-scope.md)
 - [docs/02-architecture.md](docs/02-architecture.md)

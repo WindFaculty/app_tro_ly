@@ -14,13 +14,13 @@ This checklist feeds `P02` in `tasks/task-people.md` and the live-smoke closure 
 ## Required Artifacts
 
 - Ready Game view capture
-  `unity-client/Assets/Screenshots/p02-20260329-e2-backend-ready-gameview.png`
+  `ai-dev-system/clients/unity-client/Assets/Screenshots/p02-20260329-e2-backend-ready-gameview.png`
 - Partial Game view capture
-  Existing partial evidence is still the older unstable pair at `unity-client/Assets/Screenshots/p02-20260329-e3-backend-partial-gameview.png` and `unity-client/Assets/Screenshots/p02-20260329-e3-backend-partial-gameview-after-wait.png`; rerun still needed for clean closure.
+  Existing partial evidence is still the older unstable pair at `ai-dev-system/clients/unity-client/Assets/Screenshots/p02-20260329-e3-backend-partial-gameview.png` and `ai-dev-system/clients/unity-client/Assets/Screenshots/p02-20260329-e3-backend-partial-gameview-after-wait.png`; rerun still needed for clean closure.
 - Unavailable Game view capture
-  `unity-client/Assets/Screenshots/p02-20260329-e1-backend-unavailable-gameview.png`
+  `ai-dev-system/clients/unity-client/Assets/Screenshots/p02-20260329-e1-backend-unavailable-gameview.png`
 - Restarted Game view capture with text still visible
-  `unity-client/Assets/Screenshots/p02-20260329-e6-ready-restart-gameview.png`
+  `ai-dev-system/clients/unity-client/Assets/Screenshots/p02-20260329-e6-ready-restart-gameview.png`
 - Packaged ready window capture
   `ai-dev-system/logs/p02/20260329T204609Z/packaged-ready-window-after-dismiss.png`
   Additional 2026-04-04 auto capture with backend responding:

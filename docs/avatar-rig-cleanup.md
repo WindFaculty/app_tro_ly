@@ -1,21 +1,21 @@
-# Avatar Rig Cleanup
+﻿# Avatar Rig Cleanup
 
 Updated: 2026-03-17
 
 ## Outputs
 
-- Source FBX: `unity-client/Assets/Avatar/Model/Meshy_AI_Character_output.fbx`
+- Source FBX: `ai-dev-system/clients/unity-client/Assets/Avatar/Model/Meshy_AI_Character_output.fbx`
 - Blender working file: `bleder/CHR_Avatar_Base_v001_work.blend`
 - Rig-clean Blender file: `bleder/CHR_Avatar_Base_v001_rigclean.blend`
-- Rig-clean FBX: `unity-client/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_rigclean.fbx`
-- Synced split avatar FBX: `unity-client/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_split15.fbx`
+- Rig-clean FBX: `ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_rigclean.fbx`
+- Synced split avatar FBX: `ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_split15.fbx`
 - Audit reports:
   - `tools/reports/avatar_source_audit.json`
   - `tools/reports/avatar_rigclean_report.json`
   - `tools/reports/avatar_rigclean_audit.json`
   - `tools/reports/avatar_split15_validation.json`
   - `tools/reports/avatar_split15_reaudit.json`
-  - `unity-client/Logs/BaseAvatarHumanoidValidation.json`
+  - `ai-dev-system/clients/unity-client/Logs/BaseAvatarHumanoidValidation.json`
 
 ## Rig Cleanup Applied
 
@@ -84,3 +84,4 @@ Updated: 2026-03-17
 ## Follow-up Note
 
 - Unity Inspector still shows a separate project-level warning about `Skin Weights` quality settings. This does not invalidate humanoid mapping, but it is worth fixing before animation/prefab polish so bone influence is not overly limited at runtime.
+

@@ -70,7 +70,7 @@ These remain valid product goals even where the current client is still partial.
 - Fully local LLM routing as the main default path
 - Fully finished production-avatar experience
 - Rich schedule visualization beyond the current placeholder calendar panel
-- Design-target UI details from `unity-client/Assets/Resources/UI/ui_feature_map.md`
+- Design-target UI details from `ai-dev-system/clients/unity-client/Assets/Resources/UI/ui_feature_map.md`
 
 ## Non-Goals For Current Scope
 

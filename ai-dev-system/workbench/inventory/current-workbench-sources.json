@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "source_roots": [
+    {
+      "path": "bleder",
+      "kind": "blender_authoring",
+      "notable_items": [
+        "CHR_Avatar_Base_v001_work.blend",
+        "CHR_Avatar_Base_v001_rigclean.blend",
+        "CHR_Avatar_Base_v001_split15_facial.blend",
+        "CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "CHR_Dress_AzureSakura_v001_shoulderarmfit.blend",
+        "CHR_Dress_AzureSakura_v001_shoulderarmfit_refine.blend",
+        "CHR_Dress_AzureSakura_v001_shrinkwrapfit.blend",
+        "Meshy_AI_body_kokomi_0314010618_generate.fbx"
+      ]
+    },
+    {
+      "path": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx",
+      "kind": "raw_import_source",
+      "notable_items": [
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.png",
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_metallic.png",
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_normal.png",
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_roughness.png"
+      ]
+    },
+    {
+      "path": "tools/reports",
+      "kind": "report_artifacts",
+      "notable_items": [
+        "avatar_base_v001_export_report.json",
+        "avatar_base_v001_validation.json",
+        "azure_kimono_asset_audit.json",
+        "azure_sakura_dress_polishfit_report.json"
+      ]
+    },
+    {
+      "path": "tools/renders",
+      "kind": "render_artifacts",
+      "notable_items": [
+        "azure_sakura_polishfit",
+        "azure_sakura_shoulderarmfit",
+        "azure_sakura_shrinkwrapfit",
+        "azure_sakura_polishfit_saved_state.png"
+      ]
+    }
+  ],
+  "notes": [
+    "This inventory records the current authoring roots without moving the large files into ai-dev-system/workbench yet.",
+    "No Clothy3D root is present in the current repo snapshot."
+  ]
+}

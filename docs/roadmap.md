@@ -1,250 +1,182 @@
 # Project Roadmap
 
 This file is the fastest repo entry point for current implementation truth.
-Use code as the final source of truth, and treat design-target or manual-only areas as non-shipped unless stated otherwise.
+Use code as the final source of truth, and treat planned work or manual-only validation as non-shipped unless stated otherwise.
 
-## 1. Repo At A Glance
+## 1. Current Architecture
 
-- `local-backend/`: required FastAPI backend, assistant orchestration, task or planner logic, speech adapters, scheduler, SQLite persistence
-- `unity-client/`: required Unity client, UI Toolkit shell, screen flow, chat panel, overlays, audio playback, placeholder avatar-state wiring
-- `scripts/`: Windows setup, startup, packaging, and backend smoke helpers
-- `docs/`: current implementation docs, runbook, test plan, migration baseline, avatar specs
-- `tasks/`: active AI queue, manual gates, phased backlog, and historical done log
-- `agent-platform/`: optional adjacent subsystem; present in repo but not required for the assistant runtime
-- `ai-dev-system/`: adjacent automation tooling for GUI and Unity control-plane work; not part of the required assistant runtime
-- `ai/`: prompt/context support files for AI-assisted repo work
-- `tools/`: avatar or asset pipeline helper scripts, validation reports, and renders
-- `bleder/`: Blender work files for avatar or clothing authoring
-- `Clothy3D_Studio/`: external asset-workbench/tool folder; not part of the required runtime
-- `Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/`: imported asset source folder; not part of the required runtime
-- `release/`: packaged output snapshot for release validation; not the source of truth for runtime code
+### Current implementation
 
-## 2. Main Runtime Flow
+- `local-backend/` remains the backend source of truth for business logic, storage, API routes, scheduler, speech adapters, and assistant orchestration.
+- `ai-dev-system/` is now the main non-backend integration root for the repo.
+- `ai-dev-system/clients/unity-client/` is the current Unity client source of truth.
+- `ai-dev-system/control-plane/` is the current automation runtime source of truth.
+- `ai-dev-system/context/` is the current subsystem context source of truth.
+- `ai-dev-system/domain/` is the current shared avatar, customization, room, and shared-contract source of truth.
+- `ai-dev-system/workbench/` and `ai-dev-system/asset-pipeline/` now own workbench inventory, naming guidance, and pipeline validation governance.
+- `ai-dev-system/scripts/` and `ai-dev-system/tests/` now provide the standardized non-backend entry-point surface and the subsystem test-catalog root.
+- Phase 9 removed the temporary root-level import shims that had mirrored control-plane packages at the `ai-dev-system/` root and locked the active import/bootstrap surface.
 
-`User -> Unity client -> /v1 API -> backend services -> SQLite -> response/events/audio`
+### Governance roots
 
-Current implementation flow:
+- `docs/` stays outside `ai-dev-system/` as repo governance and architecture navigation.
+- `tasks/` stays outside `ai-dev-system/` as queue, backlog, manual-gate, and done-history governance.
 
-1. Unity boots through `unity-client/Assets/Resources/UI/MainUI.uxml` and `unity-client/Assets/Scripts/App/AssistantBootstrap.cs`.
-2. `unity-client/Assets/Scripts/Core/AssistantApp.cs` coordinates shell state, API calls, event streams, voice flow, overlays, and placeholder avatar-state presentation.
-3. Unity calls `local-backend/app/api/routes.py` over REST and WebSocket.
-4. Backend routes fan into services wired by `local-backend/app/container.py`, including task, planner, routing, memory, speech, and scheduler services.
-5. SQLite persistence in `local-backend/data/app.db` stores tasks, reminders, settings, conversations, summaries, memory, and route logs.
-6. Backend returns task snapshots, chat replies, stream events, reminder events, and cached audio URLs back to the client.
+### Planned work still not done
 
-## 3. Product Modules
+- `local-backend/` remains intentionally outside the `ai-dev-system/` unification scope.
+- Root `scripts/`, root `tools/`, root `bleder/`, root import folders, and `release/` still contain current operational internals or authoring material that have not been fully absorbed yet.
+- Unity Editor and packaged-client smoke remain manual validation gates.
 
-### Shell
+## 2. Non-Backend Integration Map
 
-- Purpose: own left-rail shell state, health-state rendering, boot state, center-stage status, planner-sheet visibility, chat visibility, and settings drawer state
-- Main files:
-  - `unity-client/Assets/Scripts/App/ShellModule.cs`
-  - `unity-client/Assets/Scripts/App/ShellModuleContracts.cs`
-  - `unity-client/Assets/Scripts/App/AppShellController.cs`
-  - `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
-- Status: `implemented`
+| Area | Current source of truth | Role |
+| --- | --- | --- |
+| Control plane | `ai-dev-system/control-plane/` | GUI automation, Unity automation, MCP client, profiles, verification, healing |
+| Unity client | `ai-dev-system/clients/unity-client/` | UI Toolkit shell, 3D runtime, overlays, transport wiring, avatar presentation |
+| Domain | `ai-dev-system/domain/` | Shared avatar, customization, room, and cross-domain contracts |
+| Context | `ai-dev-system/context/` | Subsystem-local prompts, summaries, policies, and memory notes |
+| Asset pipeline | `ai-dev-system/asset-pipeline/` | Tool catalog, validation entry points, migration-owned pipeline governance |
+| Workbench | `ai-dev-system/workbench/` | Authoring-root inventory, imports, naming guidance, reports |
+| Entry points | `ai-dev-system/scripts/` | Standardized run, validate, and package surface for non-backend work |
+| Test catalog | `ai-dev-system/tests/` | Subsystem test ownership map and repo-side drift validation |
 
-### Planner
+Detailed architecture view:
 
-- Purpose: render Today or Week or Inbox or Completed task views and support planner-facing task actions against backend data
-- Main files:
-  - `unity-client/Assets/Scripts/Features/Schedule/PlannerModule.cs`
-  - `unity-client/Assets/Scripts/Features/Schedule/ScheduleScreenController.cs`
-  - `local-backend/app/services/tasks.py`
-  - `local-backend/app/services/planner.py`
-- Status: `implemented`
-  Current notes: modularization work is still in progress, and the UI is list-first rather than a finished calendar grid
+- `docs/architecture/non-backend-integration.md`
 
-### Chat
+## 3. Runtime Flow
 
-- Purpose: own transcript state, text turns, mic flow, compatibility fallback, route diagnostics, and assistant stream handling
-- Main files:
-  - `unity-client/Assets/Scripts/Features/Chat/ChatModule.cs`
-  - `unity-client/Assets/Scripts/Features/Chat/ChatPanelController.cs`
-  - `unity-client/Assets/Scripts/Chat/ChatViewModelStore.cs`
-  - `unity-client/Assets/Scripts/Core/AppModuleEvents.cs`
-  - `local-backend/app/services/assistant_orchestrator.py`
+Current implementation runtime flow:
+
+1. `ai-dev-system/clients/unity-client/` boots the current client shell and runtime presentation.
+2. `ai-dev-system/clients/unity-client/Assets/Scripts/Core/AssistantApp.cs` coordinates UI state, transport, overlays, and shell-visible avatar cues.
+3. The client calls `local-backend/app/api/routes.py` over REST and WebSocket.
+4. Backend services under `local-backend/app/services/` execute planner, settings, reminder, memory, routing, and speech logic.
+5. SQLite persistence under `local-backend/data/app.db` stores tasks, reminders, settings, conversations, summaries, and memory.
+6. `ai-dev-system/control-plane/` remains the non-backend automation subsystem for GUI and Unity automation workflows; it is not required for the baseline end-user runtime loop.
+
+## 4. Source-Of-Truth Guide
+
+Use these roots first:
+
+- Backend behavior:
   - `local-backend/app/api/routes.py`
-- Status: `implemented`
-  Current notes: `ChatModule` plus `ChatViewModelStore` own turn-state reduction for compatibility replies, assistant-stream transcript or chunk or final events, and planner-action summaries, while `AssistantApp` coordinates transport and now forwards planner handoff plus subtitle plus avatar-state cues through `AssistantEventBus` contracts before they reach shell or presentation components.
+  - `local-backend/app/services/`
+  - `local-backend/app/models/`
+  - `local-backend/app/core/`
+- Unity client behavior:
+  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/`
+  - `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`
+- Automation runtime:
+  - `ai-dev-system/control-plane/app/`
+  - `ai-dev-system/control-plane/agents/`
+  - `ai-dev-system/control-plane/executor/`
+  - `ai-dev-system/control-plane/planner/`
+  - `ai-dev-system/control-plane/memory/`
+  - `ai-dev-system/control-plane/tools/`
+  - `ai-dev-system/control-plane/mcp_client.py`
+- Shared domain contracts:
+  - `ai-dev-system/domain/avatar/`
+  - `ai-dev-system/domain/customization/`
+  - `ai-dev-system/domain/room/`
+  - `ai-dev-system/domain/shared/`
+- Workbench and asset pipeline governance:
+  - `ai-dev-system/workbench/`
+  - `ai-dev-system/asset-pipeline/`
+- Standardized scripts and structure validation:
+  - `ai-dev-system/scripts/run/`
+  - `ai-dev-system/scripts/validate/`
+  - `ai-dev-system/scripts/package/`
+  - `ai-dev-system/tests/structure/`
 
-### Avatar
+## 5. Where To Change What
 
-- Purpose: provide shell-visible avatar state, lip-sync fallback, and an optional bridge into the production avatar system when a scene contains an `AvatarConversationBridge`
-- Main files:
-  - `unity-client/Assets/Scripts/Avatar/AvatarStateMachine.cs`
-  - `unity-client/Assets/Scripts/Avatar/LipSyncController.cs`
-  - `unity-client/Assets/AvatarSystem/Core/Scripts/AvatarConversationBridge.cs`
-  - `unity-client/Assets/AvatarSystem/AvatarProduction/`
-- Status: `partial`
-  Current notes: shell presentation is still placeholder-driven, and the production avatar path still depends on scene setup plus manual validation
-
-### Settings
-
-- Purpose: load, edit, and persist user-facing runtime settings through backend-owned storage
-- Main files:
-  - `unity-client/Assets/Scripts/Features/Settings/SettingsScreenController.cs`
-  - `unity-client/Assets/Scripts/Core/SettingsViewModelStore.cs`
-  - `local-backend/app/services/settings.py`
+- UI layout or shell behavior:
+  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/App/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Core/`
+- Planner or chat or settings client behavior:
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Features/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Tasks/`
+- Avatar or customization contracts:
+  - `ai-dev-system/domain/avatar/`
+  - `ai-dev-system/domain/customization/`
+- Avatar runtime or production asset wiring:
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Avatar/`
+  - `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`
+- Automation runtime:
+  - `ai-dev-system/control-plane/`
+- Asset-pipeline governance:
+  - `ai-dev-system/asset-pipeline/`
+  - `ai-dev-system/workbench/`
+- Backend behavior:
   - `local-backend/app/api/routes.py`
-- Status: `implemented`
-  Current notes: backend stores more settings groups than the current client exposes for editing
+  - `local-backend/app/services/`
 
-## 4. Directory Reading Guide
+## 6. Validation And Entry Points
 
-Recommended read order for understanding the required runtime:
+### Current implementation
 
-1. `README.md`
-2. `docs/roadmap.md`
-3. `local-backend/app/api/routes.py`
-4. `local-backend/app/container.py`
-5. `local-backend/app/services/`
-6. `unity-client/Assets/Scripts/Core/AssistantApp.cs`
-7. `unity-client/Assets/Scripts/App/`
-8. `unity-client/Assets/Scripts/Features/`
-9. `unity-client/Assets/Resources/UI/`
-10. `docs/02-architecture.md`, `docs/03-api.md`, `docs/04-ui.md`, `docs/09-runbook.md`
-11. `tasks/task-queue.md` and `tasks/task-people.md` for current work and gates
+- Setup or startup or packaging internals still live in root `scripts/`.
+- Standardized non-backend entry points now live in `ai-dev-system/scripts/`.
+- Repo-side unification drift validation now lives in `ai-dev-system/scripts/validate/` and `ai-dev-system/tests/structure/`.
 
-## 5. Important Entry Points
+### Key commands
 
-- Backend entry:
-  - `local-backend/run_local.py`
-  - `local-backend/app/main.py`
-- Client bootstrap:
-  - `unity-client/Assets/Scripts/App/AssistantBootstrap.cs`
-  - `unity-client/Assets/Scripts/Core/AssistantApp.cs`
-- UI entry:
-  - `unity-client/Assets/Resources/UI/MainUI.uxml`
-  - `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
-- API routes:
-  - `local-backend/app/api/routes.py`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-structure.ps1`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-avatar-pipeline.ps1`
+- `python ai-dev-system/scripts/validate/validate_phase7_structure.py`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-architecture-lock.ps1`
 
-## 6. Stable vs Partial vs Placeholder
+### Manual validation required
 
-### Stable enough to treat as current implementation
+- Unity Editor visuals and runtime interaction
+- Packaged-client smoke
+- Production avatar scene integration
+- Target-machine speech quality and runtime installation
 
-- FastAPI `/v1` backend with health, task, chat, speech, settings, events, and assistant stream routes
-- SQLite-backed task, reminder, settings, conversation, memory, and route-log persistence
-- Unity UI Toolkit shell with Home, Schedule, Settings, Chat, subtitle overlay, and reminder overlay
-- REST plus WebSocket integration between client and backend
+## 7. Migration Docs
 
-### Partial
+Use these docs in order for the non-backend unification story:
 
-- Avatar production path under `unity-client/Assets/AvatarSystem/`
-- Shell-to-avatar scene integration through optional `AvatarConversationBridge`
-- Settings editing coverage in the Unity client compared with backend-supported groups
-- Planner modularization tracked in `tasks/module-migration-backlog.md`
+- `docs/migration/ai-dev-system-unification.md`
+- `docs/migration/ai-dev-system-unification-phase0.md`
+- `docs/migration/ai-dev-system-unification-phase1.md`
+- `docs/migration/ai-dev-system-unification-phase2.md`
+- `docs/migration/ai-dev-system-unification-phase3.md`
+- `docs/migration/ai-dev-system-unification-phase4.md`
+- `docs/migration/ai-dev-system-unification-phase5.md`
+- `docs/migration/ai-dev-system-unification-phase6.md`
+- `docs/migration/ai-dev-system-unification-phase7.md`
+- `docs/migration/ai-dev-system-unification-phase8.md`
+- `docs/migration/ai-dev-system-unification-phase9.md`
 
-### Placeholder
+## 8. Task Tracking
 
-- Home avatar stage presentation in the shell
-- Right-side schedule helper panel in `AppShell.uxml`
-
-### Not implemented
-
-- Finished calendar-grid schedule UI
-- Compact mini-assistant mode
-
-### Current verification gap
-
-- Manual validation required for Unity Editor visuals, packaged-client behavior, production avatar behavior, and target-machine speech quality
-- Current backend automated evidence is not fully green: `python -m pytest -q` in `local-backend/` on 2026-04-04 reported `69 passed, 1 failed`, with `tests/test_tts_service.py::test_chattts_synthesize_writes_cached_wav` failing
-
-## 7. Where To Change What
-
-- UI layout or navigation: `unity-client/Assets/Resources/UI/`, `unity-client/Assets/Scripts/App/`, `unity-client/Assets/Scripts/Core/`
-- Planner or task views: `unity-client/Assets/Scripts/Features/Schedule/` and `local-backend/app/services/tasks.py` plus `local-backend/app/services/planner.py`
-- Chat UX or stream wiring: `unity-client/Assets/Scripts/Features/Chat/`, `unity-client/Assets/Scripts/Core/AssistantApp.cs`, and `local-backend/app/services/assistant_orchestrator.py`
-- Settings behavior: `unity-client/Assets/Scripts/Features/Settings/` and `local-backend/app/services/settings.py`
-- Backend contracts or service behavior: `local-backend/app/api/routes.py`, `local-backend/app/services/`, `local-backend/app/models/`, `local-backend/app/core/`
-- Avatar runtime or production asset path: `unity-client/Assets/Scripts/Avatar/` and `unity-client/Assets/AvatarSystem/`
-- Windows setup or validation flow: `scripts/setup_windows.ps1`, `scripts/run_all.ps1`, `scripts/package_release.ps1`, `scripts/smoke_backend.py`
-
-## 8. Scripts And Validation
-
-- Setup:
-  - `scripts/setup_windows.ps1`
-- Startup:
-  - `scripts/run_all.ps1`
-- Packaging:
-  - `scripts/package_release.ps1`
-- Backend smoke:
-  - `scripts/smoke_backend.py`
-
-Current automated evidence:
-
-- Backend tests exist under `local-backend/tests/`
-- Unity EditMode and PlayMode tests exist under `unity-client/Assets/Tests/`
-
-Manual validation required:
-
-- Unity visual behavior
-- Packaged-client smoke and readability
-- Production avatar scene behavior
-- Target-machine STT or TTS quality and runtime setup
-
-## 9. Docs And Task System
-
-- Code truth:
-  - backend behavior: `local-backend/app/api/routes.py`, `local-backend/app/services/`, `local-backend/app/models/`, `local-backend/app/core/`
-  - Unity behavior: `unity-client/Assets/Resources/UI/MainUI.uxml`, `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`, `unity-client/Assets/Resources/UI/Styles/`, `unity-client/Assets/Scripts/`
-- Design target:
-  - `unity-client/Assets/Resources/UI/ui_feature_map.md`
-- Current implementation docs:
-  - `docs/02-architecture.md`
-  - `docs/03-api.md`
-  - `docs/04-ui.md`
-  - `docs/05-test-plan.md`
-  - `docs/09-runbook.md`
-- Migration baseline:
-  - `docs/migration/phase0.md`
 - Active AI queue:
   - `tasks/task-queue.md`
-- Manual or off-repo gates:
+- Manual gates:
   - `tasks/task-people.md`
-- Phased plan, not shipped structure:
+- Current root-unification phase tracker:
+  - `tasks/ai-dev-system-unification-backlog.md`
+- Older Unity modularization backlog:
   - `tasks/module-migration-backlog.md`
-- Historical log:
+- Historical completion log:
   - `tasks/done.md`
 
-## 10. Recommended Next Reading By Goal
+## 9. Read Order
 
-- Backend:
-  - `local-backend/app/api/routes.py`
-  - `local-backend/app/container.py`
-  - `local-backend/app/services/`
-- UI or shell:
-  - `unity-client/Assets/Scripts/Core/AssistantApp.cs`
-  - `unity-client/Assets/Scripts/App/`
-  - `unity-client/Assets/Resources/UI/`
-- Chat:
-  - `unity-client/Assets/Scripts/Features/Chat/`
-  - `local-backend/app/services/assistant_orchestrator.py`
-  - `docs/07-ai-runtime.md`
-- Planner:
-  - `unity-client/Assets/Scripts/Features/Schedule/`
-  - `local-backend/app/services/tasks.py`
-  - `local-backend/app/services/planner.py`
-- Avatar:
-  - `unity-client/Assets/Scripts/Avatar/`
-  - `unity-client/Assets/AvatarSystem/Core/Scripts/`
-  - `docs/avatar-spec.md`
-  - `docs/avatar-rig-cleanup.md`
+Recommended read order for the current repo state:
 
-## 11. Current Architectural Direction
-
-- Keep the required assistant runtime in `local-backend/` plus `unity-client/`.
-- Continue modularization inside the current Unity tree before considering any root-level layout move.
-- Keep backend ownership of task logic, planner summaries, reminder logic, settings persistence, memory, routing, and speech adapters.
-- Keep Unity ownership of presentation, shell flow, overlays, audio playback, and interaction wiring.
-- Preserve design-target docs as design targets, not implementation truth.
-- Treat avatar work as placeholder-safe and scene-dependent until manual production handoff and validation are complete.
-
-## Core Navigation
-
-- [Documentation Index](index.md)
-- [Architecture](02-architecture.md)
-- [API](03-api.md)
-- [UI](04-ui.md)
-- [Runbook](09-runbook.md)
+1. `README.md`
+2. `docs/index.md`
+3. `docs/roadmap.md`
+4. `docs/architecture/non-backend-integration.md`
+5. `docs/migration/ai-dev-system-unification.md`
+6. `local-backend/app/api/routes.py`
+7. `ai-dev-system/README.md`
+8. `ai-dev-system/control-plane/README.md`
+9. `ai-dev-system/domain/README.md`
+10. `tasks/task-queue.md`

@@ -1,0 +1,262 @@
+/* ─────────────────────────────────────────────────────────────
+   App Trợ Lý — Global Design System
+   Dark theme, premium feel
+───────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ── Design Tokens ── */
+:root {
+  /* Background layers */
+  --bg-base:         #0d0f14;
+  --bg-nav:          #10131a;
+  --bg-panel:        #13161f;
+  --bg-unity:        #0a0c11;
+  --bg-unity-inner:  #0f1218;
+  --bg-hover:        rgba(255, 255, 255, 0.05);
+  --bg-active:       rgba(255, 255, 255, 0.08);
+
+  /* Text */
+  --text-primary:   #f0f2f7;
+  --text-secondary: #b0b8cc;
+  --text-muted:     #6b7494;
+  --text-dim:       #404560;
+
+  /* Borders */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-medium:  rgba(255, 255, 255, 0.12);
+
+  /* Accent — indigo/violet */
+  --accent-primary:     #7c6ff7;
+  --accent-primary-dim: rgba(124, 111, 247, 0.15);
+  --accent-secondary:   #a78bfa;
+
+  /* Status */
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-error:   #f87171;
+  --color-info:    #60a5fa;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+
+  /* Radius */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+
+  /* Transition */
+  --transition-fast:   0.12s ease;
+  --transition-normal: 0.2s ease;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  user-select: none;
+  /* Remove Tauri default drag region */
+  -webkit-app-region: no-drag;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* ── Typography ── */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+p { color: var(--text-secondary); }
+
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+/* ── Utility ── */
+.text-muted   { color: var(--text-muted); }
+.text-primary { color: var(--text-primary); }
+.text-accent  { color: var(--accent-primary); }
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+}
+
+.eyebrow {
+  font-size: 11px;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sectionTitle {
+  font-size: 18px;
+  margin-top: 4px;
+}
+
+.bodyText {
+  margin-top: 8px;
+  color: var(--text-secondary);
+}
+
+.helperText {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.errorText {
+  color: var(--color-error);
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.kpiValue {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.listStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.listRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.listTitle {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.pill {
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--accent-secondary);
+  background: var(--accent-primary-dim);
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.metaGrid.twoColumns {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.formLabel {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.textArea {
+  width: 100%;
+  resize: vertical;
+  min-height: 120px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  padding: 12px;
+  font: inherit;
+  user-select: text;
+}
+
+.textArea:focus {
+  outline: 1px solid var(--accent-secondary);
+  border-color: var(--accent-secondary);
+}
+
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.primaryButton {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font: inherit;
+  font-weight: 600;
+  color: #0d0f14;
+  background: linear-gradient(135deg, #9bb0ff 0%, #c0a8ff 100%);
+  cursor: pointer;
+}
+
+.primaryButton:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}

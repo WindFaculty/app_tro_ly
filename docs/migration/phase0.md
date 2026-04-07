@@ -7,6 +7,12 @@ Status: Current implementation baseline captured before module-boundary work beg
 
 This document is the Phase 0 audit-and-freeze record for the modularization backlog in `tasks/module-migration-backlog.md`.
 
+For the later root-layout unification baseline around `ai-dev-system/`, see `docs/migration/ai-dev-system-unification-phase0.md`.
+For the architecture-layer follow-up to that baseline, see `docs/migration/ai-dev-system-unification-phase1.md`.
+For the context-absorption follow-up to that architecture layer, see `docs/migration/ai-dev-system-unification-phase2.md`.
+For the client-absorption follow-up that moved the Unity project under `ai-dev-system/clients/unity-client/`, see `docs/migration/ai-dev-system-unification-phase3.md`.
+For the control-plane unification follow-up that moved automation runtime truth under `ai-dev-system/control-plane/`, see `docs/migration/ai-dev-system-unification-phase4.md`.
+
 It captures:
 
 - current implementation truth
@@ -23,7 +29,7 @@ It captures:
 - `local-backend/app/api/routes.py` remains the API truth for health, task, chat, speech, settings, and stream routes.
 - `unity-client/Assets/Resources/UI/MainUI.uxml` still boots the UI Toolkit client through `Shell/AppShell.uxml`.
 - `unity-client/Assets/Scripts/App/`, `unity-client/Assets/Scripts/Core/`, and `unity-client/Assets/Scripts/Features/` remain the client-side truth for shell routing, typed refs, view-model ownership, and screen controllers.
-- `agent-platform/` is still an optional subsystem and is not required for the assistant runtime.
+- `agent-platform/` is not present in the current repo snapshot captured today; if used as an adjacent subsystem elsewhere, it remains optional and is not required for the assistant runtime.
 
 ### Current module state
 

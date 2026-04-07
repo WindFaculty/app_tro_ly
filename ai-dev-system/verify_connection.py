@@ -3,14 +3,14 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 
-import sys
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
 
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
-
-for child in ("unity-interface",):
-    sys.path.append(str(ROOT / child))
 
 from mcp_client import UnityMcpClient
 

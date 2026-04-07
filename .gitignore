@@ -1,6 +1,11 @@
 .DS_Store
 Thumbs.db
 .idea/
+node_modules/
+**/node_modules/
+target/
+**/target/
+dist/
 
 .venv/
 __pycache__/

@@ -1,0 +1,51 @@
+{
+  "productName": "App Trợ Lý",
+  "version": "0.1.0",
+  "identifier": "com.apptroly.desktop",
+  "build": {
+    "beforeDevCommand": "npm --prefix ../web-ui run dev -- --host 127.0.0.1 --port 1420",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm --prefix ../web-ui run build",
+    "frontendDist": "../../web-ui/dist"
+  },
+  "app": {
+    "withGlobalTauri": true,
+    "windows": [
+      {
+        "label": "main",
+        "title": "App Trợ Lý",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1100,
+        "minHeight": 700,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "center": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "nsis",
+      "msi"
+    ],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {
+    "shell": {
+      "open": true
+    },
+    "process": {}
+  }
+}

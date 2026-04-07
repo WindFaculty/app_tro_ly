@@ -6,12 +6,12 @@ Machine-facing operating rules for Codex and similar agents.
 
 ## Repo Summary
 
-- `local-backend/`: source of truth for API behavior, task logic, routing, memory, speech adapters, scheduler, and persistence
-- `unity-client/`: source of truth for client UI, screen flow, overlays, audio playback, and avatar presentation wiring
-- `scripts/`: source of truth for Windows setup, startup, packaging, and backend smoke automation
-- `docs/`: maintained documentation; may include both current-state docs and target-state design docs
-- `tasks/`: work tracking
-- `agent-platform/`: optional adjacent subsystem, not part of the required assistant runtime
+- `local-backend/`: source of truth for backend behavior and remains out of scope for the current non-backend unification
+- `ai-dev-system/clients/unity-client/`: current source of truth for client UI and avatar presentation
+- `ai-dev-system/`: current source of truth for the automation subsystem and planned integration root for the repo's non-backend system
+- `scripts/`: current source of truth for Windows setup, startup, packaging, and backend smoke automation
+- `docs/`: governance and maintained documentation
+- `tasks/`: work tracking and evidence history
 
 ## Truth Sources
 
@@ -22,20 +22,48 @@ Machine-facing operating rules for Codex and similar agents.
   - `local-backend/app/models/`
   - `local-backend/app/core/`
 - Unity UI truth lives in:
-  - `unity-client/Assets/Resources/UI/MainUI.uxml`
-  - `unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
-  - `unity-client/Assets/Resources/UI/Styles/*.uss`
-  - `unity-client/Assets/Scripts/App/`
-  - `unity-client/Assets/Scripts/Core/`
-  - `unity-client/Assets/Scripts/Features/`
+  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/MainUI.uxml`
+  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
+  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/Styles/*.uss`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/App/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Core/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Features/`
 - Avatar integration truth lives in:
-  - `unity-client/Assets/Scripts/Avatar/`
-  - `unity-client/Assets/AvatarSystem/`
+  - `ai-dev-system/clients/unity-client/Assets/Scripts/Avatar/`
+  - `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`
+- Shared avatar, customization, and room contract truth lives in:
+  - `ai-dev-system/domain/avatar/`
+  - `ai-dev-system/domain/customization/`
+  - `ai-dev-system/domain/room/`
+  - `ai-dev-system/domain/shared/`
+- Asset workbench and pipeline governance truth lives in:
+  - `ai-dev-system/workbench/`
+  - `ai-dev-system/asset-pipeline/`
+- Current `ai-dev-system/` automation truth lives in:
+  - `ai-dev-system/control-plane/app/`
+  - `ai-dev-system/control-plane/agents/`
+  - `ai-dev-system/control-plane/executor/`
+  - `ai-dev-system/control-plane/planner/`
+  - `ai-dev-system/control-plane/memory/`
+  - `ai-dev-system/control-plane/tools/`
+  - `ai-dev-system/control-plane/mcp_client.py`
+  - `ai-dev-system/workflows/`
+  - `ai-dev-system/tests/`
+  - `ai-dev-system/context/`
+  - `ai-dev-system/app/`, `ai-dev-system/agents/`, `ai-dev-system/executor/`, `ai-dev-system/planner/`, `ai-dev-system/memory/`, `ai-dev-system/tools/`, and `ai-dev-system/mcp_client.py` only as compatibility shims
 - Operations truth lives in:
   - `scripts/setup_windows.ps1`
   - `scripts/run_all.ps1`
   - `scripts/package_release.ps1`
   - `scripts/smoke_backend.py`
+- Migration guidance lives in:
+  - `docs/migration/ai-dev-system-unification-phase0.md`
+  - `docs/migration/ai-dev-system-unification-phase1.md`
+  - `docs/migration/ai-dev-system-unification-phase2.md`
+  - `docs/migration/ai-dev-system-unification-phase3.md`
+  - `docs/migration/ai-dev-system-unification-phase4.md`
+  - `docs/migration/ai-dev-system-unification-phase5.md`
+  - `docs/migration/ai-dev-system-unification-phase6.md`
 
 ## Required Workflow
 
@@ -51,6 +79,7 @@ Machine-facing operating rules for Codex and similar agents.
 - If docs conflict with code, update docs to match code.
 - If code is ambiguous, say what is uncertain and avoid stronger claims.
 - Do not treat target-state design docs as implemented reality.
+- Do not treat planned migration directories as current runtime truth until code actually moves.
 - Do not treat manual-only validation as already verified from terminal work.
 
 ## Documentation Labels
@@ -74,7 +103,7 @@ Use these distinctions consistently:
 
 ## Safety Rules
 
-- Do not overwrite or revert unrelated user changes.
+- Do not overwrite or revert unrelated user changes unless the approved migration phase explicitly requires replacing that file.
 - Do not change runtime code during a docs task unless a source comment is materially misleading.
 - Do not present design-target docs as shipped features.
 - Keep docs concise, specific, and grounded in files that exist.

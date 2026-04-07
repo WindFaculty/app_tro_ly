@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "status": "current_implementation_snapshot",
+  "source_asset_paths": [
+    "ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/Parts/Hair/ITM_Hair_01.asset"
+  ],
+  "items": [
+    {
+      "item_id": "Hair_ShortA_01",
+      "display_name": "tóc kokomi",
+      "slot": "hair",
+      "unity_slot_enum": "Hair",
+      "source_asset_path": "ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/Parts/Hair/ITM_Hair_01.asset",
+      "prefab_asset_path": "ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/Parts/Hair/CHR_Hair_ShortA_v001.fbx",
+      "compatible_tags": [
+        "short"
+      ]
+    }
+  ],
+  "notes": [
+    "This snapshot only reflects checked-in AvatarItemDefinition assets present in the repo at the time of the Phase 5 domain pass.",
+    "Runtime equip lookup is still planned work; the live Unity runtime still resolves concrete item assets directly."
+  ]
+}

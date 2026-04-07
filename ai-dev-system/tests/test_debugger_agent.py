@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
+
 from agents.debugger_agent import DebugAgent
 
 

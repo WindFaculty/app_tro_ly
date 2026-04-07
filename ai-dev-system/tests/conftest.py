@@ -1,0 +1,4 @@
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()

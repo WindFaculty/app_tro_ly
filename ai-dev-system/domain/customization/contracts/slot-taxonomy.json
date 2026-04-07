@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "source_enum_path": "ai-dev-system/clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs",
+  "slots": [
+    {
+      "unity_enum": "Hair",
+      "contract_key": "hair"
+    },
+    {
+      "unity_enum": "HairAccessory",
+      "contract_key": "hair_accessory"
+    },
+    {
+      "unity_enum": "Top",
+      "contract_key": "top"
+    },
+    {
+      "unity_enum": "Bottom",
+      "contract_key": "bottom"
+    },
+    {
+      "unity_enum": "Dress",
+      "contract_key": "dress"
+    },
+    {
+      "unity_enum": "Socks",
+      "contract_key": "socks"
+    },
+    {
+      "unity_enum": "Shoes",
+      "contract_key": "shoes"
+    },
+    {
+      "unity_enum": "Gloves",
+      "contract_key": "gloves"
+    },
+    {
+      "unity_enum": "BraceletL",
+      "contract_key": "bracelet_left"
+    },
+    {
+      "unity_enum": "BraceletR",
+      "contract_key": "bracelet_right"
+    }
+  ],
+  "reserved_slots": [
+    {
+      "unity_enum": "BodyVariant",
+      "contract_key": "body_variant"
+    },
+    {
+      "unity_enum": "FaceVariant",
+      "contract_key": "face_variant"
+    },
+    {
+      "unity_enum": "AccessoryExtra",
+      "contract_key": "accessory_extra"
+    }
+  ],
+  "notes": [
+    "Current runtime still uses Bottom rather than a pants-or-skirt split.",
+    "Current runtime still models bracelets as left and right slots."
+  ]
+}

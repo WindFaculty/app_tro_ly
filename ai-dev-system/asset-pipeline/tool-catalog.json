@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "source_root": "tools",
+  "categories": [
+    {
+      "name": "conversion",
+      "paths": [
+        "tools/blender_clean_avatar_rig.py",
+        "tools/blender_split_body_regions.py",
+        "tools/blender_fit_dress_scene.py",
+        "tools/blender_fit_dress_shrinkwrap_transfer.py",
+        "tools/blender_add_facial_blendshapes.py"
+      ]
+    },
+    {
+      "name": "validation",
+      "paths": [
+        "tools/blender_asset_audit.py",
+        "tools/blender_audit_avatar.py",
+        "tools/blender_validate_split_avatar.py",
+        "tools/blender_verify_dress_scene.py",
+        "tools/blender_scene_state_report.py"
+      ]
+    },
+    {
+      "name": "rendering",
+      "paths": [
+        "tools/blender_render_asset_front.py",
+        "tools/blender_render_arm_variants.py"
+      ]
+    },
+    {
+      "name": "artifact_roots",
+      "paths": [
+        "tools/reports",
+        "tools/renders"
+      ]
+    }
+  ],
+  "notes": [
+    "The scripts listed here remain executable from the root tools directory in current implementation.",
+    "This catalog is the Phase 6 ownership map; it does not claim the scripts have already moved into ai-dev-system/asset-pipeline."
+  ]
+}

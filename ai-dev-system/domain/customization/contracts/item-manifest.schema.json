@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-tro-ly.local/ai-dev-system/domain/customization/contracts/item-manifest.schema.json",
+  "title": "Avatar Item Manifest",
+  "description": "Planned work: a JSON projection of Unity AvatarItemDefinition for cross-system use. Current implementation still stores runtime items as ScriptableObject assets inside the Unity client.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "item_id",
+    "display_name",
+    "slot"
+  ],
+  "properties": {
+    "item_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slot": {
+      "type": "string",
+      "enum": [
+        "hair",
+        "hair_accessory",
+        "top",
+        "bottom",
+        "dress",
+        "socks",
+        "shoes",
+        "gloves",
+        "bracelet_left",
+        "bracelet_right",
+        "body_variant",
+        "face_variant",
+        "accessory_extra"
+      ]
+    },
+    "prefab_asset_path": {
+      "type": "string"
+    },
+    "material_asset_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "thumbnail_asset_path": {
+      "type": "string"
+    },
+    "occupies_slots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/slot"
+      },
+      "uniqueItems": true
+    },
+    "blocks_slots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/slot"
+      },
+      "uniqueItems": true
+    },
+    "requires_slots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/slot"
+      },
+      "uniqueItems": true
+    },
+    "compatible_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "incompatible_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "hide_body_regions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/body_region"
+      },
+      "uniqueItems": true
+    },
+    "anchor_type": {
+      "type": "string",
+      "enum": [
+        "None",
+        "BoneAttach",
+        "SocketAttach"
+      ]
+    },
+    "anchor_bone_name": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "slot": {
+      "type": "string",
+      "enum": [
+        "hair",
+        "hair_accessory",
+        "top",
+        "bottom",
+        "dress",
+        "socks",
+        "shoes",
+        "gloves",
+        "bracelet_left",
+        "bracelet_right",
+        "body_variant",
+        "face_variant",
+        "accessory_extra"
+      ]
+    },
+    "body_region": {
+      "type": "string",
+      "enum": [
+        "Head",
+        "TorsoUpper",
+        "TorsoLower",
+        "ArmUpperL",
+        "ArmUpperR",
+        "ForearmL",
+        "ForearmR",
+        "HandL",
+        "HandR",
+        "ThighL",
+        "ThighR",
+        "CalfL",
+        "CalfR",
+        "FootL",
+        "FootR"
+      ]
+    }
+  }
+}

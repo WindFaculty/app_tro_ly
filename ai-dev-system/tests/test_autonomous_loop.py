@@ -11,13 +11,14 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-for child in ("agents", "planner", "executor", "memory", "tools", "workflows", "unity-interface"):
-    path = ROOT / child
-    if str(path) not in sys.path:
-        sys.path.append(str(path))
 
-from autonomous_loop import AutonomousUnityWorkflow
-from contracts import ExecutionRecord, PlanStep, TaskDefinition
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
+
+from agents.contracts import ExecutionRecord, PlanStep, TaskDefinition
+from workflows.autonomous_loop import AutonomousUnityWorkflow
 
 
 class _FakeClient:
@@ -112,7 +113,7 @@ class AutonomousLoopTests(unittest.TestCase):
 
             task = TaskDefinition(id="demo", title="Demo", prompt="Prompt", goal={"id": "fake"})
 
-            with patch("autonomous_loop.UnityMcpClient", _FakeClient):
+            with patch("workflows.autonomous_loop.UnityMcpClient", _FakeClient):
                 summary = asyncio.run(workflow.run(Path(temp_dir), task))
 
         self.assertEqual(summary["workflow_status"], "failed")
@@ -128,7 +129,7 @@ class AutonomousLoopTests(unittest.TestCase):
 
             task = TaskDefinition(id="demo", title="Demo", prompt="Prompt", goal={"id": "fake"})
 
-            with patch("autonomous_loop.UnityMcpClient", _FakeClient):
+            with patch("workflows.autonomous_loop.UnityMcpClient", _FakeClient):
                 summary = asyncio.run(workflow.run(Path(temp_dir), task))
 
         self.assertEqual(summary["workflow_status"], "completed")
@@ -144,7 +145,7 @@ class AutonomousLoopTests(unittest.TestCase):
 
             task = TaskDefinition(id="demo", title="Demo", prompt="Prompt", goal={"id": "fake"})
 
-            with patch("autonomous_loop.UnityMcpClient", _MetadataRetryClient):
+            with patch("workflows.autonomous_loop.UnityMcpClient", _MetadataRetryClient):
                 summary = asyncio.run(workflow.run(Path(temp_dir), task))
 
         self.assertEqual(summary["workflow_status"], "completed")

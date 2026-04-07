@@ -9,12 +9,12 @@ Last updated: 2026-03-26
 - Runtime shape: Unity client + Python local backend + SQLite
 - Active LLM path: Groq fast responses, Gemini deep planning, and hybrid routing
 - Speech path: faster-whisper or whisper.cpp for STT, Piper or ChatTTS for TTS
-- Optional adjacent subsystem: `agent-platform/`
+- Optional adjacent subsystem when present: `agent-platform/`
 
 ## Current Implementation
 
 - The backend is implemented in `local-backend/` and owns task logic, orchestration, routing, memory, reminders, settings, and persistence.
-- The Unity client is implemented in `unity-client/` as a UI Toolkit shell loaded from `Assets/Resources/UI/MainUI.uxml`.
+- The Unity client is implemented in `ai-dev-system/clients/unity-client/` as a UI Toolkit shell loaded from `Assets/Resources/UI/MainUI.uxml`.
 - Current top-level client screens are Home, Schedule, and Settings.
 - Current task views exposed through the client are Today, Week, Inbox, and Completed.
 - Current voice flow supports microphone capture, STT, streamed or compatibility chat, TTS playback, subtitle overlay, and reminder overlay.

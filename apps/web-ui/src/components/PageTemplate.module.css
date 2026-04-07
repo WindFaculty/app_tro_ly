@@ -1,0 +1,53 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  gap: 8px;
+  text-align: center;
+}
+
+.placeholder p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.placeholderNote {
+  font-size: 12px !important;
+  color: var(--text-dim) !important;
+  font-style: italic;
+}

@@ -4,13 +4,18 @@ import json
 from dataclasses import asdict
 from pathlib import Path
 
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
+
 from agents.contracts import ExecutionRecord, Lesson, PlanStep, TaskDefinition
-from debugger_agent import DebugAgent
-from executor_agent import ExecutorAgent
-from lesson_store import LessonStore
-from json_logger import JsonLogger
+from agents.debugger_agent import DebugAgent
+from executor.executor_agent import ExecutorAgent
+from memory.lesson_store import LessonStore
 from mcp_client import UnityMcpClient
-from planner_agent import PlannerAgent
+from planner.planner_agent import PlannerAgent
+from tools.json_logger import JsonLogger
 
 
 class AutonomousUnityWorkflow:

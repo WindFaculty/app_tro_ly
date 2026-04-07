@@ -11,7 +11,13 @@ REPO_ROOT = ROOT.parent
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
+
 from agents.contracts import TaskDefinition
+from app.unity.surfaces import UnitySurfaceMap
 from planner.planner_agent import PlannerAgent
 
 
@@ -49,7 +55,7 @@ class TaskLibraryTests(unittest.TestCase):
 
             with self.subTest(task=task_path.name):
                 scene_path = payload["goal"]["scene_path"]
-                unity_scene_path = REPO_ROOT / "unity-client" / scene_path
+                unity_scene_path = UnitySurfaceMap.project_root() / scene_path
 
                 self.assertTrue(unity_scene_path.exists(), f"Missing scene for task {task_path.name}: {scene_path}")
 

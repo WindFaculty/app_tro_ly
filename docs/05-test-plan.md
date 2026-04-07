@@ -30,7 +30,7 @@ Coverage present in repo includes:
 
 ### Unity
 
-Unity test files exist under `unity-client/Assets/Tests/` for:
+Unity test files exist under `ai-dev-system/clients/unity-client/Assets/Tests/` for:
 
 - EditMode:
   - view-model stores

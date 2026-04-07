@@ -4,17 +4,18 @@ import asyncio
 import argparse
 import json
 from pathlib import Path
-import sys
+
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
 
 
 ROOT = Path(__file__).resolve().parent
 REPO_ROOT = ROOT.parent
 
-for child in ("agents", "planner", "executor", "memory", "tools", "workflows", "unity-interface"):
-    sys.path.append(str(ROOT / child))
-
-from autonomous_loop import AutonomousUnityWorkflow
-from workflow_report import build_workflow_report, format_workflow_report
+from tools.workflow_report import build_workflow_report, format_workflow_report
+from workflows.autonomous_loop import AutonomousUnityWorkflow
 
 
 def parse_args() -> argparse.Namespace:

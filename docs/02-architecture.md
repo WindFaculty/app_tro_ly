@@ -156,7 +156,7 @@ SQLite stores:
 
 - The backend is the source of truth for task mutations, summaries, routing, memory, settings persistence, and reminder logic.
 - The Unity client is the source of truth for presentation, screen flow, overlays, audio playback, and user interaction wiring.
-- `agent-platform/` is optional and must not be treated as a hidden runtime dependency.
+- `agent-platform/` is optional when present and must not be treated as a hidden runtime dependency.
 
 ## Known Gaps
 

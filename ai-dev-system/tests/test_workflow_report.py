@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
+from bootstrap_control_plane import bootstrap_control_plane_path
+
+
+bootstrap_control_plane_path()
+
 from tools.workflow_report import build_workflow_report, format_workflow_report
 
 
@@ -55,7 +60,7 @@ class WorkflowReportTests(unittest.TestCase):
                         },
                         "screenshot": {
                             "structured_content": {
-                                "data": {"fullPath": "D:/repo/unity-client/Assets/Screenshots/demo.png"}
+                                "data": {"fullPath": "D:/repo/ai-dev-system/clients/unity-client/Assets/Screenshots/demo.png"}
                             }
                         },
                     },
@@ -75,7 +80,7 @@ class WorkflowReportTests(unittest.TestCase):
         self.assertEqual(report["verification_reports"][0]["missing_objects"], ["Player"])
         self.assertEqual(
             report["verification_reports"][0]["screenshot"],
-            "D:/repo/unity-client/Assets/Screenshots/demo.png",
+            "D:/repo/ai-dev-system/clients/unity-client/Assets/Screenshots/demo.png",
         )
 
     def test_format_workflow_report_outputs_readable_summary(self) -> None:
@@ -97,7 +102,7 @@ class WorkflowReportTests(unittest.TestCase):
                     "top_errors": [],
                     "top_warnings": [],
                     "top_logs": ["Log: Verification completed"],
-                    "screenshot": "D:/repo/unity-client/Assets/Screenshots/demo.png",
+                    "screenshot": "D:/repo/ai-dev-system/clients/unity-client/Assets/Screenshots/demo.png",
                     "missing_objects": ["Player"],
                 }
             ],
@@ -107,7 +112,7 @@ class WorkflowReportTests(unittest.TestCase):
 
         self.assertIn("Overall status: completed", formatted)
         self.assertIn("Verification verify_scene [missing-objects]: errors=0, warnings=0, logs=1, noise_filtered=3", formatted)
-        self.assertIn("Screenshot: D:/repo/unity-client/Assets/Screenshots/demo.png", formatted)
+        self.assertIn("Screenshot: D:/repo/ai-dev-system/clients/unity-client/Assets/Screenshots/demo.png", formatted)
         self.assertIn("Missing objects: Player", formatted)
         self.assertIn("Logs:", formatted)
 

@@ -7,8 +7,8 @@ This document is the implementation snapshot for the repo as it exists now.
 ## Repo Topology
 
 - `local-backend/` is the active assistant backend.
-- `unity-client/` is the active assistant client.
-- `agent-platform/` still exists, but it is optional and not required for the assistant runtime.
+- `ai-dev-system/clients/unity-client/` is the active assistant client.
+- `agent-platform/` is not present in the current repo snapshot; if used as an adjacent subsystem elsewhere, it remains optional and not required for the assistant runtime.
 - `docs/` and `tasks/` now track the assistant rather than the older project direction.
 
 ## What Exists Today
@@ -57,7 +57,7 @@ This document is the implementation snapshot for the repo as it exists now.
 
 ## Adjacent Or Optional Code
 
-- `agent-platform/` may still be useful later, but it is not part of the required assistant runtime.
+- `agent-platform/` may still be useful later when present, but it is not part of the required assistant runtime.
 - Ollama-related settings and preflight checks exist, but the current backend does not route live assistant requests to Ollama.
 
 ## Practical Reading Order
@@ -67,7 +67,7 @@ If you need current implementation truth, read in this order:
 1. `local-backend/app/api/routes.py`
 2. `local-backend/app/container.py`
 3. `local-backend/app/services/`
-4. `unity-client/Assets/Scripts/Core/AssistantApp.cs`
-5. `unity-client/Assets/Scripts/App/`
-6. `unity-client/Assets/Scripts/Features/`
-7. `unity-client/Assets/Resources/UI/`
+4. `ai-dev-system/clients/unity-client/Assets/Scripts/Core/AssistantApp.cs`
+5. `ai-dev-system/clients/unity-client/Assets/Scripts/App/`
+6. `ai-dev-system/clients/unity-client/Assets/Scripts/Features/`
+7. `ai-dev-system/clients/unity-client/Assets/Resources/UI/`

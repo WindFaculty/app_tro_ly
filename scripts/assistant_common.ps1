@@ -141,6 +141,22 @@ function Resolve-ClientExecutable {
     return $candidates[0].FullName
 }
 
+function Resolve-UnityProjectDirectory {
+    param([string]$Root)
+
+    $candidates = @(
+        (Join-Path $Root "ai-dev-system\clients\unity-client")
+    )
+
+    foreach ($candidate in $candidates) {
+        if ((Test-Path (Join-Path $candidate "Assets")) -and (Test-Path (Join-Path $candidate "ProjectSettings"))) {
+            return $candidate
+        }
+    }
+
+    throw "Unity project folder not found. Checked: $($candidates -join ', ')"
+}
+
 function Read-AssistantConfig {
     param([string]$BackendDirectory)
 
