@@ -152,6 +152,10 @@ class TaskService:
         items = self._repository.list_tasks("status = 'done'", ())[:limit]
         return {"items": items, "count": len(items)}
 
+    def list_active(self, limit: int = 100) -> dict[str, Any]:
+        items = self._sort_items(self._repository.list_active_tasks())[:limit]
+        return {"items": items, "count": len(items)}
+
     def list_active_tasks(self) -> list[dict[str, Any]]:
         return self._repository.list_active_tasks()
 

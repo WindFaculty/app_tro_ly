@@ -1,0 +1,187 @@
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.threadList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.threadButton {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(57, 45, 29, 0.12);
+  background: rgba(255, 255, 255, 0.62);
+  text-align: left;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.threadButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(15, 118, 110, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-soft);
+}
+
+.threadButton:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.threadButtonActive {
+  border-color: rgba(15, 118, 110, 0.24);
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(194, 91, 55, 0.08)),
+    rgba(255, 255, 255, 0.94);
+}
+
+.threadTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.threadMode {
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.threadTime {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.threadPreview {
+  color: var(--text-strong);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.transcriptPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.transcriptScroller {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 560px;
+  min-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.messageCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(57, 45, 29, 0.1);
+}
+
+.messageUser {
+  background: rgba(15, 118, 110, 0.08);
+  border-color: rgba(15, 118, 110, 0.12);
+}
+
+.messageAssistant {
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.messageDraft {
+  border-style: dashed;
+}
+
+.messageHeader,
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.messageRole {
+  color: var(--text-strong);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.messageTime {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.messageBody {
+  color: var(--text-strong);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.composerPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(57, 45, 29, 0.1);
+}
+
+.cardSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardStep {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(57, 45, 29, 0.08);
+  color: var(--text-body);
+  font-size: 0.86rem;
+}
+
+@media (max-width: 760px) {
+  .searchRow,
+  .threadTopline,
+  .messageHeader,
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .transcriptScroller {
+    max-height: none;
+  }
+}

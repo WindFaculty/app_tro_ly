@@ -1,0 +1,7 @@
+interface:
+  display_name: "TDD Workflow"
+  short_description: "Add tests before modifying critical lifecycle, export, or verification behavior."
+  brand_color: "#2563EB"
+  default_prompt: "Add or update tests before changing critical behavior."
+policy:
+  allow_implicit_invocation: true

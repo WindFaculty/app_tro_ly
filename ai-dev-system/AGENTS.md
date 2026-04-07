@@ -21,6 +21,9 @@ Machine-facing rules for work inside the non-backend subsystem.
   - `control-plane/app/logging/`
   - `control-plane/app/vision/`
 - Existing workflow scaffold and runtime helpers now unified under the control plane:
+  - `control-plane/catalog/`
+  - `control-plane/orchestrator/`
+  - `control-plane/adapters/`
   - `control-plane/agents/`
   - `control-plane/executor/`
   - `control-plane/planner/`
@@ -45,9 +48,11 @@ Machine-facing rules for work inside the non-backend subsystem.
   - `asset-pipeline/`
 - Standardized subsystem entry points and drift validation:
   - `scripts/run/`
+  - `scripts/sync-agent-surfaces.py`
   - `scripts/validate/`
   - `scripts/validate/validate-architecture-lock.ps1`
   - `scripts/validate/validate-docs-tasks.ps1`
+  - `scripts/validate/validate_agent_platform_surfaces.py`
   - `scripts/package/`
   - `tests/structure/`
 

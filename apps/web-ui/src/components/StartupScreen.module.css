@@ -1,9 +1,16 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-base);
+}
+
 .container {
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: var(--bg-base);
+  padding: 24px;
 }
 
 .card {
@@ -113,6 +120,29 @@
 }
 
 .errorHint code {
+  background: var(--bg-hover);
+  padding: 1px 4px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.metaList {
+  width: 100%;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metaRow {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.metaRow code {
   background: var(--bg-hover);
   padding: 1px 4px;
   border-radius: 4px;

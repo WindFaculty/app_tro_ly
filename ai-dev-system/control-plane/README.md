@@ -11,6 +11,12 @@ Current implementation: this directory is now the source of truth for the automa
   - verification
   - healing
   - strategy routing
+- `catalog/`
+  - canonical agent, skill, workflow, rule-pack, eval, and tool-policy definitions
+- `orchestrator/`
+  - explicit workflow lifecycle, review, verification, and run-history handling
+- `adapters/`
+  - generated Codex and Antigravity surface rendering
 - `agents/`
   - shared workflow contracts
   - console debugger agent
@@ -29,6 +35,9 @@ Current implementation: this directory is now the source of truth for the automa
 
 - GUI automation: `app/automation/`
 - Unity automation runtime: `app/unity/` and `mcp_client.py`
+- canonical platform definitions: `catalog/`
+- workflow lifecycle and run history: `orchestrator/`
+- harness export rendering: `adapters/`
 - profiles: `app/profiles/`
 - planner logic:
   - `app/agent/planner.py`

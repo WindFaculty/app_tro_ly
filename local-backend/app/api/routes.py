@@ -16,10 +16,17 @@ from app.core.health import build_logs_payload, build_recovery_actions
 from app.core.logging import get_logger
 from app.models.schemas import (
     AssistantStreamMessage,
+    ChatConversationDetailResponse,
+    ChatConversationListResponse,
     ChatRequest,
     ChatResponse,
     CompleteTaskRequest,
     HealthResponse,
+    MemoryListResponse,
+    NoteCreateRequest,
+    NoteListResponse,
+    NoteRecord,
+    NoteUpdateRequest,
     RescheduleTaskRequest,
     SettingsPayload,
     SpeechSttResponse,
@@ -104,6 +111,11 @@ async def tasks_inbox(request: Request, limit: int = Query(default=50, ge=1, le=
     return _container(request).task_service.list_inbox(limit=limit)
 
 
+@router.get("/tasks/active")
+async def tasks_active(request: Request, limit: int = Query(default=100, ge=1, le=200)) -> dict[str, Any]:
+    return _container(request).task_service.list_active(limit=limit)
+
+
 @router.get("/tasks/completed")
 async def tasks_completed(request: Request, limit: int = Query(default=50, ge=1, le=200)) -> dict[str, Any]:
     return _container(request).task_service.list_completed(limit=limit)
@@ -159,6 +171,51 @@ async def reschedule_task(request: Request, task_id: str, payload: RescheduleTas
     return task.model_dump()
 
 
+@router.get("/notes", response_model=NoteListResponse)
+async def list_notes(
+    request: Request,
+    limit: int = Query(default=100, ge=1, le=200),
+    tag: str | None = Query(default=None),
+    linked_task_id: str | None = Query(default=None),
+    linked_conversation_id: str | None = Query(default=None),
+) -> NoteListResponse:
+    return _container(request).note_service.list_notes(
+        limit=limit,
+        tag=tag,
+        linked_task_id=linked_task_id,
+        linked_conversation_id=linked_conversation_id,
+    )
+
+
+@router.post("/notes", response_model=NoteRecord)
+async def create_note(request: Request, payload: NoteCreateRequest) -> NoteRecord:
+    try:
+        return _container(request).note_service.create_note(payload)
+    except ValueError as exc:
+        logger.warning("Note creation rejected: %s", exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.put("/notes/{note_id}", response_model=NoteRecord)
+async def update_note(request: Request, note_id: str, payload: NoteUpdateRequest) -> NoteRecord:
+    try:
+        return _container(request).note_service.update_note(note_id, payload)
+    except LookupError as exc:
+        logger.warning("Note update failed for %s: %s", note_id, exc)
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        logger.warning("Note update rejected for %s: %s", note_id, exc)
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/memory/items", response_model=MemoryListResponse)
+async def list_memory_items(
+    request: Request,
+    limit: int = Query(default=50, ge=1, le=200),
+) -> MemoryListResponse:
+    return _container(request).memory_service.list_memory_items(limit=limit)
+
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, payload: ChatRequest) -> ChatResponse:
     try:
@@ -169,6 +226,25 @@ async def chat(request: Request, payload: ChatRequest) -> ChatResponse:
     except ValueError as exc:
         logger.warning("Chat validation failed: %s", exc)
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.get("/chat/conversations", response_model=ChatConversationListResponse)
+async def list_chat_conversations(
+    request: Request,
+    limit: int = Query(default=20, ge=1, le=100),
+) -> ChatConversationListResponse:
+    return _container(request).conversation_service.list_conversations(limit=limit)
+
+
+@router.get("/chat/conversations/{conversation_id}", response_model=ChatConversationDetailResponse)
+async def get_chat_conversation(
+    request: Request,
+    conversation_id: str,
+) -> ChatConversationDetailResponse:
+    conversation = _container(request).conversation_service.get_conversation_detail(conversation_id)
+    if conversation is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return conversation
 
 
 @router.post("/speech/stt", response_model=SpeechSttResponse)
@@ -222,6 +298,11 @@ async def get_settings(request: Request) -> dict[str, Any]:
 @router.put("/settings")
 async def put_settings(request: Request, payload: SettingsPayload) -> dict[str, Any]:
     return _container(request).settings_service.update(payload.model_dump(exclude_unset=True))
+
+
+@router.post("/settings/reset")
+async def reset_settings(request: Request) -> dict[str, Any]:
+    return _container(request).settings_service.reset()
 
 
 @router.websocket("/events")

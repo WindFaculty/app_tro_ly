@@ -62,6 +62,10 @@ class MemoryService:
         ranked.sort(key=lambda value: (value[0], value[1]["confidence"]), reverse=True)
         return [item for _, item in ranked[:limit]]
 
+    def list_memory_items(self, limit: int = 50) -> dict[str, Any]:
+        items = self._repository.list_memory_items()[:limit]
+        return {"items": items, "count": len(items)}
+
     def extract_and_store(
         self,
         *,

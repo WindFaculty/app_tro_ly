@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from app.core.time import iso_date, iso_datetime, now_local
@@ -216,3 +216,32 @@ def test_overdue_view_lists_past_due_items(client) -> None:
     overdue = client.get("/v1/tasks/overdue")
     assert overdue.status_code == 200
     assert overdue.json()["items"][0]["title"] == "Nop hoa don"
+
+
+def test_today_and_overdue_views_accept_timezone_aware_due_at(client) -> None:
+    local_due = datetime.now().astimezone().replace(microsecond=0) - timedelta(hours=2)
+    due_at_utc = local_due.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    response = client.post(
+        "/v1/tasks",
+        json={
+            "title": "Timezone-aware due date",
+            "status": "planned",
+            "priority": "high",
+            "scheduled_date": iso_date(local_due.date()),
+            "due_at": due_at_utc,
+            "repeat_rule": "none",
+            "tags": ["timezone"],
+        },
+    )
+    assert response.status_code == 200
+    task = response.json()
+    assert task["due_at"] == local_due.replace(tzinfo=None).isoformat()
+
+    overdue = client.get("/v1/tasks/overdue")
+    assert overdue.status_code == 200
+    assert any(item["id"] == task["id"] for item in overdue.json()["items"])
+
+    today = client.get(f"/v1/tasks/today?date={iso_date(local_due.date())}")
+    assert today.status_code == 200
+    assert any(item["id"] == task["id"] for item in today.json()["overdue"])

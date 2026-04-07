@@ -1,0 +1,7 @@
+interface:
+  display_name: "Docs Sync"
+  short_description: "Update architecture, governance, and harness docs when the canonical catalog changes."
+  brand_color: "#7C3AED"
+  default_prompt: "Sync architecture and harness docs with the implemented control plane."
+policy:
+  allow_implicit_invocation: true

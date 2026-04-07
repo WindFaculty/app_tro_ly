@@ -1,0 +1,6 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Generated from ai-dev-system/control-plane/catalog/platform.json
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+persistent_instructions = "Follow AGENTS.md and .codex/AGENTS.md. Treat ai-dev-system/control-plane/catalog/platform.json as the canonical agent-platform source of truth."

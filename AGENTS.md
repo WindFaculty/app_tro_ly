@@ -41,6 +41,9 @@ Machine-facing operating rules for Codex and similar agents.
   - `ai-dev-system/asset-pipeline/`
 - Current `ai-dev-system/` automation truth lives in:
   - `ai-dev-system/control-plane/app/`
+  - `ai-dev-system/control-plane/catalog/`
+  - `ai-dev-system/control-plane/orchestrator/`
+  - `ai-dev-system/control-plane/adapters/`
   - `ai-dev-system/control-plane/agents/`
   - `ai-dev-system/control-plane/executor/`
   - `ai-dev-system/control-plane/planner/`

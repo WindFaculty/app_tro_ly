@@ -1,13 +1,13 @@
 # API - Current Backend Contract
 
-Updated: 2026-03-26
+Updated: 2026-04-07
 Base path: `/v1`
 
 This document reflects the routes and payload shapes implemented in `local-backend/app/api/routes.py` and `local-backend/app/models/schemas.py`.
 
 ## General Rules
 
-- The backend is the source of truth for task, reminder, conversation, settings, and session state.
+- The backend is the source of truth for task, note, reminder, conversation, settings, and session state.
 - Task mutations happen only through backend validation and service logic.
 - `POST /chat` and `WS /assistant/stream` use the same assistant orchestration pipeline.
 - There is no auth layer in the current repo.
@@ -62,6 +62,14 @@ Returns overdue tasks.
 Query:
 
 - `limit` default `50`, min `1`, max `200`
+
+### `GET /v1/tasks/active`
+
+Query:
+
+- `limit` default `100`, min `1`, max `200`
+
+Returns the current active-task list used by note linking and cross-module search surfaces.
 
 ### `GET /v1/tasks/completed`
 
@@ -128,6 +136,90 @@ Behavior:
 - Returns `400` for rejected values.
 - Publishes `task_updated` with `change: "rescheduled"` on success.
 
+## Notes
+
+### `GET /v1/notes`
+
+Query:
+
+- `limit` default `100`, min `1`, max `200`
+- `tag` optional exact tag filter
+- `linked_task_id` optional
+- `linked_conversation_id` optional
+
+Response model: `NoteListResponse`
+
+Each item includes:
+
+- `id`
+- `title`
+- `body`
+- `tags`
+- `linked_task_id`
+- `linked_conversation_id`
+- `pinned`
+- `created_at`
+- `updated_at`
+
+Behavior notes:
+
+- Notes are ordered by `pinned DESC`, then most-recent `updated_at`.
+- Link filters are validated only on create or update, not on list.
+
+### `POST /v1/notes`
+
+Request model: `NoteCreateRequest`
+
+Important fields:
+
+- `title`
+- `body`
+- `tags`
+- `linked_task_id`
+- `linked_conversation_id`
+- `pinned`
+
+Behavior:
+
+- Returns `400` when title is empty or a linked task or conversation does not exist.
+
+### `PUT /v1/notes/{note_id}`
+
+Request model: `NoteUpdateRequest`
+
+Behavior:
+
+- Partial updates are allowed.
+- Returns `404` if the note does not exist.
+- Returns `400` for rejected linked ids or invalid payload values.
+
+## Memory
+
+### `GET /v1/memory/items`
+
+Query:
+
+- `limit` default `50`, min `1`, max `200`
+
+Response model: `MemoryListResponse`
+
+Each item includes:
+
+- `id`
+- `category`
+- `content`
+- `confidence`
+- `status`
+- `metadata`
+- `source_conversation_id`
+- `created_at`
+- `updated_at`
+
+Behavior notes:
+
+- Returns the current active memory items ordered by strongest confidence and newest update first.
+- This route is read-only in the current implementation and exists to support the desktop knowledge module.
+
 ## Chat
 
 ### `POST /v1/chat`
@@ -169,6 +261,63 @@ Notes:
 - The backend may answer deterministically from planner output without requiring a deep plan.
 - `task_actions` reports validated backend-applied actions, not raw model guesses.
 - If TTS synthesis fails in compatibility mode, the response falls back to `speak: false`.
+- Assistant message history now persists route, provider, latency, fallback, `cards`, and `task_actions` metadata on the stored assistant turn.
+
+### `GET /v1/chat/conversations`
+
+Query:
+
+- `limit` default `20`, min `1`, max `100`
+
+Response model: `ChatConversationListResponse`
+
+Each item includes:
+
+- `conversation_id`
+- `mode`
+- `created_at`
+- `updated_at`
+- `message_count`
+- `last_message_preview`
+- `last_message_role`
+- `last_message_at`
+- `summary_text`
+
+Behavior notes:
+
+- Returns recent conversations ordered by most-recent `updated_at`.
+- `last_message_preview` is derived from the latest stored message for that conversation.
+- `summary_text` comes from the current rolling conversation summary when one exists.
+
+### `GET /v1/chat/conversations/{conversation_id}`
+
+Response model: `ChatConversationDetailResponse`
+
+Fields:
+
+- `conversation_id`
+- `mode`
+- `created_at`
+- `updated_at`
+- `summary_text`
+- `message_count`
+- `messages`
+
+Each `messages[]` item includes:
+
+- `id`
+- `conversation_id`
+- `role`
+- `content`
+- `emotion`
+- `animation_hint`
+- `metadata`
+- `created_at`
+
+Behavior notes:
+
+- Returns `404` when the conversation does not exist.
+- `metadata` mirrors the stored message metadata currently kept in SQLite for that turn.
 
 ## Assistant Streaming
 
@@ -296,6 +445,14 @@ Behavior:
 - Merges the provided nested payload into current settings.
 - Persists each top-level group in SQLite.
 - Returns the merged settings snapshot.
+
+### `POST /v1/settings/reset`
+
+Behavior:
+
+- Clears persisted `app_settings` rows from SQLite.
+- Rebuilds the returned snapshot from `SettingsService` defaults plus current backend runtime configuration.
+- This resets user-managed settings groups without changing provider secrets or other backend environment values.
 
 ## Current Enumerations
 

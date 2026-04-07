@@ -134,6 +134,29 @@ class SQLiteRepository:
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_memory_items_key
                 ON memory_items(category, normalized_key);
 
+                CREATE TABLE IF NOT EXISTS notes (
+                    id TEXT PRIMARY KEY,
+                    title TEXT NOT NULL,
+                    body TEXT NOT NULL DEFAULT '',
+                    tags_json TEXT NOT NULL DEFAULT '[]',
+                    linked_task_id TEXT,
+                    linked_conversation_id TEXT,
+                    pinned INTEGER NOT NULL DEFAULT 0,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(linked_task_id) REFERENCES tasks(id) ON DELETE SET NULL,
+                    FOREIGN KEY(linked_conversation_id) REFERENCES conversations(id) ON DELETE SET NULL
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_notes_updated_at
+                ON notes(updated_at DESC);
+
+                CREATE INDEX IF NOT EXISTS idx_notes_linked_task
+                ON notes(linked_task_id);
+
+                CREATE INDEX IF NOT EXISTS idx_notes_linked_conversation
+                ON notes(linked_conversation_id);
+
                 CREATE TABLE IF NOT EXISTS route_logs (
                     id TEXT PRIMARY KEY,
                     conversation_id TEXT,
@@ -280,6 +303,53 @@ class SQLiteRepository:
         row = self._fetchone("SELECT * FROM conversations WHERE id = ?", (conversation_id,))
         return dict(row) if row else None
 
+    def list_conversations(self, limit: int = 20) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            """
+            SELECT
+                c.id,
+                c.mode,
+                c.created_at,
+                c.updated_at,
+                (
+                    SELECT COUNT(*)
+                    FROM messages m_count
+                    WHERE m_count.conversation_id = c.id
+                ) AS message_count,
+                (
+                    SELECT m_last.content
+                    FROM messages m_last
+                    WHERE m_last.conversation_id = c.id
+                    ORDER BY m_last.created_at DESC
+                    LIMIT 1
+                ) AS last_message_content,
+                (
+                    SELECT m_last.role
+                    FROM messages m_last
+                    WHERE m_last.conversation_id = c.id
+                    ORDER BY m_last.created_at DESC
+                    LIMIT 1
+                ) AS last_message_role,
+                (
+                    SELECT m_last.created_at
+                    FROM messages m_last
+                    WHERE m_last.conversation_id = c.id
+                    ORDER BY m_last.created_at DESC
+                    LIMIT 1
+                ) AS last_message_at,
+                (
+                    SELECT cs.summary_text
+                    FROM conversation_summaries cs
+                    WHERE cs.conversation_id = c.id
+                ) AS summary_text
+            FROM conversations c
+            ORDER BY c.updated_at DESC
+            LIMIT ?
+            """,
+            (limit,),
+        )
+        return [dict(row) for row in rows]
+
     def add_message(self, payload: dict[str, Any]) -> None:
         with self._lock, self._conn:
             self._conn.execute(
@@ -351,6 +421,10 @@ class SQLiteRepository:
                 """,
                 (key, json.dumps(value)),
             )
+
+    def clear_settings(self) -> None:
+        with self._lock, self._conn:
+            self._conn.execute("DELETE FROM app_settings")
 
     def get_session_state(self) -> dict[str, Any]:
         rows = self._fetchall("SELECT key, value_json FROM session_state")
@@ -485,6 +559,39 @@ class SQLiteRepository:
                 serialized,
             )
 
+    def create_note(self, payload: dict[str, Any]) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO notes (
+                    id, title, body, tags_json, linked_task_id, linked_conversation_id,
+                    pinned, created_at, updated_at
+                ) VALUES (
+                    :id, :title, :body, :tags_json, :linked_task_id, :linked_conversation_id,
+                    :pinned, :created_at, :updated_at
+                )
+                """,
+                self._serialize_note(payload),
+            )
+
+    def update_note(self, note_id: str, updates: dict[str, Any]) -> None:
+        serialized = self._serialize_note(updates, include_id=False)
+        assignments = ", ".join(f"{key} = :{key}" for key in serialized)
+        serialized["id"] = note_id
+        with self._lock, self._conn:
+            self._conn.execute(f"UPDATE notes SET {assignments} WHERE id = :id", serialized)
+
+    def get_note(self, note_id: str) -> dict[str, Any] | None:
+        row = self._fetchone("SELECT * FROM notes WHERE id = ?", (note_id,))
+        return self._row_to_note(row) if row else None
+
+    def list_notes(self, limit: int = 100) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            "SELECT * FROM notes ORDER BY pinned DESC, updated_at DESC, title ASC LIMIT ?",
+            (limit,),
+        )
+        return [self._row_to_note(row) for row in rows]
+
     def list_route_logs(self, limit: int = 50) -> list[dict[str, Any]]:
         rows = self._fetchall(
             "SELECT * FROM route_logs ORDER BY created_at DESC LIMIT ?",
@@ -519,6 +626,25 @@ class SQLiteRepository:
                 serialized[key] = value
         return serialized
 
+    def _serialize_note(
+        self,
+        payload: dict[str, Any],
+        *,
+        include_id: bool = True,
+    ) -> dict[str, Any]:
+        data = dict(payload)
+        serialized: dict[str, Any] = {}
+        for key, value in data.items():
+            if key == "tags":
+                serialized["tags_json"] = json.dumps(value or [])
+            elif key == "pinned":
+                serialized[key] = 1 if value else 0
+            elif key == "id" and not include_id:
+                continue
+            else:
+                serialized[key] = value
+        return serialized
+
     def _row_to_task(self, row: sqlite3.Row, *, id_key: str = "id") -> dict[str, Any]:
         return {
             "id": row[id_key],
@@ -539,6 +665,19 @@ class SQLiteRepository:
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
             "completed_at": row["completed_at"],
+        }
+
+    def _row_to_note(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "title": row["title"],
+            "body": row["body"],
+            "tags": json.loads(row["tags_json"] or "[]"),
+            "linked_task_id": row["linked_task_id"],
+            "linked_conversation_id": row["linked_conversation_id"],
+            "pinned": bool(row["pinned"]),
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
         }
 
     def _fetchone(self, sql: str, params: tuple[Any, ...] = ()) -> sqlite3.Row | None:

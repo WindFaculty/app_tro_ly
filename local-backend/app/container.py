@@ -11,6 +11,7 @@ from app.services.conversation import ConversationService
 from app.services.fast_response import FastResponseService
 from app.services.llm import LlmService
 from app.services.memory import MemoryService
+from app.services.notes import NoteService
 from app.services.planning_engine import PlanningService
 from app.services.planner import PlannerService
 from app.services.prompt_context import PromptContextBuilderService
@@ -34,6 +35,7 @@ class AppContainer:
     action_validator: ActionValidator
     router_service: RouterService
     memory_service: MemoryService
+    note_service: NoteService
     deep_planning_service: PlanningService
     fast_response_service: FastResponseService
     assistant_orchestrator: AssistantOrchestrator
@@ -54,6 +56,7 @@ def build_container(settings: Settings) -> AppContainer:
     action_validator = ActionValidator(task_service, planner_service)
     router_service = RouterService(settings, llm_service)
     memory_service = MemoryService(repository, short_term_turn_limit=settings.short_term_turn_limit)
+    note_service = NoteService(repository)
     prompt_context_builder = PromptContextBuilderService(settings)
     deep_planning_service = PlanningService(llm_service, prompt_context_builder)
     fast_response_service = FastResponseService(llm_service, prompt_context_builder)
@@ -69,7 +72,7 @@ def build_container(settings: Settings) -> AppContainer:
         settings_service=settings_service,
         llm_service=llm_service,
     )
-    conversation_service = ConversationService(assistant_orchestrator)
+    conversation_service = ConversationService(assistant_orchestrator, repository)
     scheduler_service = SchedulerService(repository, event_bus, settings, speech_service)
     return AppContainer(
         settings=settings,
@@ -83,6 +86,7 @@ def build_container(settings: Settings) -> AppContainer:
         action_validator=action_validator,
         router_service=router_service,
         memory_service=memory_service,
+        note_service=note_service,
         deep_planning_service=deep_planning_service,
         fast_response_service=fast_response_service,
         assistant_orchestrator=assistant_orchestrator,

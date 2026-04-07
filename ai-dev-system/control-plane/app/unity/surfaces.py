@@ -17,7 +17,7 @@ class UnitySurfaceSpec:
 
 
 class UnitySurfaceMap:
-    _REPO_ROOT = Path(__file__).resolve().parents[3]
+    _REPO_ROOT = Path(__file__).resolve().parents[4]
     _PROJECT_ROOT_CANDIDATES = (
         _REPO_ROOT / "ai-dev-system" / "clients" / "unity-client",
         _REPO_ROOT / "unity-client",

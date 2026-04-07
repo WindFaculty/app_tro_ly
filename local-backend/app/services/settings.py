@@ -84,3 +84,7 @@ class SettingsService:
         for key, value in merged.items():
             self._repository.set_setting(key, value)
         return merged
+
+    def reset(self) -> dict[str, Any]:
+        self._repository.clear_settings()
+        return self.get()

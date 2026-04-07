@@ -47,10 +47,14 @@ ai-dev-system/
 The current automation subsystem now lives under `control-plane/`, and Phase 9 removed the temporary root-level shim packages that had bridged the old import layout.
 The shared avatar, customization, and room contract layer now lives under `domain/`, while runtime Unity code remains in `clients/unity-client/`.
 For the architecture-lock cleanup details, read `../docs/migration/ai-dev-system-unification-phase9.md`.
+The canonical agent-platform catalog, lifecycle orchestrator, and harness adapters now live under `control-plane/catalog/`, `control-plane/orchestrator/`, and `control-plane/adapters/`.
 
 Current source-of-truth roots:
 
 - `control-plane/app/`
+- `control-plane/catalog/`
+- `control-plane/orchestrator/`
+- `control-plane/adapters/`
 - `control-plane/agents/`
 - `control-plane/executor/`
 - `control-plane/planner/`
@@ -92,6 +96,9 @@ Current implemented exceptions are:
 Owns the shared non-backend automation runtime:
 
 - GUI agent runtime from `control-plane/app/`
+- canonical agent-platform specs from `control-plane/catalog/`
+- workflow lifecycle and run history from `control-plane/orchestrator/`
+- generated Codex and Antigravity surfaces from `control-plane/adapters/`
 - orchestration helpers from `control-plane/agents/`, `control-plane/executor/`, and `control-plane/planner/`
 - Unity MCP client and related workflow control from `control-plane/app/unity/` and `control-plane/mcp_client.py`
 - runtime lesson storage or prompts that belong to automation execution rather than repo governance
@@ -196,6 +203,9 @@ Use these paths first when the request is about the current automation subsystem
   - `control-plane/app/logging/`
   - `control-plane/app/vision/`
 - autonomous workflow path still in active use:
+  - `control-plane/catalog/`
+  - `control-plane/orchestrator/`
+  - `control-plane/adapters/`
   - `control-plane/agents/`
   - `control-plane/executor/`
   - `control-plane/planner/`
@@ -222,10 +232,12 @@ Use these paths first when the request is about the current automation subsystem
   - `asset-pipeline/`
 - standardized subsystem entry points and structure validation:
   - `scripts/run/`
+  - `scripts/sync-agent-surfaces.py`
   - `scripts/validate/`
   - `scripts/validate/validate-structure.ps1`
   - `scripts/validate/validate-architecture-lock.ps1`
   - `scripts/validate/validate-docs-tasks.ps1`
+  - `scripts/validate/validate_agent_platform_surfaces.py`
   - `scripts/package/`
   - `tests/structure/`
 

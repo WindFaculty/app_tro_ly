@@ -259,6 +259,8 @@ class AssistantOrchestrator:
             "token_usage": dict(token_usage),
             "fallback_used": fallback_used,
             "plan_id": plan_id,
+            "cards": [card.model_dump() for card in validated.cards + self._plan_cards(plan)],
+            "task_actions": [action.model_dump() for action in validated.task_actions],
         }
         self._save_message(
             conversation_id,

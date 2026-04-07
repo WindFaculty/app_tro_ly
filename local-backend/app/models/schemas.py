@@ -81,6 +81,74 @@ class RescheduleTaskRequest(BaseModel):
     due_at: str | None = None
 
 
+class NoteFields(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    body: str = ""
+    tags: list[str] = Field(default_factory=list)
+    linked_task_id: str | None = None
+    linked_conversation_id: str | None = None
+    pinned: bool = False
+
+    @field_validator("title")
+    @classmethod
+    def normalize_note_title(cls, value: str) -> str:
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("title must not be empty")
+        return cleaned
+
+    @field_validator("body")
+    @classmethod
+    def normalize_note_body(cls, value: str) -> str:
+        return value.strip()
+
+    @field_validator("tags")
+    @classmethod
+    def normalize_note_tags(cls, value: list[str]) -> list[str]:
+        return [item.strip() for item in value if item and item.strip()]
+
+
+class NoteCreateRequest(NoteFields):
+    pass
+
+
+class NoteUpdateRequest(BaseModel):
+    title: str | None = None
+    body: str | None = None
+    tags: list[str] | None = None
+    linked_task_id: str | None = None
+    linked_conversation_id: str | None = None
+    pinned: bool | None = None
+
+
+class NoteRecord(NoteFields):
+    id: str
+    created_at: str
+    updated_at: str
+
+
+class NoteListResponse(BaseModel):
+    items: list[NoteRecord] = Field(default_factory=list)
+    count: int = 0
+
+
+class MemoryItemRecord(BaseModel):
+    id: str
+    category: str
+    content: str
+    confidence: float
+    status: str
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    source_conversation_id: str | None = None
+    created_at: str
+    updated_at: str
+
+
+class MemoryListResponse(BaseModel):
+    items: list[MemoryItemRecord] = Field(default_factory=list)
+    count: int = 0
+
+
 class TaskActionReport(BaseModel):
     type: str
     status: str
@@ -124,6 +192,44 @@ class ChatResponse(BaseModel):
     token_usage: dict[str, Any] = Field(default_factory=dict)
     fallback_used: bool = False
     plan_id: str | None = None
+
+
+class ChatConversationSummary(BaseModel):
+    conversation_id: str
+    mode: str
+    created_at: str
+    updated_at: str
+    message_count: int = 0
+    last_message_preview: str = ""
+    last_message_role: str | None = None
+    last_message_at: str | None = None
+    summary_text: str | None = None
+
+
+class ChatConversationListResponse(BaseModel):
+    items: list[ChatConversationSummary] = Field(default_factory=list)
+    count: int = 0
+
+
+class ChatMessageRecord(BaseModel):
+    id: str
+    conversation_id: str
+    role: str
+    content: str
+    emotion: str | None = None
+    animation_hint: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: str
+
+
+class ChatConversationDetailResponse(BaseModel):
+    conversation_id: str
+    mode: str
+    created_at: str
+    updated_at: str
+    summary_text: str | None = None
+    message_count: int = 0
+    messages: list[ChatMessageRecord] = Field(default_factory=list)
 
 
 class SpeechSttResponse(BaseModel):

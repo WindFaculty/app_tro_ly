@@ -211,6 +211,30 @@ def test_settings_partial_updates_preserve_other_groups(client) -> None:
     assert second_payload["voice"]["tts_voice"] == default_payload["voice"]["tts_voice"]
 
 
+def test_settings_reset_restores_runtime_defaults(client) -> None:
+    updated = client.put(
+        "/v1/settings",
+        json={
+            "voice": {"speak_replies": False, "tts_voice": "custom-voice"},
+            "startup": {"launch_backend": False},
+            "memory": {"short_term_turn_limit": 24},
+        },
+    )
+    assert updated.status_code == 200
+
+    reset = client.post("/v1/settings/reset")
+    assert reset.status_code == 200
+    payload = reset.json()
+
+    assert payload["voice"]["speak_replies"] is True
+    assert payload["voice"]["tts_voice"] == client.app.state.container.settings.default_tts_voice
+    assert payload["startup"]["launch_backend"] is True
+    assert (
+        payload["memory"]["short_term_turn_limit"]
+        == client.app.state.container.settings.short_term_turn_limit
+    )
+
+
 def test_stt_endpoint_returns_503_when_runtime_is_missing(client) -> None:
     response = client.post(
         "/v1/speech/stt?language=vi",
