@@ -1,0 +1,156 @@
+.hero {
+  gap: 1.25rem;
+}
+
+.heroGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.heroBlock {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.searchRow {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1.8fr) minmax(10rem, 0.8fr) auto;
+}
+
+.workspaceGrid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr) minmax(18rem, 0.9fr);
+  align-items: start;
+}
+
+.messageList {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.messageCard {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(26, 38, 61, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  text-align: left;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.messageCard:hover,
+.messageCardActive {
+  transform: translateY(-2px);
+  border-color: rgba(26, 38, 61, 0.22);
+  box-shadow: 0 20px 36px rgba(15, 23, 42, 0.12);
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.messageTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.messageMeta {
+  margin: 0.2rem 0 0;
+  color: rgba(35, 44, 63, 0.72);
+  font-size: 0.82rem;
+}
+
+.messageSnippet {
+  margin: 0;
+  color: rgba(35, 44, 63, 0.86);
+  line-height: 1.5;
+}
+
+.detailStack {
+  display: grid;
+  gap: 1rem;
+}
+
+.detailBlock {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: rgba(241, 244, 252, 0.65);
+}
+
+.detailSubject {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.bodyBlock {
+  min-height: 16rem;
+}
+
+.bodyText {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: rgba(35, 44, 63, 0.88);
+}
+
+.taskForm {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.inlineFields {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) minmax(9rem, 0.55fr);
+}
+
+.sideColumn {
+  display: grid;
+  gap: 1rem;
+}
+
+.draftCard {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(26, 38, 61, 0.12);
+  background: rgba(255, 255, 255, 0.76);
+  text-align: left;
+}
+
+.draftCardActive {
+  border-color: rgba(26, 38, 61, 0.22);
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.1);
+}
+
+.composer {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (max-width: 1200px) {
+  .workspaceGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .heroGrid,
+  .searchRow,
+  .inlineFields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

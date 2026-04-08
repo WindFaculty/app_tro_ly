@@ -15,6 +15,7 @@ Important boundary:
 Its long-term role is to own:
 
 - the shared control plane for GUI automation and Unity automation
+- the optional interactive Blender MCP lane used for scene inspection and viewport capture
 - absorbed client code such as `clients/unity-client/`
 - non-backend domain contracts for avatar, customization, room, and shared events or models
 - AI context and subsystem-local policies
@@ -52,6 +53,7 @@ The canonical agent-platform catalog, lifecycle orchestrator, and harness adapte
 Current source-of-truth roots:
 
 - `control-plane/app/`
+- `control-plane/app/blender/`
 - `control-plane/catalog/`
 - `control-plane/orchestrator/`
 - `control-plane/adapters/`
@@ -67,6 +69,10 @@ Current source-of-truth roots:
 - `tests/`
 - `tasks/`
 - `context/`
+- `asset-pipeline/profiles/`
+- `asset-pipeline/schemas/`
+- `asset-pipeline/manifests/`
+- `asset-pipeline/toolchain-map.json`
 
 ### Planned work
 
@@ -96,6 +102,7 @@ Current implemented exceptions are:
 Owns the shared non-backend automation runtime:
 
 - GUI agent runtime from `control-plane/app/`
+- optional Blender MCP runtime from `control-plane/app/blender/`
 - canonical agent-platform specs from `control-plane/catalog/`
 - workflow lifecycle and run history from `control-plane/orchestrator/`
 - generated Codex and Antigravity surfaces from `control-plane/adapters/`
@@ -150,6 +157,7 @@ Owns conversion and validation code for avatar or clothing or import processing.
 Current state:
 
 - `asset-pipeline/` now owns the helper-script catalog and structure validator for this phase
+- `asset-pipeline/` now also owns the Mesh AI lifecycle profiles, schemas, manifests, and deterministic toolchain mapping
 - current executable helper scripts still live in root `tools/`
 
 ### Workbench
@@ -164,6 +172,7 @@ Owns authoring and lab material:
 Current state:
 
 - `workbench/` now owns the inventory, naming guidance, and ownership notes for these roots
+- `workbench/` now also owns Mesh AI intake guidance and logical stage ownership notes
 - current workbench data still lives outside `ai-dev-system/` in root folders such as `bleder/` and `Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/`
 
 ### Scripts
@@ -198,6 +207,7 @@ Use these paths first when the request is about the current automation subsystem
   - `control-plane/app/main.py`
   - `control-plane/app/automation/`
   - `control-plane/app/agent/`
+  - `control-plane/app/blender/`
   - `control-plane/app/profiles/`
   - `control-plane/app/unity/`
   - `control-plane/app/logging/`
@@ -217,6 +227,8 @@ Use these paths first when the request is about the current automation subsystem
   - `tasks/`
 - subsystem guidance:
   - `AGENTS.md`
+- Blender MCP interactive-lane guidance:
+  - `../docs/architecture/blender-mcp-integration.md`
 - subsystem-local context:
   - `context/summaries/`
   - `context/policies/`

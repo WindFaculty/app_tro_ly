@@ -1,0 +1,14 @@
+{
+  "id": "mesh-ai-refine-avatar-accessory",
+  "name": "Mesh AI Refine Avatar Accessory",
+  "summary": "Route Mesh AI accessories through deterministic audit, anchor review, validation, and wardrobe handoff planning.",
+  "entrypoint": "workflows/mesh_ai_refine.py",
+  "planner": "control-plane/planner/mesh_pipeline_planner.py",
+  "executor": "control-plane/executor/mesh_pipeline_executor.py",
+  "profile_id": "unity_avatar_accessory_v1",
+  "supported_asset_types": [
+    "avatar_accessory"
+  ],
+  "asset_pipeline_schema": "asset-pipeline/schemas/intake-manifest.schema.json",
+  "toolchain_map": "asset-pipeline/toolchain-map.json"
+}

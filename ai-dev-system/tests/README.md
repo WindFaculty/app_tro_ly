@@ -10,6 +10,7 @@ Current implementation: this directory now owns the subsystem test catalog and t
   - catalog entry for the current Unity EditMode and PlayMode test roots in `../clients/unity-client/Assets/Tests/`
 - `asset-pipeline/`
   - catalog entry for the current structure and asset-contract validation entry points
+  - Mesh AI pipeline structure validation entry points
 - `structure/`
   - current repo-side validation tests that catch Phase 7, Phase 8, and Phase 9 wrapper, doc, tracker, and architecture-lock drift
 
@@ -17,6 +18,7 @@ Current implementation: this directory now owns the subsystem test catalog and t
 
 - `tests/test_*.py`
   - existing workflow and control-plane-adjacent Python tests
+  - `test_mesh_ai_pipeline.py` now covers the Mesh AI profile-selection, plan-building, and bundle-materialization path
 - `../control-plane/app/tests/`
   - current control-plane runtime and unit coverage
 - `../clients/unity-client/Assets/Tests/`

@@ -91,6 +91,26 @@ class SQLiteRepository:
                     value_json TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS google_oauth_tokens (
+                    provider TEXT PRIMARY KEY,
+                    access_token TEXT,
+                    refresh_token TEXT,
+                    token_type TEXT,
+                    scope_json TEXT NOT NULL DEFAULT '[]',
+                    expires_at TEXT,
+                    email_address TEXT,
+                    last_sync_at TEXT,
+                    last_error TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS google_oauth_states (
+                    provider TEXT PRIMARY KEY,
+                    state TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
+
                 CREATE TABLE IF NOT EXISTS session_state (
                     key TEXT PRIMARY KEY,
                     value_json TEXT NOT NULL
@@ -156,6 +176,94 @@ class SQLiteRepository:
 
                 CREATE INDEX IF NOT EXISTS idx_notes_linked_conversation
                 ON notes(linked_conversation_id);
+
+                CREATE TABLE IF NOT EXISTS email_drafts (
+                    id TEXT PRIMARY KEY,
+                    provider TEXT NOT NULL,
+                    thread_id TEXT,
+                    linked_message_id TEXT,
+                    to_json TEXT NOT NULL DEFAULT '[]',
+                    cc_json TEXT NOT NULL DEFAULT '[]',
+                    bcc_json TEXT NOT NULL DEFAULT '[]',
+                    subject TEXT NOT NULL DEFAULT '',
+                    body_text TEXT NOT NULL DEFAULT '',
+                    status TEXT NOT NULL DEFAULT 'draft',
+                    gmail_message_id TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    sent_at TEXT
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_email_drafts_updated_at
+                ON email_drafts(updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS email_task_links (
+                    email_message_id TEXT NOT NULL,
+                    task_id TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    PRIMARY KEY (email_message_id, task_id),
+                    FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_email_task_links_task
+                ON email_task_links(task_id);
+
+                CREATE TABLE IF NOT EXISTS browser_automation_runs (
+                    id TEXT PRIMARY KEY,
+                    template_id TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    goal TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    current_step_index INTEGER NOT NULL DEFAULT 0,
+                    start_url TEXT,
+                    inputs_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    cancelled_at TEXT
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_browser_automation_runs_updated_at
+                ON browser_automation_runs(updated_at DESC);
+
+                CREATE TABLE IF NOT EXISTS browser_automation_steps (
+                    id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL,
+                    position INTEGER NOT NULL,
+                    action_type TEXT NOT NULL,
+                    title TEXT NOT NULL,
+                    description TEXT NOT NULL DEFAULT '',
+                    status TEXT NOT NULL,
+                    requires_approval INTEGER NOT NULL DEFAULT 1,
+                    url TEXT,
+                    payload_json TEXT NOT NULL DEFAULT '{}',
+                    result_json TEXT NOT NULL DEFAULT '{}',
+                    approval_note TEXT,
+                    recovery_notes TEXT NOT NULL DEFAULT '',
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    FOREIGN KEY(run_id) REFERENCES browser_automation_runs(id) ON DELETE CASCADE
+                );
+
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_browser_automation_steps_position
+                ON browser_automation_steps(run_id, position);
+
+                CREATE TABLE IF NOT EXISTS browser_automation_logs (
+                    id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL,
+                    step_id TEXT,
+                    level TEXT NOT NULL,
+                    code TEXT NOT NULL,
+                    message TEXT NOT NULL,
+                    payload_json TEXT NOT NULL DEFAULT '{}',
+                    created_at TEXT NOT NULL,
+                    FOREIGN KEY(run_id) REFERENCES browser_automation_runs(id) ON DELETE CASCADE,
+                    FOREIGN KEY(step_id) REFERENCES browser_automation_steps(id) ON DELETE SET NULL
+                );
+
+                CREATE INDEX IF NOT EXISTS idx_browser_automation_logs_run_created_at
+                ON browser_automation_logs(run_id, created_at ASC);
 
                 CREATE TABLE IF NOT EXISTS route_logs (
                     id TEXT PRIMARY KEY,
@@ -320,21 +428,21 @@ class SQLiteRepository:
                     SELECT m_last.content
                     FROM messages m_last
                     WHERE m_last.conversation_id = c.id
-                    ORDER BY m_last.created_at DESC
+                    ORDER BY m_last.created_at DESC, m_last.rowid DESC
                     LIMIT 1
                 ) AS last_message_content,
                 (
                     SELECT m_last.role
                     FROM messages m_last
                     WHERE m_last.conversation_id = c.id
-                    ORDER BY m_last.created_at DESC
+                    ORDER BY m_last.created_at DESC, m_last.rowid DESC
                     LIMIT 1
                 ) AS last_message_role,
                 (
                     SELECT m_last.created_at
                     FROM messages m_last
                     WHERE m_last.conversation_id = c.id
-                    ORDER BY m_last.created_at DESC
+                    ORDER BY m_last.created_at DESC, m_last.rowid DESC
                     LIMIT 1
                 ) AS last_message_at,
                 (
@@ -411,6 +519,10 @@ class SQLiteRepository:
         rows = self._fetchall("SELECT key, value_json FROM app_settings")
         return {row["key"]: json.loads(row["value_json"]) for row in rows}
 
+    def get_setting(self, key: str) -> Any:
+        row = self._fetchone("SELECT value_json FROM app_settings WHERE key = ?", (key,))
+        return json.loads(row["value_json"]) if row else None
+
     def set_setting(self, key: str, value: Any) -> None:
         with self._lock, self._conn:
             self._conn.execute(
@@ -425,6 +537,248 @@ class SQLiteRepository:
     def clear_settings(self) -> None:
         with self._lock, self._conn:
             self._conn.execute("DELETE FROM app_settings")
+
+    def get_google_oauth_token(self, provider: str) -> dict[str, Any] | None:
+        row = self._fetchone(
+            "SELECT * FROM google_oauth_tokens WHERE provider = ?",
+            (provider,),
+        )
+        return self._row_to_google_oauth_token(row) if row else None
+
+    def upsert_google_oauth_token(self, payload: dict[str, Any]) -> None:
+        serialized = dict(payload)
+        serialized["scope_json"] = json.dumps(serialized.get("scope") or [])
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO google_oauth_tokens (
+                    provider, access_token, refresh_token, token_type, scope_json, expires_at,
+                    email_address, last_sync_at, last_error, created_at, updated_at
+                ) VALUES (
+                    :provider, :access_token, :refresh_token, :token_type, :scope_json, :expires_at,
+                    :email_address, :last_sync_at, :last_error, :created_at, :updated_at
+                )
+                ON CONFLICT(provider) DO UPDATE SET
+                    access_token = excluded.access_token,
+                    refresh_token = COALESCE(excluded.refresh_token, google_oauth_tokens.refresh_token),
+                    token_type = excluded.token_type,
+                    scope_json = excluded.scope_json,
+                    expires_at = excluded.expires_at,
+                    email_address = excluded.email_address,
+                    last_sync_at = excluded.last_sync_at,
+                    last_error = excluded.last_error,
+                    updated_at = excluded.updated_at
+                """,
+                serialized,
+            )
+
+    def clear_google_oauth_token(self, provider: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute("DELETE FROM google_oauth_tokens WHERE provider = ?", (provider,))
+
+    def set_google_oauth_state(self, provider: str, state: str, created_at: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO google_oauth_states (provider, state, created_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(provider) DO UPDATE SET
+                    state = excluded.state,
+                    created_at = excluded.created_at
+                """,
+                (provider, state, created_at),
+            )
+
+    def get_google_oauth_state(self, provider: str) -> dict[str, Any] | None:
+        row = self._fetchone("SELECT * FROM google_oauth_states WHERE provider = ?", (provider,))
+        return dict(row) if row else None
+
+    def clear_google_oauth_state(self, provider: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute("DELETE FROM google_oauth_states WHERE provider = ?", (provider,))
+
+    def create_email_draft(self, payload: dict[str, Any]) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO email_drafts (
+                    id, provider, thread_id, linked_message_id, to_json, cc_json, bcc_json,
+                    subject, body_text, status, gmail_message_id, created_at, updated_at, sent_at
+                ) VALUES (
+                    :id, :provider, :thread_id, :linked_message_id, :to_json, :cc_json, :bcc_json,
+                    :subject, :body_text, :status, :gmail_message_id, :created_at, :updated_at, :sent_at
+                )
+                """,
+                self._serialize_email_draft(payload),
+            )
+
+    def update_email_draft(self, draft_id: str, updates: dict[str, Any]) -> None:
+        serialized = self._serialize_email_draft(updates, include_id=False)
+        assignments = ", ".join(f"{key} = :{key}" for key in serialized)
+        serialized["id"] = draft_id
+        with self._lock, self._conn:
+            self._conn.execute(f"UPDATE email_drafts SET {assignments} WHERE id = :id", serialized)
+
+    def get_email_draft(self, draft_id: str) -> dict[str, Any] | None:
+        row = self._fetchone("SELECT * FROM email_drafts WHERE id = ?", (draft_id,))
+        return self._row_to_email_draft(row) if row else None
+
+    def list_email_drafts(self, provider: str = "gmail", limit: int = 50) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            """
+            SELECT * FROM email_drafts
+            WHERE provider = ?
+            ORDER BY status = 'draft' DESC, updated_at DESC
+            LIMIT ?
+            """,
+            (provider, limit),
+        )
+        return [self._row_to_email_draft(row) for row in rows]
+
+    def add_email_task_link(self, email_message_id: str, task_id: str, created_at: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO email_task_links (email_message_id, task_id, created_at)
+                VALUES (?, ?, ?)
+                ON CONFLICT(email_message_id, task_id) DO NOTHING
+                """,
+                (email_message_id, task_id, created_at),
+            )
+
+    def list_email_task_links(self, email_message_ids: list[str]) -> dict[str, list[str]]:
+        if not email_message_ids:
+            return {}
+        placeholders = ", ".join("?" for _ in email_message_ids)
+        rows = self._fetchall(
+            f"""
+            SELECT email_message_id, task_id
+            FROM email_task_links
+            WHERE email_message_id IN ({placeholders})
+            ORDER BY created_at ASC
+            """,
+            tuple(email_message_ids),
+        )
+        grouped: dict[str, list[str]] = {}
+        for row in rows:
+            grouped.setdefault(row["email_message_id"], []).append(row["task_id"])
+        return grouped
+
+    def create_browser_automation_run(self, payload: dict[str, Any]) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO browser_automation_runs (
+                    id, template_id, title, goal, status, current_step_index, start_url, inputs_json,
+                    created_at, updated_at, completed_at, cancelled_at
+                ) VALUES (
+                    :id, :template_id, :title, :goal, :status, :current_step_index, :start_url, :inputs_json,
+                    :created_at, :updated_at, :completed_at, :cancelled_at
+                )
+                """,
+                self._serialize_browser_automation_run(payload),
+            )
+
+    def update_browser_automation_run(self, run_id: str, updates: dict[str, Any]) -> None:
+        serialized = self._serialize_browser_automation_run(updates, include_id=False)
+        assignments = ", ".join(f"{key} = :{key}" for key in serialized)
+        serialized["id"] = run_id
+        with self._lock, self._conn:
+            self._conn.execute(f"UPDATE browser_automation_runs SET {assignments} WHERE id = :id", serialized)
+
+    def get_browser_automation_run(self, run_id: str) -> dict[str, Any] | None:
+        row = self._fetchone("SELECT * FROM browser_automation_runs WHERE id = ?", (run_id,))
+        return self._row_to_browser_automation_run(row) if row else None
+
+    def list_browser_automation_runs(self, limit: int = 20) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            """
+            SELECT
+                r.*,
+                (
+                    SELECT COUNT(*)
+                    FROM browser_automation_steps s
+                    WHERE s.run_id = r.id
+                ) AS step_count,
+                (
+                    SELECT s.title
+                    FROM browser_automation_steps s
+                    WHERE s.run_id = r.id AND s.position = r.current_step_index
+                    LIMIT 1
+                ) AS pending_step_title,
+                (
+                    SELECT l.message
+                    FROM browser_automation_logs l
+                    WHERE l.run_id = r.id
+                    ORDER BY l.created_at DESC
+                    LIMIT 1
+                ) AS last_log_message
+            FROM browser_automation_runs r
+            ORDER BY r.updated_at DESC
+            LIMIT ?
+            """,
+            (limit,),
+        )
+        items = []
+        for row in rows:
+            payload = self._row_to_browser_automation_run(row)
+            payload["step_count"] = row["step_count"]
+            payload["pending_step_title"] = row["pending_step_title"]
+            payload["last_log_message"] = row["last_log_message"]
+            items.append(payload)
+        return items
+
+    def create_browser_automation_steps(self, items: list[dict[str, Any]]) -> None:
+        with self._lock, self._conn:
+            for item in items:
+                self._conn.execute(
+                    """
+                    INSERT INTO browser_automation_steps (
+                        id, run_id, position, action_type, title, description, status, requires_approval,
+                        url, payload_json, result_json, approval_note, recovery_notes, created_at,
+                        updated_at, completed_at
+                    ) VALUES (
+                        :id, :run_id, :position, :action_type, :title, :description, :status, :requires_approval,
+                        :url, :payload_json, :result_json, :approval_note, :recovery_notes, :created_at,
+                        :updated_at, :completed_at
+                    )
+                    """,
+                    self._serialize_browser_automation_step(item),
+                )
+
+    def update_browser_automation_step(self, step_id: str, updates: dict[str, Any]) -> None:
+        serialized = self._serialize_browser_automation_step(updates, include_id=False)
+        assignments = ", ".join(f"{key} = :{key}" for key in serialized)
+        serialized["id"] = step_id
+        with self._lock, self._conn:
+            self._conn.execute(f"UPDATE browser_automation_steps SET {assignments} WHERE id = :id", serialized)
+
+    def list_browser_automation_steps(self, run_id: str) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            "SELECT * FROM browser_automation_steps WHERE run_id = ? ORDER BY position ASC",
+            (run_id,),
+        )
+        return [self._row_to_browser_automation_step(row) for row in rows]
+
+    def create_browser_automation_log(self, payload: dict[str, Any]) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT INTO browser_automation_logs (
+                    id, run_id, step_id, level, code, message, payload_json, created_at
+                ) VALUES (
+                    :id, :run_id, :step_id, :level, :code, :message, :payload_json, :created_at
+                )
+                """,
+                self._serialize_browser_automation_log(payload),
+            )
+
+    def list_browser_automation_logs(self, run_id: str) -> list[dict[str, Any]]:
+        rows = self._fetchall(
+            "SELECT * FROM browser_automation_logs WHERE run_id = ? ORDER BY created_at ASC",
+            (run_id,),
+        )
+        return [self._row_to_browser_automation_log(row) for row in rows]
 
     def get_session_state(self) -> dict[str, Any]:
         rows = self._fetchall("SELECT key, value_json FROM session_state")
@@ -645,6 +999,69 @@ class SQLiteRepository:
                 serialized[key] = value
         return serialized
 
+    def _serialize_email_draft(
+        self,
+        payload: dict[str, Any],
+        *,
+        include_id: bool = True,
+    ) -> dict[str, Any]:
+        data = dict(payload)
+        serialized: dict[str, Any] = {}
+        for key, value in data.items():
+            if key in {"to", "cc", "bcc"}:
+                serialized[f"{key}_json"] = json.dumps(value or [])
+            elif key == "id" and not include_id:
+                continue
+            else:
+                serialized[key] = value
+        return serialized
+
+    def _serialize_browser_automation_run(
+        self,
+        payload: dict[str, Any],
+        *,
+        include_id: bool = True,
+    ) -> dict[str, Any]:
+        data = dict(payload)
+        serialized: dict[str, Any] = {}
+        for key, value in data.items():
+            if key == "inputs":
+                serialized["inputs_json"] = json.dumps(value or {})
+            elif key == "id" and not include_id:
+                continue
+            else:
+                serialized[key] = value
+        return serialized
+
+    def _serialize_browser_automation_step(
+        self,
+        payload: dict[str, Any],
+        *,
+        include_id: bool = True,
+    ) -> dict[str, Any]:
+        data = dict(payload)
+        serialized: dict[str, Any] = {}
+        for key, value in data.items():
+            if key == "requires_approval":
+                serialized[key] = 1 if value else 0
+            elif key in {"payload", "result"}:
+                serialized[f"{key}_json"] = json.dumps(value or {})
+            elif key == "id" and not include_id:
+                continue
+            else:
+                serialized[key] = value
+        return serialized
+
+    def _serialize_browser_automation_log(self, payload: dict[str, Any]) -> dict[str, Any]:
+        data = dict(payload)
+        serialized: dict[str, Any] = {}
+        for key, value in data.items():
+            if key == "payload":
+                serialized["payload_json"] = json.dumps(value or {})
+            else:
+                serialized[key] = value
+        return serialized
+
     def _row_to_task(self, row: sqlite3.Row, *, id_key: str = "id") -> dict[str, Any]:
         return {
             "id": row[id_key],
@@ -678,6 +1095,84 @@ class SQLiteRepository:
             "pinned": bool(row["pinned"]),
             "created_at": row["created_at"],
             "updated_at": row["updated_at"],
+        }
+
+    def _row_to_email_draft(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "provider": row["provider"],
+            "thread_id": row["thread_id"],
+            "linked_message_id": row["linked_message_id"],
+            "to": json.loads(row["to_json"] or "[]"),
+            "cc": json.loads(row["cc_json"] or "[]"),
+            "bcc": json.loads(row["bcc_json"] or "[]"),
+            "subject": row["subject"],
+            "body_text": row["body_text"],
+            "status": row["status"],
+            "gmail_message_id": row["gmail_message_id"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "sent_at": row["sent_at"],
+        }
+
+    def _row_to_google_oauth_token(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "provider": row["provider"],
+            "access_token": row["access_token"],
+            "refresh_token": row["refresh_token"],
+            "token_type": row["token_type"],
+            "scope": json.loads(row["scope_json"] or "[]"),
+            "expires_at": row["expires_at"],
+            "email_address": row["email_address"],
+            "last_sync_at": row["last_sync_at"],
+            "last_error": row["last_error"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+        }
+
+    def _row_to_browser_automation_run(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "template_id": row["template_id"],
+            "title": row["title"],
+            "goal": row["goal"],
+            "status": row["status"],
+            "current_step_index": row["current_step_index"],
+            "start_url": row["start_url"],
+            "inputs": json.loads(row["inputs_json"] or "{}"),
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "completed_at": row["completed_at"],
+            "cancelled_at": row["cancelled_at"],
+        }
+
+    def _row_to_browser_automation_step(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "position": row["position"],
+            "action_type": row["action_type"],
+            "title": row["title"],
+            "description": row["description"],
+            "status": row["status"],
+            "requires_approval": bool(row["requires_approval"]),
+            "url": row["url"],
+            "approval_note": row["approval_note"],
+            "recovery_notes": row["recovery_notes"],
+            "result": json.loads(row["result_json"] or "{}"),
+            "updated_at": row["updated_at"],
+            "completed_at": row["completed_at"],
+        }
+
+    def _row_to_browser_automation_log(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "run_id": row["run_id"],
+            "step_id": row["step_id"],
+            "level": row["level"],
+            "code": row["code"],
+            "message": row["message"],
+            "payload": json.loads(row["payload_json"] or "{}"),
+            "created_at": row["created_at"],
         }
 
     def _fetchone(self, sql: str, params: tuple[Any, ...] = ()) -> sqlite3.Row | None:

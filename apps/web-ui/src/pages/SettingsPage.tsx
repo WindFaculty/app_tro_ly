@@ -1,8 +1,24 @@
 import { useEffect, useState } from "react";
 import { PageTemplate } from "@/components/PageTemplate";
-import type { HealthResponse, SettingsResponse } from "@/contracts/backend";
+import type {
+  GoogleCalendarStatusResponse,
+  GoogleEmailStatusResponse,
+  HealthResponse,
+  SettingsResponse,
+} from "@/contracts/backend";
 import { useDesktopSession } from "@/features/shell/DesktopSessionContext";
-import { checkHealth, getSettings, resetSettings, updateSettings } from "@/services/backendClient";
+import {
+  checkHealth,
+  disconnectGoogleCalendar,
+  disconnectGoogleEmail,
+  getGoogleCalendarStatus,
+  getGoogleEmailStatus,
+  getSettings,
+  resetSettings,
+  startGoogleCalendarConnect,
+  startGoogleEmailConnect,
+  updateSettings,
+} from "@/services/backendClient";
 import {
   getDesktopRestoreState,
   getShellRuntimeState,
@@ -17,10 +33,17 @@ function toneForStatus(status: string | undefined): "accent" | "sun" | "success"
   if (status === "ready" || status === "persisted" || status === "reset") {
     return "success";
   }
-  if (status === "partial" || status === "restored" || status === "defaulted" || status === "recovered") {
+  if (
+    status === "partial" ||
+    status === "restored" ||
+    status === "defaulted" ||
+    status === "recovered" ||
+    status === "disabled" ||
+    status === "not_configured"
+  ) {
     return "sun";
   }
-  if (status === "error" || status === "timeout") {
+  if (status === "error" || status === "timeout" || status === "disconnected") {
     return "danger";
   }
   return "accent";
@@ -35,10 +58,26 @@ function formatPath(value: string | null | undefined): string {
   return normalized && normalized.length > 0 ? normalized : "not available";
 }
 
+function cloneSettingsDraft(value: SettingsResponse): SettingsResponse {
+  return {
+    voice: { ...value.voice },
+    model: { ...value.model },
+    window_mode: { ...value.window_mode },
+    avatar: { ...value.avatar },
+    reminder: { ...value.reminder },
+    startup: { ...value.startup },
+    memory: { ...value.memory },
+    google_email: { ...value.google_email },
+    google_calendar: { ...value.google_calendar },
+  };
+}
+
 export function SettingsPage() {
   const { sessionState, updateSessionState } = useDesktopSession();
   const [settings, setSettings] = useState<SettingsResponse | null>(null);
   const [draft, setDraft] = useState<SettingsResponse | null>(null);
+  const [emailStatus, setEmailStatus] = useState<GoogleEmailStatusResponse | null>(null);
+  const [calendarStatus, setCalendarStatus] = useState<GoogleCalendarStatusResponse | null>(null);
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [shellState, setShellState] = useState<ShellRuntimeState | null>(null);
   const [restoreState, setRestoreState] = useState<DesktopRestoreState | null>(null);
@@ -51,22 +90,25 @@ export function SettingsPage() {
     setBusy("refresh");
     setError("");
     try {
-      const [nextSettings, nextHealth, nextShell, nextRestore] = await Promise.all([
+      const [
+        nextSettings,
+        nextEmailStatus,
+        nextCalendarStatus,
+        nextHealth,
+        nextShell,
+        nextRestore,
+      ] = await Promise.all([
         getSettings(),
+        getGoogleEmailStatus(),
+        getGoogleCalendarStatus(),
         checkHealth(),
         getShellRuntimeState(),
         getDesktopRestoreState(),
       ]);
       setSettings(nextSettings);
-      setDraft({
-        voice: { ...nextSettings.voice },
-        model: { ...nextSettings.model },
-        window_mode: { ...nextSettings.window_mode },
-        avatar: { ...nextSettings.avatar },
-        reminder: { ...nextSettings.reminder },
-        startup: { ...nextSettings.startup },
-        memory: { ...nextSettings.memory },
-      });
+      setDraft(cloneSettingsDraft(nextSettings));
+      setEmailStatus(nextEmailStatus);
+      setCalendarStatus(nextCalendarStatus);
       setHealth(nextHealth);
       setShellState(nextShell);
       setRestoreState(nextRestore);
@@ -93,12 +135,21 @@ export function SettingsPage() {
   const unsaved =
     settings !== null &&
     draft !== null &&
-    (settings.voice.tts_voice !== draft.voice.tts_voice ||
+    (settings.voice.input_mode !== draft.voice.input_mode ||
+      settings.voice.tts_voice !== draft.voice.tts_voice ||
       settings.voice.speak_replies !== draft.voice.speak_replies ||
+      settings.voice.show_transcript_preview !== draft.voice.show_transcript_preview ||
       settings.reminder.lead_minutes !== draft.reminder.lead_minutes ||
       settings.reminder.speech_enabled !== draft.reminder.speech_enabled ||
       settings.memory.auto_extract !== draft.memory.auto_extract ||
-      settings.memory.short_term_turn_limit !== draft.memory.short_term_turn_limit);
+      settings.memory.short_term_turn_limit !== draft.memory.short_term_turn_limit ||
+      settings.google_email.sync_enabled !== draft.google_email.sync_enabled ||
+      settings.google_email.default_label !== draft.google_email.default_label ||
+      settings.google_email.query_limit !== draft.google_email.query_limit ||
+      settings.google_calendar.sync_enabled !== draft.google_calendar.sync_enabled ||
+      settings.google_calendar.default_calendar_id !== draft.google_calendar.default_calendar_id ||
+      settings.google_calendar.agenda_days !== draft.google_calendar.agenda_days ||
+      settings.google_calendar.event_limit !== draft.google_calendar.event_limit);
 
   const pathRows = [
     { label: "Desktop app data", value: shellState?.app_data_dir ?? null },
@@ -124,8 +175,10 @@ export function SettingsPage() {
     try {
       const updated = await updateSettings({
         voice: {
+          input_mode: "push_to_talk",
           tts_voice: draft.voice.tts_voice.trim() || "vi-VN-default",
           speak_replies: draft.voice.speak_replies,
+          show_transcript_preview: draft.voice.show_transcript_preview,
         },
         reminder: {
           speech_enabled: draft.reminder.speech_enabled,
@@ -138,18 +191,29 @@ export function SettingsPage() {
             64,
           ),
         },
+        google_email: {
+          sync_enabled: draft.google_email.sync_enabled,
+          default_label: String(draft.google_email.default_label || "INBOX").trim().toUpperCase() || "INBOX",
+          query_limit: Math.min(Math.max(Number(draft.google_email.query_limit) || 20, 1), 50),
+        },
+        google_calendar: {
+          sync_enabled: draft.google_calendar.sync_enabled,
+          default_calendar_id:
+            String(draft.google_calendar.default_calendar_id || "primary").trim() || "primary",
+          agenda_days: Math.min(Math.max(Number(draft.google_calendar.agenda_days) || 7, 1), 31),
+          event_limit: Math.min(Math.max(Number(draft.google_calendar.event_limit) || 20, 1), 100),
+        },
       });
       setSettings(updated);
-      setDraft({
-        voice: { ...updated.voice },
-        model: { ...updated.model },
-        window_mode: { ...updated.window_mode },
-        avatar: { ...updated.avatar },
-        reminder: { ...updated.reminder },
-        startup: { ...updated.startup },
-        memory: { ...updated.memory },
-      });
-      setHealth(await checkHealth());
+      setDraft(cloneSettingsDraft(updated));
+      const [nextHealth, nextEmailStatus, nextCalendarStatus] = await Promise.all([
+        checkHealth(),
+        getGoogleEmailStatus(),
+        getGoogleCalendarStatus(),
+      ]);
+      setHealth(nextHealth);
+      setEmailStatus(nextEmailStatus);
+      setCalendarStatus(nextCalendarStatus);
       setMessage("Backend-backed settings saved.");
     } catch (saveError) {
       setMessage(saveError instanceof Error ? saveError.message : String(saveError));
@@ -164,16 +228,15 @@ export function SettingsPage() {
     try {
       const updated = await resetSettings();
       setSettings(updated);
-      setDraft({
-        voice: { ...updated.voice },
-        model: { ...updated.model },
-        window_mode: { ...updated.window_mode },
-        avatar: { ...updated.avatar },
-        reminder: { ...updated.reminder },
-        startup: { ...updated.startup },
-        memory: { ...updated.memory },
-      });
-      setHealth(await checkHealth());
+      setDraft(cloneSettingsDraft(updated));
+      const [nextHealth, nextEmailStatus, nextCalendarStatus] = await Promise.all([
+        checkHealth(),
+        getGoogleEmailStatus(),
+        getGoogleCalendarStatus(),
+      ]);
+      setHealth(nextHealth);
+      setEmailStatus(nextEmailStatus);
+      setCalendarStatus(nextCalendarStatus);
       setMessage("Backend settings were reset to defaults.");
     } catch (resetError) {
       setMessage(resetError instanceof Error ? resetError.message : String(resetError));
@@ -224,6 +287,62 @@ export function SettingsPage() {
     }
   };
 
+  const connectGoogleAccount = async () => {
+    setBusy("connect_google");
+    setMessage("");
+    try {
+      const payload = await startGoogleEmailConnect();
+      window.open(payload.authorization_url, "_blank", "noopener,noreferrer");
+      setEmailStatus(await getGoogleEmailStatus());
+      setMessage("Opened Google consent flow. Finish it in the browser, then refresh facts.");
+    } catch (connectError) {
+      setMessage(connectError instanceof Error ? connectError.message : String(connectError));
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const disconnectGoogleAccount = async () => {
+    setBusy("disconnect_google");
+    setMessage("");
+    try {
+      setEmailStatus(await disconnectGoogleEmail());
+      setMessage("Disconnected the Google email account.");
+    } catch (disconnectError) {
+      setMessage(disconnectError instanceof Error ? disconnectError.message : String(disconnectError));
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const connectGoogleCalendarAccount = async () => {
+    setBusy("connect_google_calendar");
+    setMessage("");
+    try {
+      const payload = await startGoogleCalendarConnect();
+      window.open(payload.authorization_url, "_blank", "noopener,noreferrer");
+      setCalendarStatus(await getGoogleCalendarStatus());
+      setMessage("Opened Google Calendar consent flow. Finish it in the browser, then refresh facts.");
+    } catch (connectError) {
+      setMessage(connectError instanceof Error ? connectError.message : String(connectError));
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const disconnectGoogleCalendarAccount = async () => {
+    setBusy("disconnect_google_calendar");
+    setMessage("");
+    try {
+      setCalendarStatus(await disconnectGoogleCalendar());
+      setMessage("Disconnected the Google Calendar account.");
+    } catch (disconnectError) {
+      setMessage(disconnectError instanceof Error ? disconnectError.message : String(disconnectError));
+    } finally {
+      setBusy("");
+    }
+  };
+
   return (
     <PageTemplate
       title="Settings"
@@ -239,7 +358,16 @@ export function SettingsPage() {
         { label: "Backend", value: health?.status ?? "...", detail: health?.service ?? "health" },
         { label: "Theme", value: currentTheme, detail: showHostDiagnostics ? "host details visible" : "host details hidden" },
         { label: "Restore", value: restoreState?.restore_status ?? "...", detail: restoreLastRoute ? "route reopens" : "start fresh" },
-        { label: "Voice", value: settings?.voice.tts_voice ?? "...", detail: settings?.voice.speak_replies ? "speech enabled" : "speech disabled" },
+        {
+          label: "Google email",
+          value: emailStatus?.connected ? emailStatus.email_address ?? "connected" : emailStatus?.status ?? "...",
+          detail: draft?.google_email.sync_enabled ? "sync enabled" : "sync disabled",
+        },
+        {
+          label: "Google calendar",
+          value: calendarStatus?.connected ? calendarStatus.calendar_id ?? "connected" : calendarStatus?.status ?? "...",
+          detail: draft?.google_calendar.sync_enabled ? "sync enabled" : "sync disabled",
+        },
       ]}
     >
       <div className="appStack">
@@ -350,13 +478,23 @@ export function SettingsPage() {
                 <div className="surfaceHeader">
                   <div className="surfaceHeaderBlock">
                     <span className="eyebrow">Backend settings</span>
-                    <h3 className="surfaceTitle">Voice, reminder, and memory defaults</h3>
+                    <h3 className="surfaceTitle">Voice, reminder, memory, Gmail, and Calendar defaults</h3>
                   </div>
                   <span className="chip" data-tone={unsaved ? "warm" : "success"}>
                     {unsaved ? "unsaved" : "synced"}
                   </span>
                 </div>
                 <div className={styles.fields}>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Voice input mode</span>
+                    <span className={styles.hint}>Desktop v1 keeps voice locked to push-to-talk for privacy and control.</span>
+                    <input
+                      className="textInput"
+                      type="text"
+                      value={draft.voice.input_mode === "push_to_talk" ? "push_to_talk" : draft.voice.input_mode}
+                      readOnly
+                    />
+                  </label>
                   <label className={styles.field}>
                     <span className={styles.label}>TTS voice</span>
                     <span className={styles.hint}>Used for replies and reminder speech.</span>
@@ -380,6 +518,27 @@ export function SettingsPage() {
                       onChange={(event) =>
                         setDraft((current) =>
                           current ? { ...current, voice: { ...current.voice, speak_replies: event.target.checked } } : current,
+                        )
+                      }
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Transcript preview</span>
+                    <span className={styles.hint}>Shows partial speech recognition text while the push-to-talk button is held.</span>
+                    <input
+                      type="checkbox"
+                      checked={draft.voice.show_transcript_preview}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                voice: {
+                                  ...current.voice,
+                                  show_transcript_preview: event.target.checked,
+                                },
+                              }
+                            : current,
                         )
                       }
                     />
@@ -442,6 +601,164 @@ export function SettingsPage() {
                       }
                     />
                   </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Gmail sync</span>
+                    <span className={styles.hint}>Lets the desktop email module call Gmail routes.</span>
+                    <input
+                      type="checkbox"
+                      checked={draft.google_email.sync_enabled}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_email: { ...current.google_email, sync_enabled: event.target.checked },
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Default Gmail label</span>
+                    <span className={styles.hint}>Used as the default mailbox lens for the email module.</span>
+                    <select
+                      className="textInput"
+                      value={String(draft.google_email.default_label || "INBOX").toUpperCase()}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_email: { ...current.google_email, default_label: event.target.value },
+                              }
+                            : current,
+                        )
+                      }
+                    >
+                      <option value="INBOX">Inbox</option>
+                      <option value="STARRED">Starred</option>
+                      <option value="IMPORTANT">Important</option>
+                      <option value="SENT">Sent</option>
+                      <option value="ALL">All mail</option>
+                    </select>
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Gmail query limit</span>
+                    <span className={styles.hint}>Caps one backend inbox fetch to keep refreshes lightweight.</span>
+                    <input
+                      className="textInput"
+                      type="number"
+                      min={1}
+                      max={50}
+                      value={draft.google_email.query_limit}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_email: {
+                                  ...current.google_email,
+                                  query_limit: Number(event.target.value),
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Calendar sync</span>
+                    <span className={styles.hint}>Lets the planner fetch and write Google Calendar events.</span>
+                    <input
+                      type="checkbox"
+                      checked={draft.google_calendar.sync_enabled}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_calendar: {
+                                  ...current.google_calendar,
+                                  sync_enabled: event.target.checked,
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Default calendar id</span>
+                    <span className={styles.hint}>Uses Google `primary` unless you point the planner at another calendar.</span>
+                    <input
+                      className="textInput"
+                      type="text"
+                      value={draft.google_calendar.default_calendar_id}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_calendar: {
+                                  ...current.google_calendar,
+                                  default_calendar_id: event.target.value,
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                      placeholder="primary"
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Agenda days</span>
+                    <span className={styles.hint}>Controls how many days the planner agenda fetches at once.</span>
+                    <input
+                      className="textInput"
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={draft.google_calendar.agenda_days}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_calendar: {
+                                  ...current.google_calendar,
+                                  agenda_days: Number(event.target.value),
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                  </label>
+                  <label className={styles.field}>
+                    <span className={styles.label}>Calendar event limit</span>
+                    <span className={styles.hint}>Caps one Google Calendar agenda fetch to keep planner refreshes lightweight.</span>
+                    <input
+                      className="textInput"
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={draft.google_calendar.event_limit}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current
+                            ? {
+                                ...current,
+                                google_calendar: {
+                                  ...current.google_calendar,
+                                  event_limit: Number(event.target.value),
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                  </label>
                 </div>
                 <div className="actionRow">
                   <span className="helperText">{message || "Current implementation keeps provider routing read-only in React."}</span>
@@ -453,6 +770,106 @@ export function SettingsPage() {
             </div>
 
             <div className={styles.grid}>
+              <article className="surface">
+                <div className="surfaceHeader">
+                  <div className="surfaceHeaderBlock">
+                    <span className="eyebrow">Google email account</span>
+                    <h3 className="surfaceTitle">Gmail auth state and redirect visibility</h3>
+                  </div>
+                  <span className="chip" data-tone={toneForStatus(emailStatus?.status)}>
+                    {emailStatus?.status ?? "checking"}
+                  </span>
+                </div>
+                <div className="detailGrid">
+                  <div className="detailRow">
+                    <span className="detailLabel">Account</span>
+                    <span className="detailValue">{emailStatus?.email_address ?? "not connected"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Configured</span>
+                    <span className="detailValue">{emailStatus?.configured ? "yes" : "no"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Sync</span>
+                    <span className="detailValue">{emailStatus?.sync_enabled ? "enabled" : "disabled"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Last sync</span>
+                    <span className="detailValue">{emailStatus?.last_sync_at ?? "not synced yet"}</span>
+                  </div>
+                </div>
+                <p className="helperText">{emailStatus?.detail ?? "Reading Google email state."}</p>
+                <p className="helperText">
+                  Redirect URI: <code>{emailStatus?.redirect_uri ?? "not available"}</code>
+                </p>
+                <div className="actionRow">
+                  <button
+                    className="secondaryButton"
+                    onClick={() => void connectGoogleAccount()}
+                    disabled={busy === "connect_google" || !emailStatus?.auth_url_available}
+                  >
+                    {busy === "connect_google" ? "Opening..." : "Connect Google"}
+                  </button>
+                  <button
+                    className="ghostButton"
+                    onClick={() => void disconnectGoogleAccount()}
+                    disabled={busy === "disconnect_google" || !emailStatus?.connected}
+                  >
+                    {busy === "disconnect_google" ? "Disconnecting..." : "Disconnect"}
+                  </button>
+                </div>
+              </article>
+
+              <article className="surface">
+                <div className="surfaceHeader">
+                  <div className="surfaceHeaderBlock">
+                    <span className="eyebrow">Google calendar account</span>
+                    <h3 className="surfaceTitle">Calendar auth state and redirect visibility</h3>
+                  </div>
+                  <span className="chip" data-tone={toneForStatus(calendarStatus?.status)}>
+                    {calendarStatus?.status ?? "checking"}
+                  </span>
+                </div>
+                <div className="detailGrid">
+                  <div className="detailRow">
+                    <span className="detailLabel">Calendar</span>
+                    <span className="detailValue">{calendarStatus?.calendar_id ?? "not connected"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Configured</span>
+                    <span className="detailValue">{calendarStatus?.configured ? "yes" : "no"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Sync</span>
+                    <span className="detailValue">{calendarStatus?.sync_enabled ? "enabled" : "disabled"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Last sync</span>
+                    <span className="detailValue">{calendarStatus?.last_sync_at ?? "not synced yet"}</span>
+                  </div>
+                </div>
+                <p className="helperText">{calendarStatus?.detail ?? "Reading Google Calendar state."}</p>
+                <p className="helperText">
+                  Redirect URI: <code>{calendarStatus?.redirect_uri ?? "not available"}</code>
+                </p>
+                <div className="actionRow">
+                  <button
+                    className="secondaryButton"
+                    onClick={() => void connectGoogleCalendarAccount()}
+                    disabled={busy === "connect_google_calendar" || !calendarStatus?.auth_url_available}
+                  >
+                    {busy === "connect_google_calendar" ? "Opening..." : "Connect Google Calendar"}
+                  </button>
+                  <button
+                    className="ghostButton"
+                    onClick={() => void disconnectGoogleCalendarAccount()}
+                    disabled={busy === "disconnect_google_calendar" || !calendarStatus?.connected}
+                  >
+                    {busy === "disconnect_google_calendar" ? "Disconnecting..." : "Disconnect"}
+                  </button>
+                </div>
+              </article>
+
               <article className="surface">
                 <div className="surfaceHeader">
                   <div className="surfaceHeaderBlock">

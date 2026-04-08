@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfbe8dfe4700e8c47a78254145583a6d, type: 3}
+  m_Name: LipSyncMap_Prototype_Default
+  m_EditorClassIdentifier: Assembly-CSharp::AvatarSystem.Data.LipSyncMapDefinition
+  mappings:
+  - viseme: 0
+    targets:
+    - blendShapeName: Viseme_Rest
+      weight: 100
+  - viseme: 1
+    targets:
+    - blendShapeName: Viseme_AA
+      weight: 100
+    - blendShapeName: MouthOpen
+      weight: 60
+  - viseme: 2
+    targets:
+    - blendShapeName: Viseme_E
+      weight: 100
+  - viseme: 3
+    targets:
+    - blendShapeName: Viseme_I
+      weight: 100
+  - viseme: 4
+    targets:
+    - blendShapeName: Viseme_O
+      weight: 100
+  - viseme: 5
+    targets:
+    - blendShapeName: Viseme_U
+      weight: 100
+  - viseme: 6
+    targets:
+    - blendShapeName: Viseme_FV
+      weight: 100
+  - viseme: 7
+    targets:
+    - blendShapeName: Viseme_L
+      weight: 100
+  - viseme: 8
+    targets:
+    - blendShapeName: Viseme_MBP
+      weight: 100

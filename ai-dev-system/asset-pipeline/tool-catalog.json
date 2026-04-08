@@ -40,6 +40,7 @@
   ],
   "notes": [
     "The scripts listed here remain executable from the root tools directory in current implementation.",
-    "This catalog is the Phase 6 ownership map; it does not claim the scripts have already moved into ai-dev-system/asset-pipeline."
+    "This catalog is the Phase 6 ownership map; it does not claim the scripts have already moved into ai-dev-system/asset-pipeline.",
+    "The Mesh AI refine foundation now consumes these root script paths through ai-dev-system/asset-pipeline/toolchain-map.json."
   ]
 }

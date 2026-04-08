@@ -4,6 +4,8 @@ import type { BackendLifecycleEvent, DesktopRestoreState } from "@contracts";
 import { ShellLayout } from "@/components/ShellLayout";
 import { StartupScreen } from "@/components/StartupScreen";
 import { DashboardPage } from "@/pages/DashboardPage";
+import { EmailPage } from "@/pages/EmailPage";
+import { AutomationPage } from "@/pages/AutomationPage";
 import { ChatPage } from "@/pages/ChatPage";
 import { NotesPage } from "@/pages/NotesPage";
 import { PlannerPage } from "@/pages/PlannerPage";
@@ -209,6 +211,8 @@ function App() {
           <Route path="chat" element={<ChatPage />} />
           <Route path="planner" element={<PlannerPage />} />
           <Route path="notes" element={<NotesPage />} />
+          <Route path="email" element={<EmailPage />} />
+          <Route path="automation" element={<AutomationPage />} />
           <Route path="wardrobe" element={<WardrobePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="status" element={<StatusPage />} />

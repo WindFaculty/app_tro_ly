@@ -33,9 +33,11 @@ const NAV_ITEMS = [
   { to: "/chat", label: "Chat", icon: "02", hint: "Assistant lane" },
   { to: "/planner", label: "Planner", icon: "03", hint: "Work rhythm" },
   { to: "/notes", label: "Notes", icon: "04", hint: "Knowledge graph" },
-  { to: "/wardrobe", label: "Wardrobe", icon: "05", hint: "Taxonomy shell" },
-  { to: "/settings", label: "Settings", icon: "06", hint: "Preferences" },
-  { to: "/status", label: "Status", icon: "07", hint: "Diagnostics" },
+  { to: "/email", label: "Email", icon: "05", hint: "Gmail workflow" },
+  { to: "/automation", label: "Automation", icon: "06", hint: "Approval-first browser flows" },
+  { to: "/wardrobe", label: "Wardrobe", icon: "07", hint: "Taxonomy shell" },
+  { to: "/settings", label: "Settings", icon: "08", hint: "Preferences" },
+  { to: "/status", label: "Status", icon: "09", hint: "Diagnostics" },
 ];
 
 interface ShellLayoutProps {

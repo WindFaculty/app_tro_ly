@@ -7,8 +7,11 @@ from app.core.events import EventBus
 from app.db.repository import SQLiteRepository
 from app.services.action_validator import ActionValidator
 from app.services.assistant_orchestrator import AssistantOrchestrator
+from app.services.browser_automation import BrowserAutomationService
 from app.services.conversation import ConversationService
 from app.services.fast_response import FastResponseService
+from app.services.google_calendar import GoogleCalendarService
+from app.services.google_email import GoogleEmailService
 from app.services.llm import LlmService
 from app.services.memory import MemoryService
 from app.services.notes import NoteService
@@ -20,6 +23,7 @@ from app.services.scheduler import SchedulerService
 from app.services.settings import SettingsService
 from app.services.speech import SpeechService
 from app.services.tasks import TaskService
+from app.services.wardrobe import WardrobeService
 
 
 @dataclass
@@ -30,6 +34,9 @@ class AppContainer:
     settings_service: SettingsService
     llm_service: LlmService
     speech_service: SpeechService
+    google_email_service: GoogleEmailService
+    google_calendar_service: GoogleCalendarService
+    browser_automation_service: BrowserAutomationService
     task_service: TaskService
     planner_service: PlannerService
     action_validator: ActionValidator
@@ -41,6 +48,7 @@ class AppContainer:
     assistant_orchestrator: AssistantOrchestrator
     conversation_service: ConversationService
     scheduler_service: SchedulerService
+    wardrobe_service: WardrobeService
 
 
 def build_container(settings: Settings) -> AppContainer:
@@ -52,6 +60,9 @@ def build_container(settings: Settings) -> AppContainer:
     llm_service = LlmService(settings)
     speech_service = SpeechService(settings)
     task_service = TaskService(repository, settings)
+    google_email_service = GoogleEmailService(repository, settings, settings_service, task_service)
+    google_calendar_service = GoogleCalendarService(repository, settings, settings_service)
+    browser_automation_service = BrowserAutomationService(repository)
     planner_service = PlannerService(task_service)
     action_validator = ActionValidator(task_service, planner_service)
     router_service = RouterService(settings, llm_service)
@@ -74,6 +85,7 @@ def build_container(settings: Settings) -> AppContainer:
     )
     conversation_service = ConversationService(assistant_orchestrator, repository)
     scheduler_service = SchedulerService(repository, event_bus, settings, speech_service)
+    wardrobe_service = WardrobeService(settings)
     return AppContainer(
         settings=settings,
         repository=repository,
@@ -81,6 +93,9 @@ def build_container(settings: Settings) -> AppContainer:
         settings_service=settings_service,
         llm_service=llm_service,
         speech_service=speech_service,
+        google_email_service=google_email_service,
+        google_calendar_service=google_calendar_service,
+        browser_automation_service=browser_automation_service,
         task_service=task_service,
         planner_service=planner_service,
         action_validator=action_validator,
@@ -92,4 +107,5 @@ def build_container(settings: Settings) -> AppContainer:
         assistant_orchestrator=assistant_orchestrator,
         conversation_service=conversation_service,
         scheduler_service=scheduler_service,
+        wardrobe_service=wardrobe_service,
     )

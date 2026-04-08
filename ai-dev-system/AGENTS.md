@@ -46,6 +46,12 @@ Machine-facing rules for work inside the non-backend subsystem.
 - Subsystem-local workbench and pipeline governance:
   - `workbench/`
   - `asset-pipeline/`
+  - `asset-pipeline/profiles/`
+  - `asset-pipeline/schemas/`
+  - `asset-pipeline/manifests/`
+  - `asset-pipeline/toolchain-map.json`
+  - `control-plane/tools/mesh_ai_pipeline.py`
+  - `control-plane/tools/mesh_ai_blender_wrappers.py`
 - Standardized subsystem entry points and drift validation:
   - `scripts/run/`
   - `scripts/sync-agent-surfaces.py`
@@ -63,7 +69,9 @@ Machine-facing rules for work inside the non-backend subsystem.
 - `domain/`: current home for shared avatar, customization, room, and cross-domain contract ownership
 - `context/`: current home for absorbed AI context and subsystem-local policies
 - `asset-pipeline/`: current home for tool catalogs, structure validation, and migration-owned pipeline guidance
+- `asset-pipeline/`: current home for Mesh AI lifecycle contracts, toolchain mapping, and normalized handoff manifests
 - `workbench/`: current home for authoring-root inventories, naming guidance, and migration-owned workbench notes
+- `workbench/`: current home for Mesh AI intake guidance and logical lifecycle ownership notes
 - `scripts/`: current standardized home for non-backend run, validate, package, and migrate entry points
 
 ## Working Rules

@@ -128,8 +128,8 @@ impl UnityBridgeState {
                 self.update_status(|status| {
                     status.state = "serialize_failed".to_string();
                     status.last_error = Some(error.to_string());
-                    status.note = "Khong the serialize command truoc khi gui sang Unity bridge."
-                        .to_string();
+                    status.note =
+                        "Khong the serialize command truoc khi gui sang Unity bridge.".to_string();
                 });
                 let status = self.status(app);
                 return UnityBridgeDispatchResult {
@@ -143,7 +143,11 @@ impl UnityBridgeState {
         };
 
         let delivered = {
-            let guard = self.inner.outbound.lock().expect("unity bridge outbound mutex poisoned");
+            let guard = self
+                .inner
+                .outbound
+                .lock()
+                .expect("unity bridge outbound mutex poisoned");
             guard
                 .as_ref()
                 .map(|sender| sender.send(serialized).is_ok())
@@ -153,8 +157,8 @@ impl UnityBridgeState {
         if delivered {
             self.update_status(|status| {
                 status.state = "connected".to_string();
-                status.note = "Command da duoc forward qua websocket local sang Unity runtime."
-                    .to_string();
+                status.note =
+                    "Command da duoc forward qua websocket local sang Unity runtime.".to_string();
             });
         } else {
             self.update_status(|status| {
@@ -297,7 +301,10 @@ impl UnityBridgeState {
                     writer_task.abort();
                     self.mark_disconnected(
                         &app,
-                        Some("Dang quay ve trang thai listening cho Unity runtime tiep theo.".to_string()),
+                        Some(
+                            "Dang quay ve trang thai listening cho Unity runtime tiep theo."
+                                .to_string(),
+                        ),
                     );
                 }
             }
@@ -330,8 +337,8 @@ impl UnityBridgeState {
                 self.update_status(|status| {
                     status.state = "event_parse_failed".to_string();
                     status.last_error = Some(error.to_string());
-                    status.note = "Host nhan duoc payload tu Unity nhung parse schema that bai."
-                        .to_string();
+                    status.note =
+                        "Host nhan duoc payload tu Unity nhung parse schema that bai.".to_string();
                 });
                 self.emit_status(app);
             }
@@ -351,8 +358,8 @@ impl UnityBridgeState {
             status.state = "listening".to_string();
             status.connected_client = None;
             status.last_error = reason;
-            status.note = "Host bridge van dang lang nghe, cho Unity runtime ket noi lai."
-                .to_string();
+            status.note =
+                "Host bridge van dang lang nghe, cho Unity runtime ket noi lai.".to_string();
         });
         self.emit_status(app);
     }

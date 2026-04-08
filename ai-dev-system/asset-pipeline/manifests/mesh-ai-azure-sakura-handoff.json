@@ -1,0 +1,383 @@
+{
+  "asset_id": "azure-sakura-kimono-0326010047",
+  "asset_name": "Azure Sakura Kimono",
+  "asset_type": "avatar_clothing",
+  "category": "clothing_foundation",
+  "source": "mesh_ai",
+  "source_path": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+  "quality_estimate": "8/10",
+  "status": "export-ready",
+  "profile_id": "unity_avatar_clothing_v1",
+  "target_runtime": "unity",
+  "target_unity_path": "Assets/AvatarSystem/AvatarProduction/Wardrobe/Foundations/AzureSakuraKimono",
+  "slot": "dress",
+  "room_focus_preset": "wardrobe",
+  "toolchain_steps": [
+    {
+      "step_id": "asset_audit",
+      "stage": "raw",
+      "step_type": "blender_script",
+      "description": "Audit the raw clothing mesh from Mesh AI.",
+      "outputs": {
+        "report_path": "tools/reports/azure_kimono_asset_audit.json"
+      },
+      "notes": [],
+      "script_path": "tools/blender_asset_audit.py",
+      "script_absolute_path": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_asset_audit.py",
+      "command_spec": {
+        "runner": "blender_cli",
+        "executable_hint": "blender",
+        "argv": [
+          "blender",
+          "--background",
+          "--python",
+          "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_asset_audit.py",
+          "--",
+          "--input",
+          "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+          "--report",
+          "tools/reports/azure_kimono_asset_audit.json"
+        ]
+      },
+      "args": {
+        "input": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+        "report": "tools/reports/azure_kimono_asset_audit.json"
+      }
+    },
+    {
+      "step_id": "dress_fit",
+      "stage": "cleaned",
+      "step_type": "blender_script",
+      "description": "Run the current clothing fit wrapper against the base avatar scene.",
+      "outputs": {
+        "cleaned_source_path": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "report_path": "tools/reports/azure_sakura_dress_polishfit_report.json"
+      },
+      "notes": [],
+      "script_path": "tools/blender_fit_dress_scene.py",
+      "script_absolute_path": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_fit_dress_scene.py",
+      "command_spec": {
+        "runner": "blender_cli",
+        "executable_hint": "blender",
+        "argv": [
+          "blender",
+          "--background",
+          "--python",
+          "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_fit_dress_scene.py",
+          "--",
+          "--base-blend",
+          "bleder/CHR_Avatar_Base_v001_split15_facial.blend",
+          "--source-body-blend",
+          "bleder/CHR_Avatar_Base_v001_rigclean.blend",
+          "--dress-fbx",
+          "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+          "--output-blend",
+          "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "--report",
+          "tools/reports/azure_sakura_dress_polishfit_report.json",
+          "--dress-name",
+          "CHR_Dress_AzureSakuraKimono_v1"
+        ]
+      },
+      "args": {
+        "base-blend": "bleder/CHR_Avatar_Base_v001_split15_facial.blend",
+        "source-body-blend": "bleder/CHR_Avatar_Base_v001_rigclean.blend",
+        "dress-fbx": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+        "output-blend": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "report": "tools/reports/azure_sakura_dress_polishfit_report.json",
+        "dress-name": "CHR_Dress_AzureSakuraKimono_v1"
+      }
+    },
+    {
+      "step_id": "scene_state_report",
+      "stage": "validated",
+      "step_type": "blender_script",
+      "description": "Record scene visibility and review state for the cleaned clothing blend.",
+      "outputs": {
+        "report_path": "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+      },
+      "notes": [],
+      "script_path": "tools/blender_scene_state_report.py",
+      "script_absolute_path": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_scene_state_report.py",
+      "command_spec": {
+        "runner": "blender_cli",
+        "executable_hint": "blender",
+        "argv": [
+          "blender",
+          "--background",
+          "--python",
+          "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_scene_state_report.py",
+          "--",
+          "--input",
+          "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "--report",
+          "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+        ]
+      },
+      "args": {
+        "input": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "report": "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+      }
+    },
+    {
+      "step_id": "verify_fit",
+      "stage": "validated",
+      "step_type": "blender_script",
+      "description": "Verify that the fitted clothing deforms with the current avatar rig.",
+      "outputs": {
+        "report_path": "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+      },
+      "notes": [],
+      "script_path": "tools/blender_verify_dress_scene.py",
+      "script_absolute_path": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_verify_dress_scene.py",
+      "command_spec": {
+        "runner": "blender_cli",
+        "executable_hint": "blender",
+        "argv": [
+          "blender",
+          "--background",
+          "--python",
+          "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_verify_dress_scene.py",
+          "--",
+          "--input",
+          "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "--dress-name",
+          "CHR_Dress_AzureSakuraKimono_v1",
+          "--report",
+          "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+        ]
+      },
+      "args": {
+        "input": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "dress-name": "CHR_Dress_AzureSakuraKimono_v1",
+        "report": "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+      }
+    },
+    {
+      "step_id": "preview_render",
+      "stage": "export-ready",
+      "step_type": "blender_script",
+      "description": "Capture a front preview render for the cleaned clothing asset.",
+      "outputs": {
+        "preview_render_path": "tools/renders/azure_sakura_polishfit/current.png"
+      },
+      "notes": [],
+      "script_path": "tools/blender_render_asset_front.py",
+      "script_absolute_path": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_render_asset_front.py",
+      "command_spec": {
+        "runner": "blender_cli",
+        "executable_hint": "blender",
+        "argv": [
+          "blender",
+          "--background",
+          "--python",
+          "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_render_asset_front.py",
+          "--",
+          "--input",
+          "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "--output",
+          "tools/renders/azure_sakura_polishfit/current.png"
+        ]
+      },
+      "args": {
+        "input": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "output": "tools/renders/azure_sakura_polishfit/current.png"
+      }
+    }
+  ],
+  "validation_report_path": "tools/reports/azure_sakura_dress_polishfit_verify_report.json",
+  "preview_render_path": "tools/renders/azure_sakura_polishfit/current.png",
+  "handoff_source_path": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+  "artifact_ingestion": {
+    "highest_completed_stage": "export-ready",
+    "completed_step_count": 5,
+    "pending_step_count": 0,
+    "pending_manual_gates": [],
+    "steps": [
+      {
+        "step_id": "asset_audit",
+        "stage": "raw",
+        "step_type": "blender_script",
+        "description": "Audit the raw clothing mesh from Mesh AI.",
+        "output_evidence": {
+          "report_path": "tools/reports/azure_kimono_asset_audit.json"
+        },
+        "missing_outputs": [],
+        "script_path": "tools/blender_asset_audit.py",
+        "command_spec": {
+          "runner": "blender_cli",
+          "executable_hint": "blender",
+          "argv": [
+            "blender",
+            "--background",
+            "--python",
+            "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_asset_audit.py",
+            "--",
+            "--input",
+            "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+            "--report",
+            "tools/reports/azure_kimono_asset_audit.json"
+          ]
+        },
+        "args": {
+          "input": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+          "report": "tools/reports/azure_kimono_asset_audit.json"
+        },
+        "completed": true
+      },
+      {
+        "step_id": "dress_fit",
+        "stage": "cleaned",
+        "step_type": "blender_script",
+        "description": "Run the current clothing fit wrapper against the base avatar scene.",
+        "output_evidence": {
+          "cleaned_source_path": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "report_path": "tools/reports/azure_sakura_dress_polishfit_report.json"
+        },
+        "missing_outputs": [],
+        "script_path": "tools/blender_fit_dress_scene.py",
+        "command_spec": {
+          "runner": "blender_cli",
+          "executable_hint": "blender",
+          "argv": [
+            "blender",
+            "--background",
+            "--python",
+            "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_fit_dress_scene.py",
+            "--",
+            "--base-blend",
+            "bleder/CHR_Avatar_Base_v001_split15_facial.blend",
+            "--source-body-blend",
+            "bleder/CHR_Avatar_Base_v001_rigclean.blend",
+            "--dress-fbx",
+            "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+            "--output-blend",
+            "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+            "--report",
+            "tools/reports/azure_sakura_dress_polishfit_report.json",
+            "--dress-name",
+            "CHR_Dress_AzureSakuraKimono_v1"
+          ]
+        },
+        "args": {
+          "base-blend": "bleder/CHR_Avatar_Base_v001_split15_facial.blend",
+          "source-body-blend": "bleder/CHR_Avatar_Base_v001_rigclean.blend",
+          "dress-fbx": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+          "output-blend": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "report": "tools/reports/azure_sakura_dress_polishfit_report.json",
+          "dress-name": "CHR_Dress_AzureSakuraKimono_v1"
+        },
+        "completed": true
+      },
+      {
+        "step_id": "scene_state_report",
+        "stage": "validated",
+        "step_type": "blender_script",
+        "description": "Record scene visibility and review state for the cleaned clothing blend.",
+        "output_evidence": {
+          "report_path": "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+        },
+        "missing_outputs": [],
+        "script_path": "tools/blender_scene_state_report.py",
+        "command_spec": {
+          "runner": "blender_cli",
+          "executable_hint": "blender",
+          "argv": [
+            "blender",
+            "--background",
+            "--python",
+            "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_scene_state_report.py",
+            "--",
+            "--input",
+            "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+            "--report",
+            "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+          ]
+        },
+        "args": {
+          "input": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "report": "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+        },
+        "completed": true
+      },
+      {
+        "step_id": "verify_fit",
+        "stage": "validated",
+        "step_type": "blender_script",
+        "description": "Verify that the fitted clothing deforms with the current avatar rig.",
+        "output_evidence": {
+          "report_path": "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+        },
+        "missing_outputs": [],
+        "script_path": "tools/blender_verify_dress_scene.py",
+        "command_spec": {
+          "runner": "blender_cli",
+          "executable_hint": "blender",
+          "argv": [
+            "blender",
+            "--background",
+            "--python",
+            "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_verify_dress_scene.py",
+            "--",
+            "--input",
+            "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+            "--dress-name",
+            "CHR_Dress_AzureSakuraKimono_v1",
+            "--report",
+            "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+          ]
+        },
+        "args": {
+          "input": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "dress-name": "CHR_Dress_AzureSakuraKimono_v1",
+          "report": "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+        },
+        "completed": true
+      },
+      {
+        "step_id": "preview_render",
+        "stage": "export-ready",
+        "step_type": "blender_script",
+        "description": "Capture a front preview render for the cleaned clothing asset.",
+        "output_evidence": {
+          "preview_render_path": "tools/renders/azure_sakura_polishfit/current.png"
+        },
+        "missing_outputs": [],
+        "script_path": "tools/blender_render_asset_front.py",
+        "command_spec": {
+          "runner": "blender_cli",
+          "executable_hint": "blender",
+          "argv": [
+            "blender",
+            "--background",
+            "--python",
+            "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_render_asset_front.py",
+            "--",
+            "--input",
+            "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+            "--output",
+            "tools/renders/azure_sakura_polishfit/current.png"
+          ]
+        },
+        "args": {
+          "input": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+          "output": "tools/renders/azure_sakura_polishfit/current.png"
+        },
+        "completed": true
+      }
+    ],
+    "notes": [
+      "Execution evidence is ingested from the current root artifact paths rather than copied into ai-dev-system."
+    ]
+  },
+  "notes": [
+    "This handoff manifest captures ingested executed root artifacts without claiming a live Unity runtime registry.",
+    "Import into Unity should still wait for the relevant manual gates and live equip or prefab hookup tasks."
+  ],
+  "manual_gates": [
+    "Blender wrapper execution still requires a target machine with Blender installed.",
+    "Unity wardrobe runtime item registry mapping remains planned work.",
+    "Current implementation supports clothing-foundation refinement wrappers but still depends on target-machine Blender execution.",
+    "Unity runtime wardrobe handoff registry intake now exists, but bridge-driven live equip still remains planned work."
+  ]
+}

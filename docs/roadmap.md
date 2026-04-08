@@ -13,7 +13,7 @@ Use code as the final source of truth, and treat planned work or manual-only val
 - `ai-dev-system/control-plane/` is the current automation runtime source of truth.
 - `ai-dev-system/context/` is the current subsystem context source of truth.
 - `ai-dev-system/domain/` is the current shared avatar, customization, room, and shared-contract source of truth.
-- `ai-dev-system/workbench/` and `ai-dev-system/asset-pipeline/` now own workbench inventory, naming guidance, and pipeline validation governance.
+- `ai-dev-system/workbench/` and `ai-dev-system/asset-pipeline/` now own workbench inventory, naming guidance, pipeline validation governance, and the Mesh AI asset-refine contract foundation.
 - `ai-dev-system/scripts/` and `ai-dev-system/tests/` now provide the standardized non-backend entry-point surface and the subsystem test-catalog root.
 - Phase 9 removed the temporary root-level import shims that had mirrored control-plane packages at the `ai-dev-system/` root and locked the active import/bootstrap surface.
 
@@ -44,6 +44,8 @@ Use code as the final source of truth, and treat planned work or manual-only val
 Detailed architecture view:
 
 - `docs/architecture/non-backend-integration.md`
+- `docs/architecture/blender-mcp-integration.md`
+- `docs/architecture/mesh-ai-blender-unity-integration.md`
 
 ## 3. Runtime Flow
 
@@ -71,6 +73,7 @@ Use these roots first:
   - `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`
 - Automation runtime:
   - `ai-dev-system/control-plane/app/`
+  - `ai-dev-system/control-plane/app/blender/`
   - `ai-dev-system/control-plane/agents/`
   - `ai-dev-system/control-plane/executor/`
   - `ai-dev-system/control-plane/planner/`
@@ -85,6 +88,8 @@ Use these roots first:
 - Workbench and asset pipeline governance:
   - `ai-dev-system/workbench/`
   - `ai-dev-system/asset-pipeline/`
+  - `docs/architecture/blender-mcp-integration.md`
+  - `docs/architecture/mesh-ai-blender-unity-integration.md`
 - Standardized scripts and structure validation:
   - `ai-dev-system/scripts/run/`
   - `ai-dev-system/scripts/validate/`
@@ -111,6 +116,8 @@ Use these roots first:
 - Asset-pipeline governance:
   - `ai-dev-system/asset-pipeline/`
   - `ai-dev-system/workbench/`
+  - `docs/architecture/blender-mcp-integration.md`
+  - `docs/architecture/mesh-ai-blender-unity-integration.md`
 - Backend behavior:
   - `local-backend/app/api/routes.py`
   - `local-backend/app/services/`
@@ -131,6 +138,7 @@ Use these roots first:
 - `npm run rebuild:check`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-structure.ps1`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-avatar-pipeline.ps1`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-blender-mcp.ps1`
 - `python ai-dev-system/scripts/validate/validate_phase7_structure.py`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File ai-dev-system/scripts/validate/validate-architecture-lock.ps1`
 
@@ -212,9 +220,11 @@ Recommended read order for the current repo state:
 9. `docs/architecture/local-storage.md`
 10. `docs/adr/README.md`
 11. `docs/architecture/non-backend-integration.md`
-12. `docs/migration/ai-dev-system-unification.md`
-13. `local-backend/app/api/routes.py`
-14. `ai-dev-system/README.md`
-15. `ai-dev-system/control-plane/README.md`
-16. `ai-dev-system/domain/README.md`
-17. `tasks/task-queue.md`
+12. `docs/architecture/mesh-ai-blender-unity-integration.md`
+13. `docs/architecture/blender-mcp-integration.md`
+14. `docs/migration/ai-dev-system-unification.md`
+15. `local-backend/app/api/routes.py`
+16. `ai-dev-system/README.md`
+17. `ai-dev-system/control-plane/README.md`
+18. `ai-dev-system/domain/README.md`
+19. `tasks/task-queue.md`

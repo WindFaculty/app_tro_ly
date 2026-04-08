@@ -372,7 +372,9 @@ fn normalize_session_state(input: DesktopSessionState) -> DesktopSessionState {
             },
             backend_message: input.runtime_snapshot.backend_message.trim().to_string(),
             backend_ready: input.runtime_snapshot.backend_ready,
-            unity_runtime_state: normalize_optional_text(input.runtime_snapshot.unity_runtime_state),
+            unity_runtime_state: normalize_optional_text(
+                input.runtime_snapshot.unity_runtime_state,
+            ),
             unity_bridge_state: normalize_optional_text(input.runtime_snapshot.unity_bridge_state),
             window_maximized: input.runtime_snapshot.window_maximized,
             updated_at_ms: now,
@@ -487,7 +489,10 @@ fn normalize_optional_text(value: Option<String>) -> Option<String> {
 }
 
 fn resolve_persistence_paths(app: &AppHandle) -> Result<PersistenceFilePaths, String> {
-    let app_data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
     Ok(PersistenceFilePaths {
         session_state: app_data_dir.join(SESSION_STATE_RELATIVE_PATH),
         window_state: app_data_dir.join(WINDOW_STATE_RELATIVE_PATH),
@@ -620,8 +625,14 @@ fn quarantine_invalid_file(path: &Path) {
 }
 
 fn build_quarantine_path(path: &Path) -> PathBuf {
-    let stem = path.file_stem().and_then(|value| value.to_str()).unwrap_or("state");
-    let extension = path.extension().and_then(|value| value.to_str()).unwrap_or("json");
+    let stem = path
+        .file_stem()
+        .and_then(|value| value.to_str())
+        .unwrap_or("state");
+    let extension = path
+        .extension()
+        .and_then(|value| value.to_str())
+        .unwrap_or("json");
     path.with_file_name(format!(
         "{}.corrupt-{}.{}",
         stem,
@@ -684,7 +695,10 @@ mod tests {
                 "/chat".to_string()
             ]
         );
-        assert_eq!(normalized.session.schema_version, PERSISTENCE_SCHEMA_VERSION);
+        assert_eq!(
+            normalized.session.schema_version,
+            PERSISTENCE_SCHEMA_VERSION
+        );
     }
 
     #[test]
@@ -705,7 +719,10 @@ mod tests {
         .expect("expected recovery with default");
 
         assert_eq!(restored.active_route, "/");
-        assert!(report.recovered_files.iter().any(|item| item == "session-state.json"));
+        assert!(report
+            .recovered_files
+            .iter()
+            .any(|item| item == "session-state.json"));
         let sibling_files = fs::read_dir(path.parent().expect("missing parent"))
             .expect("failed to read state dir")
             .count();

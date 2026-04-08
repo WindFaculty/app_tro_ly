@@ -1,0 +1,38 @@
+{
+  "name": "com.unity.2d.tooling",
+  "displayName": "2D Tooling",
+  "version": "2.0.1",
+  "unity": "6000.4",
+  "unityRelease": "0a4",
+  "description": "A Unity Editor tool to analyze Sprite Atlases usage.",
+  "dependencies": {
+    "com.unity.2d.common": "13.0.1",
+    "com.unity.modules.uielements": "1.0.0"
+  },
+  "relatedPackages": {
+    "com.unity.2d.common.tests": "13.0.1",
+    "com.unity.2d.tooling.tests": "2.0.1"
+  },
+  "samples": [
+    {
+      "displayName": "Sample Sprite Atlas Report",
+      "description": "Sample Sprite Atlas report that shows how to use the Sprite Atlas data source to create a report. Note that this sample uses the internal APIs from the package which are subject to change.",
+      "path": "Samples~/Sample Sprite Atlas Report"
+    },
+    {
+      "displayName": "Sample Sprite Data source And Report",
+      "description": "Sample custom data source and report implementation.",
+      "path": "Samples~/Sample Sprite Data source And Report"
+    }
+  ],
+  "repository": {
+    "revision": "09156026ac819d901f92f956a6317aacbae1ba9e",
+    "type": "git",
+    "url": "https://github.cds.internal.unity3d.com/unity/2d.git"
+  },
+  "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.2d.tooling@2.0/manual/index.html",
+  "_upm": {
+    "changelog": "# Added\n- Columns for all Sprite Atlas reports can be sorted.\n  \n### Fixed\n- Fixed secondary texture in Sprite Atlas mistaken as atlas with more than 1 texture. (DANB-1210)"
+  },
+  "_fingerprint": "baa4133dcff250a359748b59a534fd6575b25a8a"
+}

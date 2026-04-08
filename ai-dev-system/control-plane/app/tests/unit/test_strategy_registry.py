@@ -13,6 +13,7 @@ class TestStrategyRegistry:
     def test_known_strategies_registered(self):
         known = [
             "mcp_tool",
+            "blender_mcp_tool",
             "mcp_batch",
             "pywinauto_click",
             "pywinauto_invoke",

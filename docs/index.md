@@ -4,6 +4,7 @@
 
 - [roadmap.md](roadmap.md) - ENTRY POINT for repo structure, runtime flow, module ownership, and reading order
 - [architecture/non-backend-integration.md](architecture/non-backend-integration.md) - current non-backend integration map, ownership split, and source-of-truth guide
+- [architecture/blender-mcp-integration.md](architecture/blender-mcp-integration.md) - optional Blender MCP control-plane lane, policy defaults, and Codex local-config guidance
 - [02-architecture.md](02-architecture.md) - current assistant runtime architecture
 - [03-api.md](03-api.md) - current backend contract
 - [04-ui.md](04-ui.md) - current Unity UI implementation and planned-direction boundary

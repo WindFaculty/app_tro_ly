@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-04-07 17:50:46Z" end-time="2026-04-07 17:50:47Z" duration="0.3033051">
+  <test-suite type="TestSuite" id="1000" name="Local Desktop Assistant" fullname="Local Desktop Assistant" runstate="Runnable" testcasecount="33" result="Passed" start-time="2026-04-07 17:50:46Z" end-time="2026-04-07 17:50:47Z" duration="0.303305" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1048" name="LocalAssistant.EditModeTests.dll" fullname="D:/antigaravity_code/app_tro_ly/ai-dev-system/clients/unity-client/Library/ScriptAssemblies/LocalAssistant.EditModeTests.dll" runstate="Runnable" testcasecount="33" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.271239" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="14680" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1049" name="LocalAssistant" fullname="LocalAssistant" runstate="Runnable" testcasecount="33" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.268051" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1050" name="Tests" fullname="LocalAssistant.Tests" runstate="Runnable" testcasecount="33" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.265619" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1051" name="EditMode" fullname="LocalAssistant.Tests.EditMode" runstate="Runnable" testcasecount="33" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.263169" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1028" name="MeshAssetRegistryTests" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.255354" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1029" name="ReloadRegistersWardrobeAndRoomHandoffManifests" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.ReloadRegistersWardrobeAndRoomHandoffManifests" methodname="ReloadRegistersWardrobeAndRoomHandoffManifests" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="1742163632" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.135815" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1030" name="TryApplyRoomFocusPresetUsesRegistryAliasWhenSceneObjectIsMissing" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.TryApplyRoomFocusPresetUsesRegistryAliasWhenSceneObjectIsMissing" methodname="TryApplyRoomFocusPresetUsesRegistryAliasWhenSceneObjectIsMissing" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="1984736651" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.018577" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1031" name="UnityBridgeClientUsesRegistryFallbacksWithoutClaimingLiveWardrobeMapping" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.UnityBridgeClientUsesRegistryFallbacksWithoutClaimingLiveWardrobeMapping" methodname="UnityBridgeClientUsesRegistryFallbacksWithoutClaimingLiveWardrobeMapping" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="1960033216" result="Passed" start-time="2026-04-07 17:50:47Z" end-time="2026-04-07 17:50:47Z" duration="0.046971" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[InteractionRuntime] Could not find target object 'DeskLantern'.
+[UnityBridgeClient] Wardrobe key 'AzureSakuraKimono' matched handoff manifest 'azure-sakura-kimono-0326010047', nhung runtime mapping sang AvatarItemDefinition van la planned work cho A20.
+<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/tranx/AppData/LocalLow/DefaultCompany/Local Desktop Assistant\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

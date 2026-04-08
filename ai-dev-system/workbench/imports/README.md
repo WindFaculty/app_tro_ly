@@ -11,6 +11,7 @@ Notes:
 
 - The Meshy kimono folder is a raw source import, not a runtime asset root.
 - The FBX inside `bleder/` is currently an in-process authoring input rather than a normalized import destination.
+- `mesh-ai-intake.md` defines the current intake metadata and lifecycle contract for new Mesh AI imports.
 
 Planned work:
 

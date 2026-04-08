@@ -11,6 +11,19 @@ Important boundary:
 
 - `tool-catalog.json`
   - current source-root map of helper scripts grouped by pipeline role
+- `toolchain-map.json`
+  - deterministic profile-to-wrapper mapping for the Mesh AI refine foundation
+- `profiles/`
+  - current Mesh AI lifecycle profiles for props, room items, accessories, and clothing
+- `schemas/`
+  - current manifest and report shapes for intake, refinement, validation, and export handoff
+- `manifests/`
+  - normalized lifecycle examples grounded in current repo assets and reports, including ingested execution evidence from root artifacts when present
+  - first target-machine wrapper execution summary for the Azure Sakura sample
+- `reports/README.md`
+  - ownership note for report projections versus root executed artifacts
+- `tool-mapping.md`
+  - current human-readable mapping between profiles and root Blender helpers
 - `validate-phase6-structure.ps1`
   - repeatable PowerShell validation for the current Phase 6 workbench and pipeline source roots
 
@@ -34,4 +47,10 @@ Important boundary:
 
 - The helper scripts themselves have not been moved under `ai-dev-system/asset-pipeline/` yet.
 - No unified import-normalization command exists yet for all raw asset sources.
-- Export-ready packaging helpers are still represented by current reports and manual flow, not a fully centralized pipeline package.
+- Export-ready packaging helpers are still represented by current reports, manifests, and manual flow, not a fully centralized runtime package.
+- Target-machine Blender execution and live Unity prefab or equip mapping remain manual gates even though profile and workflow foundations now exist and Unity now has registry intake for the export handoff manifests.
+- The current repo now includes one executed Azure Sakura wrapper pass captured through `workflows/mesh_ai_refine.py --execute-wrappers`, but broader profile coverage and Unity registry consumption still remain follow-up work.
+
+Reminder:
+
+- The Mesh AI foundation still calls into root `tools/` and does not replace that executable helper root.

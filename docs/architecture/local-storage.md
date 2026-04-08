@@ -16,8 +16,9 @@ This document locks the local storage strategy for the desktop rebuild:
 Current backend storage behavior is already proven in code:
 
 - `local-backend/app/core/config.py` resolves `data_dir`, `db_path`, `audio_dir`, `cache_dir`, and `log_dir`
-- `local-backend/app/db/repository.py` initializes SQLite tables for tasks, notes, conversations, reminders, settings, session state, assistant sessions, summaries, memory, and route logs
+- `local-backend/app/db/repository.py` initializes SQLite tables for tasks, notes, conversations, reminders, settings, session state, assistant sessions, summaries, memory, route logs, Google OAuth token state, local email drafts, email-task links, and browser automation runs plus steps plus audit logs
 - `local-backend/app/container.py` creates the repository during backend startup
+- `local-backend/app/services/wardrobe.py` now creates and maintains the JSON wardrobe registry under `data/wardrobe/registry.json`
 
 Current default path behavior keeps backend data under:
 
@@ -26,14 +27,21 @@ local-backend/data/
 |- app.db
 |- audio/
 |- cache/
-`- logs/
+|- logs/
+`- wardrobe/
+   `- registry.json
 ```
+
+Packaged current implementation note:
+
+- `apps/desktop-shell/src-tauri/src/backend.rs` now injects `ASSISTANT_DATA_DIR`, `ASSISTANT_DB_PATH`, `ASSISTANT_AUDIO_DIR`, `ASSISTANT_CACHE_DIR`, and `ASSISTANT_LOG_DIR` from the Tauri host, so packaged desktop builds keep mutable backend state under the app data or cache or log roots instead of inside bundled resources.
 
 Current implementation note:
 
 - `app_settings` and `session_state` are still stored in SQLite today
 - that is current behavior, not the locked target split for future phases
 - the desktop rebuild shell now also owns separate JSON restore files in `apps/desktop-shell/src-tauri/src/persistence.rs` for shell session restore and host-level recovery state
+- the desktop rebuild backend now also owns `data/wardrobe/registry.json` through `local-backend/app/services/wardrobe.py`, with JSON validation plus corrupt-file quarantine before falling back to a seeded default registry
 
 ## Target Ownership
 
@@ -78,6 +86,8 @@ Current implementation note:
 - `apps/desktop-shell/src-tauri/src/persistence.rs` now creates and maintains `state/session-state.json`, `state/window-state.json`, `state/runtime-snapshot.json`, `ui/theme-state.json`, `ui/filters.json`, and `config/app-preferences.json` under the Tauri app data root
 - `apps/web-ui/src/App.tsx` plus `apps/web-ui/src/components/ShellLayout.tsx` now restore and persist shell route or runtime context through those host-managed JSON files
 - `apps/web-ui/src/pages/SettingsPage.tsx` plus the host reset command in `apps/desktop-shell/src-tauri/src/lib.rs` can now rebuild those desktop restore files back to defaults as a recovery action
+- `local-backend/app/services/wardrobe.py` now persists the wardrobe registry under `local-backend/data/wardrobe/registry.json`, seeds it from the shared customization domain contracts, and exposes it through `/v1/wardrobe`, `/v1/wardrobe/export`, and `/v1/wardrobe/import`
+- packaged desktop builds now stage `local-backend/` plus `ai-dev-system/domain/customization/contracts/` and `sample-data/` through `scripts/prepare_desktop_bundle_resources.py`, so wardrobe contract reads still resolve without bundling live backend data or backend tests
 - browser preview uses `localStorage` as a development-only fallback through `apps/web-ui/src/services/runtimeHost.ts`; it is not the desktop source of truth
 
 ## SQLite Scope
@@ -95,12 +105,14 @@ SQLite is reserved for structured business records and durable history.
 - conversation summaries
 - memory items
 - route logs
+- Google OAuth token state for Gmail and Google Calendar
+- local email drafts
+- email-task links
+- browser automation runs, steps, and audit logs
 
 ### Planned target additions for SQLite
 
-- calendar cache
-- email cache metadata
-- automation history
+- richer email or calendar cache metadata if later phases need offline history
 
 ### Planned target migrations out of SQLite
 
@@ -122,6 +134,11 @@ Target JSON categories:
 - app preferences
 - wardrobe registry and sync-ready manifest snapshots
 - lightweight runtime snapshots for recovery
+
+Current implementation note:
+
+- `local-backend/data/wardrobe/registry.json` is now the current desktop-side JSON registry for slot taxonomy snapshots, item metadata, preset assignments, compatibility warnings, and import or export payloads
+- packaged desktop builds now route that same registry shape under `<app-data-root>/data/wardrobe/registry.json` through the host-owned backend path overrides in `apps/desktop-shell/src-tauri/src/backend.rs`
 
 JSON files must be:
 
@@ -150,6 +167,12 @@ A01 locks only the ownership rule:
 - React must not become the source of truth for provider secrets
 
 Detailed credential handling remains planned work for later implementation phases.
+
+Current implementation note:
+
+- A09 and A10 now store Google OAuth tokens plus local Gmail draft and task-link state in SQLite through `local-backend/app/db/repository.py`
+- Current implementation: Google Calendar event reads and writes are provider-backed and do not create a local calendar-event cache yet
+- backend environment variables in `local-backend/app/core/config.py` still own the Google OAuth client id or secret and redirect configuration
 
 ## Related Documents
 

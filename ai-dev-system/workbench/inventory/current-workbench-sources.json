@@ -5,6 +5,10 @@
     {
       "path": "bleder",
       "kind": "blender_authoring",
+      "logical_statuses": [
+        "cleaned",
+        "export-ready"
+      ],
       "notable_items": [
         "CHR_Avatar_Base_v001_work.blend",
         "CHR_Avatar_Base_v001_rigclean.blend",
@@ -19,6 +23,9 @@
     {
       "path": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx",
       "kind": "raw_import_source",
+      "logical_statuses": [
+        "raw"
+      ],
       "notable_items": [
         "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
         "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.png",
@@ -30,6 +37,9 @@
     {
       "path": "tools/reports",
       "kind": "report_artifacts",
+      "logical_statuses": [
+        "validated"
+      ],
       "notable_items": [
         "avatar_base_v001_export_report.json",
         "avatar_base_v001_validation.json",
@@ -40,6 +50,10 @@
     {
       "path": "tools/renders",
       "kind": "render_artifacts",
+      "logical_statuses": [
+        "validated",
+        "export-ready"
+      ],
       "notable_items": [
         "azure_sakura_polishfit",
         "azure_sakura_shoulderarmfit",
@@ -50,6 +64,7 @@
   ],
   "notes": [
     "This inventory records the current authoring roots without moving the large files into ai-dev-system/workbench yet.",
-    "No Clothy3D root is present in the current repo snapshot."
+    "No Clothy3D root is present in the current repo snapshot.",
+    "Mesh AI lifecycle ownership is logical guidance only; the current physical files remain in their root authoring locations."
   ]
 }

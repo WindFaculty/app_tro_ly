@@ -1,7 +1,14 @@
 import { useDeferredValue, useMemo, useState } from "react";
 import type { DesktopPlannerView } from "@contracts";
 import { PageTemplate } from "@/components/PageTemplate";
-import type { SettingsResponse, TaskRecord, WeekDaySummary } from "@/contracts/backend";
+import type {
+  GoogleCalendarEventRecord,
+  GoogleCalendarStatusResponse,
+  SettingsResponse,
+  TaskRecord,
+  WeekDaySummary,
+} from "@/contracts/backend";
+import { useGoogleCalendarWorkspace } from "@/features/calendar/useGoogleCalendarWorkspace";
 import { usePlannerWorkspace } from "@/features/planner/usePlannerWorkspace";
 import styles from "./PlannerPage.module.css";
 
@@ -55,6 +62,23 @@ function priorityTone(priority: string): "accent" | "sun" | "success" | "danger"
   }
 }
 
+function integrationTone(
+  status: string | undefined,
+): "accent" | "sun" | "success" | "danger" | "warm" {
+  switch (status) {
+    case "ready":
+      return "success";
+    case "disabled":
+    case "not_configured":
+      return "sun";
+    case "error":
+    case "disconnected":
+      return "danger";
+    default:
+      return "accent";
+  }
+}
+
 function formatDateTime(value: string | null | undefined): string {
   if (!value) {
     return "No time";
@@ -87,6 +111,25 @@ function formatDate(value: string | null | undefined): string {
     month: "short",
     day: "numeric",
   }).format(parsed);
+}
+
+function formatCalendarEventRange(event: GoogleCalendarEventRecord): string {
+  if (event.is_all_day) {
+    const start = formatDate(event.start_date);
+    const end = event.end_date && event.end_date !== event.start_date ? ` - ${formatDate(event.end_date)}` : "";
+    return `${start}${end} | all day`;
+  }
+  return `${formatDateTime(event.start_at)} - ${formatDateTime(event.end_at)}`;
+}
+
+function calendarSummaryLabel(status: GoogleCalendarStatusResponse | null): string {
+  if (!status) {
+    return "...";
+  }
+  if (status.connected) {
+    return status.calendar_id ?? "connected";
+  }
+  return status.status;
 }
 
 function taskAnchor(task: TaskRecord): string {
@@ -282,6 +325,7 @@ function TaskCard({
 
 export function PlannerPage() {
   const workspace = usePlannerWorkspace();
+  const googleCalendar = useGoogleCalendarWorkspace();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const deferredSearch = useDeferredValue(searchQuery.trim().toLowerCase());
@@ -332,6 +376,7 @@ export function PlannerPage() {
 
   const leadMinutes = reminderLeadMinutes(workspace.state.settings);
   const activeCount = allTasks.filter((task) => !["done", "cancelled"].includes(task.status)).length;
+  const calendarAgendaCount = googleCalendar.state.agenda?.count ?? 0;
 
   const handleStartCreate = () => {
     workspace.startCreate(activeTag ? { tagsText: activeTag } : undefined);
@@ -442,49 +487,421 @@ export function PlannerPage() {
         );
       case "calendar":
         return (
-          <article className="surface">
-            <div className="surfaceHeader">
-              <div className="surfaceHeaderBlock">
-                <span className="eyebrow">Calendar view</span>
-                <h3 className="surfaceTitle">Week grid for date-first planning</h3>
-                <p className="surfaceIntro">
-                  This is the landed planner calendar view for local tasks. Google calendar data
-                  still belongs to A10.
-                </p>
+          <>
+            <article className="surface">
+              <div className="surfaceHeader">
+                <div className="surfaceHeaderBlock">
+                  <span className="eyebrow">Calendar view</span>
+                  <h3 className="surfaceTitle">Local week grid plus Google agenda</h3>
+                  <p className="surfaceIntro">
+                    A10 keeps the existing local task week grid from A07 and adds a real Google
+                    Calendar agenda plus event editing surface inside the planner lane.
+                  </p>
+                </div>
+                <span className="chip" data-tone={integrationTone(googleCalendar.state.status?.status)}>
+                  {calendarSummaryLabel(googleCalendar.state.status)}
+                </span>
               </div>
-            </div>
-            <div className={styles.calendarGrid}>
-              {filteredWeekDays.map((day) => (
-                <article key={day.date} className={styles.calendarDay}>
-                  <div className={styles.calendarDayHeader}>
-                    <p className="listTitle">{formatDate(day.date)}</p>
-                    <span className="chip" data-tone="accent">
-                      {day.items.length}
-                    </span>
+              <div className={styles.calendarGrid}>
+                {filteredWeekDays.map((day) => (
+                  <article key={day.date} className={styles.calendarDay}>
+                    <div className={styles.calendarDayHeader}>
+                      <p className="listTitle">{formatDate(day.date)}</p>
+                      <span className="chip" data-tone="accent">
+                        {day.items.length}
+                      </span>
+                    </div>
+                    <div className={styles.calendarTaskList}>
+                      {day.items.length > 0 ? (
+                        day.items.map((task) => (
+                          <button
+                            key={task.id}
+                            type="button"
+                            className={styles.calendarTask}
+                            onClick={() => workspace.startEdit(task)}
+                          >
+                            <span className={styles.calendarTaskTitle}>{task.title}</span>
+                            <span className={styles.calendarTaskMeta}>
+                              {formatDateTime(task.start_at || task.due_at)}
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="helperText">No tasks</p>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </article>
+
+            <div className={styles.calendarWorkspaceGrid}>
+              <article className="surface surfaceMuted">
+                <div className="surfaceHeader">
+                  <div className="surfaceHeaderBlock">
+                    <span className="eyebrow">Google Calendar sync</span>
+                    <h3 className="surfaceTitle">Agenda window and provider state</h3>
+                    <p className="surfaceIntro">
+                      The planner reads the current Google Calendar window directly from the backend
+                      integration instead of inventing a local calendar cache.
+                    </p>
                   </div>
-                  <div className={styles.calendarTaskList}>
-                    {day.items.length > 0 ? (
-                      day.items.map((task) => (
-                        <button
-                          key={task.id}
-                          type="button"
-                          className={styles.calendarTask}
-                          onClick={() => workspace.startEdit(task)}
-                        >
-                          <span className={styles.calendarTaskTitle}>{task.title}</span>
-                          <span className={styles.calendarTaskMeta}>
-                            {formatDateTime(task.start_at || task.due_at)}
+                  <span className="chip" data-tone={integrationTone(googleCalendar.state.status?.status)}>
+                    {googleCalendar.state.status?.status ?? "checking"}
+                  </span>
+                </div>
+                <div className="detailGrid">
+                  <div className="detailRow">
+                    <span className="detailLabel">Account</span>
+                    <span className="detailValue">{googleCalendar.state.status?.calendar_id ?? "not connected"}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Agenda days</span>
+                    <span className="detailValue">{googleCalendar.state.status?.agenda_days ?? 7}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Event limit</span>
+                    <span className="detailValue">{googleCalendar.state.status?.event_limit ?? 20}</span>
+                  </div>
+                  <div className="detailRow">
+                    <span className="detailLabel">Time zone</span>
+                    <span className="detailValue">{googleCalendar.state.agenda?.time_zone ?? "not reported"}</span>
+                  </div>
+                </div>
+                <label className={styles.calendarControl}>
+                  <span className="formLabel">Agenda start date</span>
+                  <input
+                    type="date"
+                    className="textInput"
+                    value={googleCalendar.state.windowStartDate}
+                    onChange={(event) => googleCalendar.setWindowStartDate(event.target.value)}
+                  />
+                </label>
+                <div className="actionRow">
+                  <span className="helperText">
+                    {googleCalendar.state.status?.detail ??
+                      "Connect Google Calendar from Settings to enable agenda sync."}
+                  </span>
+                  <div className="chipRow">
+                    <button
+                      type="button"
+                      className="ghostButton"
+                      onClick={() => void googleCalendar.refresh()}
+                      disabled={googleCalendar.state.loading || googleCalendar.state.mutating}
+                    >
+                      {googleCalendar.state.loading ? "Refreshing..." : "Refresh agenda"}
+                    </button>
+                    <button
+                      type="button"
+                      className="secondaryButton"
+                      onClick={() => googleCalendar.startCreate()}
+                      disabled={googleCalendar.state.mutating}
+                    >
+                      New event
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              <article className="surface">
+                <div className="surfaceHeader">
+                  <div className="surfaceHeaderBlock">
+                    <span className="eyebrow">Google agenda</span>
+                    <h3 className="surfaceTitle">Connected calendar events</h3>
+                    <p className="surfaceIntro">
+                      Event reads stay provider-backed, while edits write back through the Google
+                      Calendar API routes added in A10.
+                    </p>
+                  </div>
+                  <span className="chip" data-tone={calendarAgendaCount > 0 ? "accent" : "sun"}>
+                    {calendarAgendaCount} events
+                  </span>
+                </div>
+                {googleCalendar.state.agenda?.items.length ? (
+                  <div className={styles.calendarEventList}>
+                    {googleCalendar.state.agenda.items.map((event) => (
+                      <article key={event.id} className={styles.calendarEventCard}>
+                        <div className={styles.calendarEventHeader}>
+                          <div>
+                            <p className="listTitle">{event.summary}</p>
+                            <p className="listSubtitle">
+                              {formatCalendarEventRange(event)}
+                              {event.location ? ` | ${event.location}` : ""}
+                            </p>
+                          </div>
+                          <span className="chip" data-tone={event.is_all_day ? "sun" : "accent"}>
+                            {event.is_all_day ? "all day" : "timed"}
                           </span>
-                        </button>
-                      ))
-                    ) : (
-                      <p className="helperText">No tasks</p>
-                    )}
+                        </div>
+                        {event.description && <p className="bodyText">{event.description}</p>}
+                        <div className="chipRow">
+                          {event.attendees.length > 0 ? (
+                            event.attendees.map((attendee) => (
+                              <span key={attendee} className="chip" data-tone="accent">
+                                {attendee}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="chip" data-tone="sun">
+                              no attendees
+                            </span>
+                          )}
+                        </div>
+                        <div className={styles.taskActions}>
+                          <button
+                            type="button"
+                            className="ghostButton"
+                            onClick={() => googleCalendar.startEdit(event)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="ghostButton"
+                            onClick={() => void googleCalendar.deleteEvent(event)}
+                          >
+                            Delete
+                          </button>
+                          {event.html_link && (
+                            <a
+                              className="ghostButton"
+                              href={event.html_link}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open in Google
+                            </a>
+                          )}
+                        </div>
+                      </article>
+                    ))}
                   </div>
-                </article>
-              ))}
+                ) : (
+                  <div className="emptyState">
+                    <p className="emptyStateTitle">No Google Calendar events in this window</p>
+                    <p className="emptyStateText">
+                      {googleCalendar.state.status?.detail ??
+                        "Connect Google Calendar from Settings, then refresh the planner agenda."}
+                    </p>
+                  </div>
+                )}
+              </article>
             </div>
-          </article>
+
+            <article className="surface surfaceMuted">
+              <div className="surfaceHeader">
+                <div className="surfaceHeaderBlock">
+                  <span className="eyebrow">Calendar editor</span>
+                  <h3 className="surfaceTitle">
+                    {googleCalendar.draftMode === "edit" ? "Edit selected event" : "Create a calendar event"}
+                  </h3>
+                  <p className="surfaceIntro">
+                    This editor writes directly to the backend Google Calendar contract and keeps
+                    all-day versus timed events explicit.
+                  </p>
+                </div>
+                <span
+                  className="chip"
+                  data-tone={googleCalendar.draftMode === "edit" ? "warm" : "accent"}
+                >
+                  {googleCalendar.draftMode}
+                </span>
+              </div>
+              <div className={styles.editorGrid}>
+                <label className={styles.editorField}>
+                  <span className="formLabel">Summary</span>
+                  <input
+                    className="textInput"
+                    value={googleCalendar.draft.summary}
+                    onChange={(event) =>
+                      googleCalendar.setDraft((current) => ({
+                        ...current,
+                        summary: event.target.value,
+                      }))
+                    }
+                    placeholder="Project kickoff"
+                  />
+                </label>
+
+                <label className={styles.editorField}>
+                  <span className="formLabel">Description</span>
+                  <textarea
+                    className="textArea"
+                    rows={4}
+                    value={googleCalendar.draft.description}
+                    onChange={(event) =>
+                      googleCalendar.setDraft((current) => ({
+                        ...current,
+                        description: event.target.value,
+                      }))
+                    }
+                    placeholder="Agenda notes and context"
+                  />
+                </label>
+
+                <div className={styles.editorSplit}>
+                  <label className={styles.editorField}>
+                    <span className="formLabel">Location</span>
+                    <input
+                      className="textInput"
+                      value={googleCalendar.draft.location}
+                      onChange={(event) =>
+                        googleCalendar.setDraft((current) => ({
+                          ...current,
+                          location: event.target.value,
+                        }))
+                      }
+                      placeholder="Conference room or meeting link"
+                    />
+                  </label>
+
+                  <label className={styles.editorField}>
+                    <span className="formLabel">Calendar id</span>
+                    <input
+                      className="textInput"
+                      value={googleCalendar.draft.calendarId}
+                      onChange={(event) =>
+                        googleCalendar.setDraft((current) => ({
+                          ...current,
+                          calendarId: event.target.value,
+                        }))
+                      }
+                      placeholder={googleCalendar.state.status?.default_calendar_id ?? "primary"}
+                    />
+                  </label>
+                </div>
+
+                <label className={styles.editorField}>
+                  <span className="formLabel">Attendees</span>
+                  <input
+                    className="textInput"
+                    value={googleCalendar.draft.attendeesText}
+                    onChange={(event) =>
+                      googleCalendar.setDraft((current) => ({
+                        ...current,
+                        attendeesText: event.target.value,
+                      }))
+                    }
+                    placeholder="pm@example.com, design@example.com"
+                  />
+                </label>
+
+                <label className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    checked={googleCalendar.draft.isAllDay}
+                    onChange={(event) =>
+                      googleCalendar.setDraft((current) => ({
+                        ...current,
+                        isAllDay: event.target.checked,
+                      }))
+                    }
+                  />
+                  <span className="helperText">All-day event</span>
+                </label>
+
+                {googleCalendar.draft.isAllDay ? (
+                  <div className={styles.editorSplit}>
+                    <label className={styles.editorField}>
+                      <span className="formLabel">Start date</span>
+                      <input
+                        type="date"
+                        className="textInput"
+                        value={googleCalendar.draft.startDate}
+                        onChange={(event) =>
+                          googleCalendar.setDraft((current) => ({
+                            ...current,
+                            startDate: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+
+                    <label className={styles.editorField}>
+                      <span className="formLabel">End date</span>
+                      <input
+                        type="date"
+                        className="textInput"
+                        value={googleCalendar.draft.endDate}
+                        onChange={(event) =>
+                          googleCalendar.setDraft((current) => ({
+                            ...current,
+                            endDate: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <div className={styles.editorSplit}>
+                    <label className={styles.editorField}>
+                      <span className="formLabel">Start at</span>
+                      <input
+                        type="datetime-local"
+                        className="textInput"
+                        value={googleCalendar.draft.startAt}
+                        onChange={(event) =>
+                          googleCalendar.setDraft((current) => ({
+                            ...current,
+                            startAt: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+
+                    <label className={styles.editorField}>
+                      <span className="formLabel">End at</span>
+                      <input
+                        type="datetime-local"
+                        className="textInput"
+                        value={googleCalendar.draft.endAt}
+                        onChange={(event) =>
+                          googleCalendar.setDraft((current) => ({
+                            ...current,
+                            endAt: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+              <div className="actionRow">
+                <span className="helperText">
+                  {googleCalendar.state.message ||
+                    "Google Calendar event writes stay disabled until the account is connected in Settings."}
+                </span>
+                <div className="chipRow">
+                  <button
+                    type="button"
+                    className="ghostButton"
+                    onClick={googleCalendar.resetDraft}
+                  >
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    className="primaryButton"
+                    onClick={() => void googleCalendar.submitDraft()}
+                    disabled={googleCalendar.state.mutating}
+                  >
+                    {googleCalendar.state.mutating
+                      ? "Saving..."
+                      : googleCalendar.draftMode === "edit"
+                        ? "Save event"
+                        : "Create event"}
+                  </button>
+                </div>
+              </div>
+            </article>
+
+            {googleCalendar.state.error && (
+              <article className="surface">
+                <span className="eyebrow">Calendar issue</span>
+                <p className="errorText">{googleCalendar.state.error}</p>
+              </article>
+            )}
+          </>
         );
       case "inbox":
         return (
@@ -648,7 +1065,7 @@ export function PlannerPage() {
       title="Planner"
       icon="PL"
       eyebrow="Planning lane"
-      description="A07 turns the planner lane into a real task workspace with CRUD, week and calendar views, reminder handling, tag filtering, and persisted planner-view restore."
+      description="A07 landed the task planner, and A10 adds Google Calendar agenda plus event editing without moving business UI back into Unity."
       actions={
         <>
           <button
@@ -662,10 +1079,15 @@ export function PlannerPage() {
           <button
             type="button"
             className="ghostButton"
-            onClick={() => void workspace.refresh()}
-            disabled={workspace.state.loading || workspace.state.mutating}
+            onClick={() => void Promise.all([workspace.refresh(), googleCalendar.refresh()])}
+            disabled={
+              workspace.state.loading ||
+              workspace.state.mutating ||
+              googleCalendar.state.loading ||
+              googleCalendar.state.mutating
+            }
           >
-            Refresh
+            Refresh all
           </button>
         </>
       }
@@ -686,6 +1108,11 @@ export function PlannerPage() {
           detail: "Direct backend overdue query",
         },
         {
+          label: "Calendar",
+          value: String(calendarAgendaCount),
+          detail: googleCalendar.state.status?.connected ? "Google agenda connected" : "Google agenda not connected",
+        },
+        {
           label: "Tags",
           value: String(tagBuckets.length),
           detail: activeTag ? `Filtering #${activeTag}` : "No tag filter",
@@ -697,10 +1124,10 @@ export function PlannerPage() {
           <div className="surfaceHeader">
             <div className="surfaceHeaderBlock">
               <span className="eyebrow">Workspace mode</span>
-              <h3 className="surfaceTitle">Planner, reminders, tags, and calendar views</h3>
+              <h3 className="surfaceTitle">Planner, reminders, tags, local calendar, and Google agenda</h3>
               <p className="surfaceIntro">
-                The selected planner view now persists through the desktop restore layer instead of
-                resetting to a placeholder page.
+                The selected planner view still persists through the desktop restore layer, and the
+                calendar lens now combines the local week plan with a provider-backed Google agenda.
               </p>
             </div>
             <span className="chip" data-tone="accent">

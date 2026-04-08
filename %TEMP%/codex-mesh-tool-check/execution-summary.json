@@ -1,0 +1,151 @@
+{
+  "asset_id": "azure-sakura-kimono-0326010047",
+  "profile_id": "unity_avatar_clothing_v1",
+  "blender_executable": "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+  "intake_manifest": "ai-dev-system/asset-pipeline/manifests/mesh-ai-azure-sakura-intake.json",
+  "started_at": "2026-04-08T07:51:16.051037+00:00",
+  "completed_at": "2026-04-08T07:52:47.474335+00:00",
+  "steps": [
+    {
+      "step_id": "asset_audit",
+      "stage": "raw",
+      "step_type": "blender_script",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+        "--background",
+        "--python",
+        "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_asset_audit.py",
+        "--",
+        "--input",
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+        "--report",
+        "tools/reports/azure_kimono_asset_audit.json"
+      ],
+      "started_at": "2026-04-08T07:51:16.051082+00:00",
+      "completed_at": "2026-04-08T07:51:31.593560+00:00",
+      "duration_seconds": 15.54,
+      "return_code": 0,
+      "stdout": "FBX version: 7400\nWrote asset audit to: D:\\antigaravity_code\\app_tro_ly\\tools\\reports\\azure_kimono_asset_audit.json\nBlender 5.1.0 (hash adfe2921d5f3 built 2026-03-17 01:37:32)\n\nBlender quit\n",
+      "stderr": "",
+      "output_evidence": {
+        "report_path": "tools/reports/azure_kimono_asset_audit.json"
+      },
+      "missing_outputs": []
+    },
+    {
+      "step_id": "dress_fit",
+      "stage": "cleaned",
+      "step_type": "blender_script",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+        "--background",
+        "--python",
+        "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_fit_dress_scene.py",
+        "--",
+        "--base-blend",
+        "bleder/CHR_Avatar_Base_v001_split15_facial.blend",
+        "--source-body-blend",
+        "bleder/CHR_Avatar_Base_v001_rigclean.blend",
+        "--dress-fbx",
+        "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+        "--output-blend",
+        "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "--report",
+        "tools/reports/azure_sakura_dress_polishfit_report.json",
+        "--dress-name",
+        "CHR_Dress_AzureSakuraKimono_v1"
+      ],
+      "started_at": "2026-04-08T07:51:31.593601+00:00",
+      "completed_at": "2026-04-08T07:52:17.350024+00:00",
+      "duration_seconds": 45.754,
+      "return_code": 0,
+      "stdout": "00:05.796  blend            | Read blend: \"D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Avatar_Base_v001_split15_facial.blend\"\nFBX version: 7400\nInfo: 30528 vertex weights limited\nInfo: Packed 4 file(s)\nInfo: Saved as \"CHR_Dress_AzureSakura_v001_polishfit.blend\"\nWrote dress fit report to: D:\\antigaravity_code\\app_tro_ly\\tools\\reports\\azure_sakura_dress_polishfit_report.json\nSaved fitted dress scene to: D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend\nBlender 5.1.0 (hash adfe2921d5f3 built 2026-03-17 01:37:32)\n\nBlender quit\n",
+      "stderr": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_fit_dress_scene.py:132: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0\n  material.use_nodes = True\n",
+      "output_evidence": {
+        "cleaned_source_path": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "report_path": "tools/reports/azure_sakura_dress_polishfit_report.json"
+      },
+      "missing_outputs": []
+    },
+    {
+      "step_id": "scene_state_report",
+      "stage": "validated",
+      "step_type": "blender_script",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+        "--background",
+        "--python",
+        "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_scene_state_report.py",
+        "--",
+        "--input",
+        "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "--report",
+        "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+      ],
+      "started_at": "2026-04-08T07:52:17.350065+00:00",
+      "completed_at": "2026-04-08T07:52:24.467239+00:00",
+      "duration_seconds": 7.116,
+      "return_code": 0,
+      "stdout": "00:05.437  blend            | Read blend: \"D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend\"\nWrote scene state report to: D:\\antigaravity_code\\app_tro_ly\\tools\\reports\\azure_sakura_dress_polishfit_scene_state.json\nBlender 5.1.0 (hash adfe2921d5f3 built 2026-03-17 01:37:32)\n\nBlender quit\n",
+      "stderr": "",
+      "output_evidence": {
+        "report_path": "tools/reports/azure_sakura_dress_polishfit_scene_state.json"
+      },
+      "missing_outputs": []
+    },
+    {
+      "step_id": "verify_fit",
+      "stage": "validated",
+      "step_type": "blender_script",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+        "--background",
+        "--python",
+        "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_verify_dress_scene.py",
+        "--",
+        "--input",
+        "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "--dress-name",
+        "CHR_Dress_AzureSakuraKimono_v1",
+        "--report",
+        "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+      ],
+      "started_at": "2026-04-08T07:52:24.467268+00:00",
+      "completed_at": "2026-04-08T07:52:31.952553+00:00",
+      "duration_seconds": 7.483,
+      "return_code": 0,
+      "stdout": "00:05.407  blend            | Read blend: \"D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend\"\nWrote dress verification report to: D:\\antigaravity_code\\app_tro_ly\\tools\\reports\\azure_sakura_dress_polishfit_verify_report.json\nBlender 5.1.0 (hash adfe2921d5f3 built 2026-03-17 01:37:32)\n\nBlender quit\n",
+      "stderr": "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_verify_dress_scene.py:87: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0\n  if material is None or not material.use_nodes or material.node_tree is None:\n",
+      "output_evidence": {
+        "report_path": "tools/reports/azure_sakura_dress_polishfit_verify_report.json"
+      },
+      "missing_outputs": []
+    },
+    {
+      "step_id": "preview_render",
+      "stage": "export-ready",
+      "step_type": "blender_script",
+      "command": [
+        "C:\\Program Files\\Blender Foundation\\Blender 5.1\\blender.exe",
+        "--background",
+        "--python",
+        "D:\\antigaravity_code\\app_tro_ly\\tools\\blender_render_asset_front.py",
+        "--",
+        "--input",
+        "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+        "--output",
+        "tools/renders/azure_sakura_polishfit/current.png"
+      ],
+      "started_at": "2026-04-08T07:52:31.952593+00:00",
+      "completed_at": "2026-04-08T07:52:47.473089+00:00",
+      "duration_seconds": 15.519,
+      "return_code": 0,
+      "stdout": "00:06.047  blend            | Read blend: \"D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend\"\n00:14.266  render           | Saved: 'D:\\antigaravity_code\\app_tro_ly\\tools\\renders\\azure_sakura_polishfit\\current.png'\nRendered asset to: D:\\antigaravity_code\\app_tro_ly\\tools\\renders\\azure_sakura_polishfit\\current.png\nBlender 5.1.0 (hash adfe2921d5f3 built 2026-03-17 01:37:32)\n\nBlender quit\n",
+      "stderr": "",
+      "output_evidence": {
+        "preview_render_path": "tools/renders/azure_sakura_polishfit/current.png"
+      },
+      "missing_outputs": []
+    }
+  ]
+}

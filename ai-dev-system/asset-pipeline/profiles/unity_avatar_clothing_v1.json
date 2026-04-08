@@ -1,0 +1,37 @@
+{
+  "id": "unity_avatar_clothing_v1",
+  "asset_type": "avatar_clothing",
+  "category": "clothing_foundation",
+  "source_expectation": {
+    "accepted_sources": [
+      "mesh_ai"
+    ],
+    "quality_estimate_target": "8/10 or better intake for clothing refinement with an existing base avatar scene",
+    "source_formats": [
+      ".fbx",
+      ".blend"
+    ]
+  },
+  "refinement_checklist": [
+    "Run raw asset audit before fit work.",
+    "Select the clothing refinement wrapper that matches the current base avatar blend workflow.",
+    "Generate a cleaned blend output plus scene-state and preview artifacts.",
+    "Verify deformation behavior before marking the asset validated."
+  ],
+  "validation_checklist": [
+    "Raw audit report exists.",
+    "Fit report exists.",
+    "Verification report exists.",
+    "Preview render or scene-state evidence exists.",
+    "Manual gate notes cover Unity registry wiring and target-machine Blender execution."
+  ],
+  "export_expectation": {
+    "target_runtime": "unity",
+    "handoff_shape": "export_handoff_manifest",
+    "target_unity_path_pattern": "Assets/AvatarSystem/AvatarProduction/Wardrobe/Foundations/<AssetName>"
+  },
+  "manual_gate_notes": [
+    "Current implementation supports clothing-foundation refinement wrappers but still depends on target-machine Blender execution.",
+    "Unity runtime wardrobe handoff registry intake now exists, but bridge-driven live equip mapping still remains planned work."
+  ]
+}

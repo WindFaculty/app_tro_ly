@@ -1,9 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap");
-
 :root {
   color-scheme: light;
-  --font-sans: "Manrope", "Segoe UI Variable Text", "Segoe UI", sans-serif;
-  --font-display: "Instrument Serif", Georgia, serif;
+  --font-sans: "Aptos", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
   --font-mono: "Cascadia Code", "JetBrains Mono", monospace;
 
   --bg-canvas: #f4ecde;

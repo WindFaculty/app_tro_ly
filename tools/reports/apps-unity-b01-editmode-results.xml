@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="3" result="Passed" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.3600052">
+  <test-suite type="TestSuite" id="1000" name="Local Desktop Assistant" fullname="Local Desktop Assistant" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.360005" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1052" name="LocalAssistant.EditModeTests.dll" fullname="D:/antigaravity_code/app_tro_ly/apps/unity-client/Library/ScriptAssemblies/LocalAssistant.EditModeTests.dll" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.337239" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="19700" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1053" name="LocalAssistant" fullname="LocalAssistant" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.332410" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1054" name="Tests" fullname="LocalAssistant.Tests" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.330204" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1055" name="EditMode" fullname="LocalAssistant.Tests.EditMode" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.327382" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1044" name="StandaloneRoomRuntimeTests" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.321906" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1045" name="ComposeBuildsStandaloneRuntimeWithoutLegacyUiShell" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests.ComposeBuildsStandaloneRuntimeWithoutLegacyUiShell" methodname="ComposeBuildsStandaloneRuntimeWithoutLegacyUiShell" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" seed="827451619" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.238973" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1046" name="ComposeCreatesPlaceholderRoomZonesAndAvatarRoot" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests.ComposeCreatesPlaceholderRoomZonesAndAvatarRoot" methodname="ComposeCreatesPlaceholderRoomZonesAndAvatarRoot" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" seed="218015749" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.006027" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="SceneStateControllerMovesCameraBetweenStandaloneFocusAnchors" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests.SceneStateControllerMovesCameraBetweenStandaloneFocusAnchors" methodname="SceneStateControllerMovesCameraBetweenStandaloneFocusAnchors" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" seed="1233018622" result="Passed" start-time="2026-04-08 07:36:35Z" end-time="2026-04-08 07:36:35Z" duration="0.024189" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/tranx/AppData/LocalLow/DefaultCompany/Local Desktop Assistant\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

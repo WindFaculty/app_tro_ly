@@ -18,6 +18,8 @@ Current implementation: this directory now owns the standardized non-backend ent
   - validates the unification overview docs and task-governance tracker links for drift
 - `validate/validate-architecture-lock.ps1`
   - validates the Phase 9 architecture lock for shim absence, bootstrap surface, and stale active-path drift
+- `validate/validate-mesh-ai-pipeline.ps1`
+  - validates the Mesh AI lifecycle contracts, workflow specs, wrapper mapping, and task/doc references
 - `package/package-unity-client.ps1`
   - forwards to the current release-packaging script at repo root
 

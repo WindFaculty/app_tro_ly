@@ -15,6 +15,7 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 - Phase 4 moved the automation runtime under `ai-dev-system/control-plane/`, and Phase 9 removed the temporary root-level shim packages that had bridged the old import layout.
 - Phase 5 has now established `ai-dev-system/domain/` as the shared contract root for avatar, customization, and room ownership while Unity runtime code remains under `ai-dev-system/clients/unity-client/`.
 - Phase 6 now gives `ai-dev-system/workbench/` and `ai-dev-system/asset-pipeline/` real ownership over authoring inventories, naming guidance, and structure validation, while large authoring files and helper scripts still remain in their current root paths.
+- The Mesh AI -> Blender -> validation -> Unity handoff foundation now lives under `ai-dev-system/asset-pipeline/`, `ai-dev-system/workbench/`, and `ai-dev-system/control-plane/` as lifecycle contracts, wrapper planning, and workflow specs that still point at the current root Blender helpers.
 - A production-ready avatar experience is not fully wired end-to-end yet. The repo contains avatar groundwork and prototype assets under `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`, but live behavior still depends on Unity scene setup and manual validation.
 
 ## Repo Layout
@@ -57,6 +58,7 @@ Windows-first local assistant built from a Unity client, a FastAPI backend, and 
 - Some UI areas are still placeholder-driven, especially the Home avatar stage, the lack of a real calendar grid, and the shell-owned schedule-side helper panel.
 - The mini-assistant window described in design docs is not implemented.
 - Speech quality and availability still depend on machine-local runtime setup.
+- Mesh AI handoff manifests do not mean Unity wardrobe or room registries are already complete; those remain planned or manual-gate work.
 
 ## Quick Start
 
@@ -134,6 +136,7 @@ For the client-absorption step that moves the Unity project under `ai-dev-system
 For the control-plane unification step that makes `ai-dev-system/control-plane/` the current automation runtime home, read [docs/migration/ai-dev-system-unification-phase4.md](docs/migration/ai-dev-system-unification-phase4.md).
 For the domain pass that makes `ai-dev-system/domain/` the shared avatar or customization or room contract root, read [docs/migration/ai-dev-system-unification-phase5.md](docs/migration/ai-dev-system-unification-phase5.md).
 For the workbench and asset-pipeline pass that establishes current inventory and validation ownership, read [docs/migration/ai-dev-system-unification-phase6.md](docs/migration/ai-dev-system-unification-phase6.md).
+For the current Mesh AI -> Blender -> Unity handoff boundary, read [docs/architecture/mesh-ai-blender-unity-integration.md](docs/architecture/mesh-ai-blender-unity-integration.md).
 For the scripts and tests standardization pass, read [docs/migration/ai-dev-system-unification-phase7.md](docs/migration/ai-dev-system-unification-phase7.md).
 For the docs and task-governance rewrite, read [docs/migration/ai-dev-system-unification-phase8.md](docs/migration/ai-dev-system-unification-phase8.md).
 For the architecture-lock cleanup that removes temporary import shims and stale absorbed-root references, read [docs/migration/ai-dev-system-unification-phase9.md](docs/migration/ai-dev-system-unification-phase9.md).

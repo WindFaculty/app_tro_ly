@@ -30,6 +30,9 @@ Current repo-side behavior already shows these runtime slices:
 12. `apps/web-ui/src/services/runtimeHost.ts` and `apps/web-ui/src/services/unityBridge.ts` already separate host lifecycle calls from Unity bridge calls.
 13. `apps/web-ui/src/components/StartupScreen.tsx`, `apps/web-ui/src/components/WindowChrome.tsx`, and `apps/web-ui/src/pages/StatusPage.tsx` now surface startup recovery, shell window controls, and host runtime facts through typed Tauri calls.
 14. `apps/desktop-shell/src-tauri/src/unity_runtime.rs` and `apps/desktop-shell/src-tauri/src/unity_bridge.rs` already expose Unity runtime and bridge status as host-level concerns.
+15. `scripts/prepare_desktop_bundle_resources.py` now stages a bundle-safe `local-backend/` runtime plus the wardrobe customization contracts and sample data under `apps/desktop-shell/.tauri-bundle-resources/` before `tauri build`, without copying live backend data or tests.
+16. `apps/desktop-shell/src-tauri/tauri.conf.json` plus `apps/desktop-shell/src-tauri/capabilities/default.json` now lock the desktop package to `nsis` plus `msi`, a non-null desktop CSP, and a reduced plugin surface that keeps only safe external shell open plus logging.
+17. `apps/desktop-shell/src-tauri/src/backend.rs` now resolves bundled `local-backend/` resources in release mode, routes backend mutable state into the Tauri app data or cache or log roots through `ASSISTANT_*` environment variables, and suppresses stray Windows console windows during backend startup.
 
 ## Target Startup Flow
 
@@ -108,6 +111,7 @@ Current implementation note:
 - Tauri host launches and checks `http://127.0.0.1:8096`
 - `scripts/validate_desktop_execution_surface.py` now guards this alignment in repo-side validation
 - Tauri host now emits `backend-status`, `backend-ready`, and `backend-error` so the shell can recover without inventing startup state in React
+- `scripts/validate_desktop_bundle.py` now guards the packaged resource roots, CSP, and reduced plugin surface before cargo checks
 
 ## Failure And Recovery Flow
 
@@ -125,6 +129,7 @@ Current implementation note:
 - `apps/web-ui/src/components/WindowChrome.tsx` now exposes desktop window controls without relying on native window decorations
 - `apps/desktop-shell/src-tauri/src/persistence.rs` now quarantines corrupted JSON restore files and rewrites them with defaults instead of crashing shell startup
 - `apps/web-ui/src/App.tsx` now applies the last saved route only when the user did not already choose a route through the URL hash
+- packaged desktop builds now start the backend from bundled resources rather than the repo root, while still surfacing the same diagnostics and recovery lane if startup fails
 
 ## Shutdown Flow
 

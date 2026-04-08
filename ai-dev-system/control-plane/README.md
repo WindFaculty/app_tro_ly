@@ -28,20 +28,26 @@ Current implementation: this directory is now the source of truth for the automa
   - lesson store for workflow runs
 - `tools/`
   - workflow reporting and JSON logging helpers
+  - Mesh AI pipeline planning and Blender wrapper rendering
 - `mcp_client.py`
   - shared MCP stdio client for the older autonomous workflow path
 
 ## Ownership Map
 
 - GUI automation: `app/automation/`
+- Blender MCP automation runtime: `app/blender/`
 - Unity automation runtime: `app/unity/` and `mcp_client.py`
 - canonical platform definitions: `catalog/`
 - workflow lifecycle and run history: `orchestrator/`
 - harness export rendering: `adapters/`
 - profiles: `app/profiles/`
+- Blender profile and policy-gated interactive lane:
+  - `app/blender/`
+  - `app/profiles/blender_editor_profile.py`
 - planner logic:
   - `app/agent/planner.py`
   - `planner/planner_agent.py`
+  - `planner/mesh_pipeline_planner.py`
 - verifier logic:
   - `app/agent/verifier.py`
   - `agents/debugger_agent.py`
@@ -51,6 +57,11 @@ Current implementation: this directory is now the source of truth for the automa
 - capability routing:
   - `app/unity/capabilities.py`
   - `app/agent/strategies/`
+- Mesh AI asset-refine workflow foundation:
+  - `tools/mesh_ai_pipeline.py`
+  - `tools/mesh_ai_blender_wrappers.py`
+  - `executor/mesh_pipeline_executor.py`
+  - `workflows/mesh_ai_refine.py`
 
 ## Compatibility Note
 

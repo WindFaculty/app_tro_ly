@@ -82,7 +82,8 @@ impl UnityRuntimeState {
         let Some(candidate) = resolve_runtime_candidate(app) else {
             let status = UnityRuntimeStatus {
                 state: "missing_build".to_string(),
-                message: "Không thể launch Unity vì repo chưa có build executable hợp lệ.".to_string(),
+                message: "Không thể launch Unity vì repo chưa có build executable hợp lệ."
+                    .to_string(),
                 executable_path: None,
                 build_root: None,
                 pid: None,
@@ -109,10 +110,7 @@ impl UnityRuntimeState {
             }
         }
 
-        let spawn_result = cmd
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn();
+        let spawn_result = cmd.stdout(Stdio::null()).stderr(Stdio::null()).spawn();
 
         let status = match spawn_result {
             Ok(child) => {
@@ -306,7 +304,7 @@ fn resolve_repo_candidate(app: &AppHandle) -> Option<RuntimeCandidate> {
 
 fn resolve_packaged_candidate(app: &AppHandle) -> Option<RuntimeCandidate> {
     let resource_dir = app.path().resource_dir().ok()?;
-    let runtime_root = resource_dir.join("resources").join("unity-runtime");
+    let runtime_root = resource_dir.join("unity-runtime");
     let executable_path = find_first_exe_in_dir(&runtime_root, 2)?;
 
     Some(RuntimeCandidate {

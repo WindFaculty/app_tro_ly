@@ -33,6 +33,22 @@ function toneForAssistantState(
   }
 }
 
+function toneForMicrophoneState(
+  state: string,
+): "accent" | "sun" | "success" | "danger" | "warm" {
+  switch (state) {
+    case "listening":
+      return "success";
+    case "requesting_permission":
+    case "processing":
+      return "sun";
+    case "unsupported":
+      return "danger";
+    default:
+      return "accent";
+  }
+}
+
 function formatTimestamp(value?: string | null): string {
   if (!value) {
     return "No timestamp";
@@ -49,6 +65,78 @@ function formatTimestamp(value?: string | null): string {
     hour: "numeric",
     minute: "2-digit",
   }).format(parsed);
+}
+
+function formatDuration(durationMs: number): string {
+  const totalSeconds = Math.max(0, Math.round(durationMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function describeVoiceInputMode(value: string): string {
+  return value === "push_to_talk" ? "push-to-talk" : value || "voice";
+}
+
+function describeMicrophoneState(state: string): string {
+  switch (state) {
+    case "unsupported":
+      return "Mic unavailable";
+    case "requesting_permission":
+      return "Requesting microphone access";
+    case "listening":
+      return "Listening";
+    case "processing":
+      return "Transcribing";
+    default:
+      return "Ready";
+  }
+}
+
+function voiceButtonLabel(
+  state: string,
+  voiceSupported: boolean,
+  speechPlaybackState: string,
+): string {
+  if (!voiceSupported) {
+    return "Mic unavailable";
+  }
+
+  switch (state) {
+    case "requesting_permission":
+      return "Allow microphone...";
+    case "listening":
+      return "Release to send";
+    case "processing":
+      return "Transcribing...";
+    default:
+      return speechPlaybackState === "playing" ? "Hold to interrupt and talk" : "Hold to talk";
+  }
+}
+
+function transcriptPreviewCopy(workspace: ReturnType<typeof useAssistantWorkspace>): string {
+  if (!workspace.voiceSupported) {
+    return "This runtime does not currently expose microphone capture.";
+  }
+
+  if (!workspace.showTranscriptPreview) {
+    return "Transcript preview is hidden by Settings, but the final transcript still lands in the conversation.";
+  }
+
+  if (workspace.transcriptPreview.trim()) {
+    return workspace.transcriptPreview.trim();
+  }
+
+  switch (workspace.microphoneState) {
+    case "requesting_permission":
+      return "Waiting for microphone permission before the push-to-talk turn can begin.";
+    case "listening":
+      return "Listening for your speech. Release the button when the turn is complete.";
+    case "processing":
+      return "Finishing the voice turn and asking the backend for transcription plus the assistant reply.";
+    default:
+      return "Hold the voice button to start a push-to-talk turn. Text and voice both stay in the same thread history.";
+  }
 }
 
 function matchesThread(thread: ChatConversationSummary, query: string): boolean {
@@ -146,6 +234,7 @@ export function ChatPage() {
   const workspace = useAssistantWorkspace();
   const [composerValue, setComposerValue] = useState(QUICK_PROMPTS[0]);
   const [searchValue, setSearchValue] = useState("");
+  const [voiceButtonHeld, setVoiceButtonHeld] = useState(false);
   const deferredSearchValue = useDeferredValue(searchValue.trim().toLowerCase());
 
   const filteredThreads = useMemo(
@@ -184,12 +273,21 @@ export function ChatPage() {
     }
   };
 
+  const releaseVoiceCapture = () => {
+    if (!voiceButtonHeld) {
+      return;
+    }
+
+    setVoiceButtonHeld(false);
+    void workspace.endVoiceCapture();
+  };
+
   return (
     <PageTemplate
       title="Chat"
       icon="CH"
       eyebrow="Assistant lane"
-      description="A06 turns chat into the primary assistant surface with backend-backed threads, live streaming state, retries, local search, and structured action cards."
+      description="A12 extends the assistant workspace with push-to-talk capture, transcript preview, stream-first voice turns, and backend-driven speech playback while preserving thread history, retries, search, and action cards."
       actions={
         <>
           <button
@@ -227,12 +325,17 @@ export function ChatPage() {
         {
           label: "State",
           value: workspace.assistantState || "idle",
-          detail: workspace.streamMode === "fallback" ? "REST fallback active" : "Stream-first transport",
+          detail:
+            workspace.microphoneState === "listening"
+              ? "push-to-talk live"
+              : workspace.streamMode === "fallback"
+                ? "REST fallback active"
+                : "stream-first transport",
         },
         {
-          label: "Route",
-          value: workspace.route || "pending",
-          detail: workspace.provider || "Provider pending",
+          label: "Voice",
+          value: describeMicrophoneState(workspace.microphoneState),
+          detail: describeVoiceInputMode(workspace.voiceInputMode),
         },
         {
           label: "Actions",
@@ -325,18 +428,19 @@ export function ChatPage() {
           <div className="surfaceHeader">
             <div className="surfaceHeaderBlock">
               <span className="eyebrow">Transcript</span>
-              <h3 className="surfaceTitle">Stream-first conversation lane</h3>
+              <h3 className="surfaceTitle">Text and push-to-talk conversation lane</h3>
               <p className="surfaceIntro">
-                Text turns prefer `WS /v1/assistant/stream` and fall back to `POST /v1/chat` only
-                when the stream cannot start.
+                Text and voice turns both prefer <code>WS /v1/assistant/stream</code> and voice
+                falls back through <code>POST /v1/speech/stt</code> plus <code>POST /v1/chat</code>
+                when the stream cannot stay up.
               </p>
             </div>
             <div className="chipRow">
               <span className="chip" data-tone={toneForAssistantState(workspace.assistantState)}>
                 {workspace.assistantState || "idle"}
               </span>
-              <span className="chip" data-tone={workspace.streamMode === "fallback" ? "sun" : "success"}>
-                {workspace.streamMode === "fallback" ? "rest fallback" : "stream live"}
+              <span className="chip" data-tone={toneForMicrophoneState(workspace.microphoneState)}>
+                {describeMicrophoneState(workspace.microphoneState)}
               </span>
             </div>
           </div>
@@ -398,6 +502,94 @@ export function ChatPage() {
             </div>
 
             <div className={styles.composerPanel}>
+              <div className={styles.voicePanel}>
+                <div className={styles.voiceHeader}>
+                  <div>
+                    <p className="listTitle">Push-to-talk voice turn</p>
+                    <p className="listSubtitle">
+                      The current desktop voice mode stays locked to{" "}
+                      {describeVoiceInputMode(workspace.voiceInputMode)}.
+                    </p>
+                  </div>
+                  <div className="chipRow">
+                    <span className="chip" data-tone={toneForMicrophoneState(workspace.microphoneState)}>
+                      {describeMicrophoneState(workspace.microphoneState)}
+                    </span>
+                    <span className="chip" data-tone={workspace.showTranscriptPreview ? "accent" : "warm"}>
+                      {workspace.showTranscriptPreview ? "preview on" : "preview hidden"}
+                    </span>
+                    {(workspace.microphoneState === "listening" || workspace.microphoneState === "processing") && (
+                      <span className="chip" data-tone="success">
+                        {formatDuration(workspace.voiceDurationMs)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.voiceControlRow}>
+                  <button
+                    type="button"
+                    className={`${styles.pushToTalkButton} ${
+                      voiceButtonHeld || workspace.microphoneState === "listening"
+                        ? styles.pushToTalkButtonActive
+                        : ""
+                    }`}
+                    disabled={
+                      workspace.submitting ||
+                      workspace.microphoneState === "requesting_permission" ||
+                      workspace.microphoneState === "processing" ||
+                      !workspace.voiceSupported
+                    }
+                    onPointerDown={(event) => {
+                      if (event.button !== 0) {
+                        return;
+                      }
+
+                      event.preventDefault();
+                      setVoiceButtonHeld(true);
+                      void workspace.beginVoiceCapture();
+                    }}
+                    onPointerUp={(event) => {
+                      event.preventDefault();
+                      releaseVoiceCapture();
+                    }}
+                    onPointerCancel={releaseVoiceCapture}
+                    onPointerLeave={releaseVoiceCapture}
+                    onBlur={releaseVoiceCapture}
+                  >
+                    {voiceButtonLabel(
+                      workspace.microphoneState,
+                      workspace.voiceSupported,
+                      workspace.speechPlaybackState,
+                    )}
+                  </button>
+
+                  {workspace.speechPlaybackState === "playing" && (
+                    <button
+                      type="button"
+                      className="ghostButton"
+                      onClick={workspace.stopSpeechPlayback}
+                    >
+                      Stop audio
+                    </button>
+                  )}
+                </div>
+
+                <div className={styles.voicePreviewCard}>
+                  <div className={styles.voicePreviewHeader}>
+                    <span className={styles.voicePreviewLabel}>Transcript preview</span>
+                    <span className="chip" data-tone={workspace.audioQueueDepth > 0 ? "success" : "accent"}>
+                      {workspace.audioQueueDepth > 0
+                        ? `${workspace.audioQueueDepth} audio clips queued`
+                        : workspace.speechPlaybackState === "playing"
+                          ? "reply audio live"
+                          : "audio idle"}
+                    </span>
+                  </div>
+                  <p className={styles.voicePreviewText}>{transcriptPreviewCopy(workspace)}</p>
+                </div>
+              </div>
+
               <div className="chipRow">
                 {QUICK_PROMPTS.map((prompt) => (
                   <button
@@ -426,7 +618,7 @@ export function ChatPage() {
               />
               <div className="actionRow">
                 <span className="helperText">
-                  Send with Ctrl+Enter. Voice transport stays out of scope here until A12.
+                  Send with Ctrl+Enter. Hold the voice button to talk and release it to send the turn.
                 </span>
                 <button
                   type="button"
@@ -446,7 +638,7 @@ export function ChatPage() {
             <div className="surfaceHeader">
               <div className="surfaceHeaderBlock">
                 <span className="eyebrow">Diagnostics</span>
-                <h3 className="surfaceTitle">Routing and fallback signal</h3>
+                <h3 className="surfaceTitle">Routing, voice, and fallback signal</h3>
               </div>
             </div>
 
@@ -467,6 +659,16 @@ export function ChatPage() {
                 <span className="detailLabel">Latency</span>
                 <span className="detailValue">
                   {workspace.latencyMs === null ? "pending" : `${workspace.latencyMs} ms`}
+                </span>
+              </div>
+              <div className="detailRow">
+                <span className="detailLabel">Voice mode</span>
+                <span className="detailValue">{describeVoiceInputMode(workspace.voiceInputMode)}</span>
+              </div>
+              <div className="detailRow">
+                <span className="detailLabel">Speech</span>
+                <span className="detailValue">
+                  {workspace.speechPlaybackState === "playing" ? "reply audio playing" : "idle"}
                 </span>
               </div>
               <div className="detailRow">
@@ -550,8 +752,8 @@ export function ChatPage() {
             <div className="emptyState">
               <p className="emptyStateTitle">No structured cards yet</p>
               <p className="emptyStateText">
-                Deeper planning payloads such as `planner_output` land here when the selected route
-                returns them.
+                Deeper planning payloads such as <code>planner_output</code> land here when the
+                selected route returns them.
               </p>
             </div>
           )}

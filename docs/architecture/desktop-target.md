@@ -24,7 +24,7 @@ Current implementation in this repo is still a transition state:
 
 - `local-backend/` is the current source of truth for backend logic, SQLite persistence, scheduler, speech, and assistant orchestration.
 - `ai-dev-system/clients/unity-client/` is still the current end-user shell and avatar runtime.
-- `apps/desktop-shell/` now contains the repo-side Tauri host with backend process ownership, startup status plus retry entry points, window controls, Unity runtime inspection, Unity bridge state, and JSON-backed desktop restore files under the app data root.
+- `apps/desktop-shell/` now contains the repo-side Tauri host with backend process ownership, startup status plus retry entry points, window controls, Unity runtime inspection, Unity bridge state, JSON-backed desktop restore files under the app data root, bundle-resource staging for packaged builds, and the current desktop hardening surface in `src-tauri/tauri.conf.json` plus `src-tauri/capabilities/default.json`.
 - `apps/web-ui/` now contains the React startup shell, desktop window chrome, runtime status surfaces, route auto-restore, a shared design system, and module-shell page framing on top of the typed backend plus Tauri plus Unity bridge adapters.
 - `packages/contracts/` already contains typed Tauri command or event names plus typed Unity bridge envelopes, including desktop restore-state surfaces.
 
@@ -155,9 +155,12 @@ Current implementation note:
 - root `package.json` now provides the repo-level rebuild execution scripts for `apps/web-ui/`, `apps/desktop-shell/`, and `packages/contracts/`
 - `apps/desktop-shell/src-tauri/src/lib.rs` now exposes shell runtime facts, backend restart, shell window controls, and desktop restore-state persistence through typed Tauri commands
 - `apps/desktop-shell/src-tauri/src/persistence.rs` now owns versioned JSON restore files, corrupted-file quarantine, and main-window state capture or restore
+- `scripts/prepare_desktop_bundle_resources.py` plus `scripts/validate_desktop_bundle.py` now stage a bundle-safe copy of `local-backend/` plus the customization contracts needed by wardrobe export or import flows, and validate the desktop package surface before cargo checks
+- `apps/desktop-shell/src-tauri/src/backend.rs` now resolves bundled `local-backend/` resources in release mode and injects host-owned app data or cache or log paths into the backend through `ASSISTANT_*` environment variables so packaged builds do not write mutable state into bundle resources
+- `apps/desktop-shell/src-tauri/tauri.conf.json` plus `apps/desktop-shell/src-tauri/capabilities/default.json` now lock packaged resource roots, a non-null desktop CSP, and a shell-open-only plugin permission surface for the Tauri bundle
 - `apps/web-ui/src/App.tsx`, `apps/web-ui/src/components/ShellLayout.tsx`, and `apps/web-ui/src/pages/StatusPage.tsx` now consume those host persistence surfaces for route auto-restore, session autosave, and diagnostics
 - `apps/web-ui/src/services/runtimeHost.ts` now mirrors the same restore contract in browser preview by falling back to `localStorage`
-- `apps/web-ui/src/styles/globals.css` plus `apps/web-ui/src/components/PageTemplate.tsx` now define the shared desktop design system and module-shell framing used across dashboard, chat, planner, wardrobe, settings, and diagnostics surfaces
+- `apps/web-ui/src/styles/globals.css` plus `apps/web-ui/src/components/PageTemplate.tsx` now define the shared desktop design system and module-shell framing used across dashboard, chat, planner, wardrobe, settings, and diagnostics surfaces, without depending on remote Google font imports in the packaged shell
 
 ## Source Of Truth For The Desktop Rebuild
 

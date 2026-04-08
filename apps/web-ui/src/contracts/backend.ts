@@ -158,6 +158,418 @@ export interface NoteListResponse {
   count: number;
 }
 
+export interface WardrobeValidationIssue {
+  severity: string;
+  code: string;
+  message: string;
+  slots: string[];
+  item_ids: string[];
+}
+
+export interface WardrobeItemRecord {
+  item_id: string;
+  display_name: string;
+  slot: string;
+  source: string;
+  source_asset_path?: string | null;
+  prefab_asset_path?: string | null;
+  material_asset_paths: string[];
+  thumbnail_asset_path?: string | null;
+  occupies_slots: string[];
+  blocks_slots: string[];
+  requires_slots: string[];
+  compatible_tags: string[];
+  incompatible_tags: string[];
+  hide_body_regions: string[];
+  anchor_type: string;
+  anchor_bone_name?: string | null;
+  created_at: string;
+  updated_at: string;
+  validation_issues: WardrobeValidationIssue[];
+  sync_status: string;
+}
+
+export interface WardrobeItemCreatePayload {
+  item_id: string;
+  display_name: string;
+  slot: string;
+  source?: string;
+  source_asset_path?: string | null;
+  prefab_asset_path?: string | null;
+  material_asset_paths?: string[];
+  thumbnail_asset_path?: string | null;
+  occupies_slots?: string[];
+  blocks_slots?: string[];
+  requires_slots?: string[];
+  compatible_tags?: string[];
+  incompatible_tags?: string[];
+  hide_body_regions?: string[];
+  anchor_type?: string;
+  anchor_bone_name?: string | null;
+}
+
+export interface WardrobeItemUpdatePayload {
+  display_name?: string;
+  slot?: string;
+  source?: string;
+  source_asset_path?: string | null;
+  prefab_asset_path?: string | null;
+  material_asset_paths?: string[];
+  thumbnail_asset_path?: string | null;
+  occupies_slots?: string[];
+  blocks_slots?: string[];
+  requires_slots?: string[];
+  compatible_tags?: string[];
+  incompatible_tags?: string[];
+  hide_body_regions?: string[];
+  anchor_type?: string;
+  anchor_bone_name?: string | null;
+}
+
+export interface WardrobeOutfitRecord {
+  outfit_id: string;
+  display_name: string;
+  source: string;
+  thumbnail_asset_path?: string | null;
+  slot_assignments: Record<string, string>;
+  created_at: string;
+  updated_at: string;
+  validation_issues: WardrobeValidationIssue[];
+  sync_status: string;
+}
+
+export interface WardrobeOutfitCreatePayload {
+  outfit_id: string;
+  display_name: string;
+  source?: string;
+  thumbnail_asset_path?: string | null;
+  slot_assignments?: Record<string, string>;
+}
+
+export interface WardrobeOutfitUpdatePayload {
+  display_name?: string;
+  source?: string;
+  thumbnail_asset_path?: string | null;
+  slot_assignments?: Record<string, string>;
+}
+
+export interface WardrobeSlotRecord {
+  key: string;
+  unity_enum: string;
+  display_name: string;
+  reserved: boolean;
+  item_count: number;
+  outfit_count: number;
+  notes: string[];
+}
+
+export interface WardrobeSummary {
+  slot_count: number;
+  reserved_slot_count: number;
+  item_count: number;
+  outfit_count: number;
+  warning_count: number;
+  error_count: number;
+  ready_item_count: number;
+  ready_outfit_count: number;
+}
+
+export interface WardrobeSnapshotResponse {
+  version: number;
+  updated_at: string;
+  registry_path: string;
+  slot_taxonomy_version: number;
+  slots: WardrobeSlotRecord[];
+  items: WardrobeItemRecord[];
+  outfits: WardrobeOutfitRecord[];
+  summary: WardrobeSummary;
+}
+
+export interface WardrobeImportPayload {
+  mode?: "merge" | "replace";
+  items?: WardrobeItemCreatePayload[];
+  outfits?: WardrobeOutfitCreatePayload[];
+}
+
+export interface GoogleEmailStatusResponse {
+  provider: string;
+  status: string;
+  configured: boolean;
+  connected: boolean;
+  sync_enabled: boolean;
+  email_address?: string | null;
+  auth_url_available: boolean;
+  redirect_uri?: string | null;
+  default_label: string;
+  query_limit: number;
+  scopes: string[];
+  last_sync_at?: string | null;
+  last_error?: string | null;
+  detail: string;
+}
+
+export interface EmailMessageSummary {
+  id: string;
+  thread_id: string;
+  subject: string;
+  from_display: string;
+  from_address: string;
+  to: string[];
+  snippet: string;
+  labels: string[];
+  is_read: boolean;
+  starred: boolean;
+  has_attachments: boolean;
+  received_at?: string | null;
+  linked_task_ids: string[];
+}
+
+export interface EmailMessageDetail extends EmailMessageSummary {
+  cc: string[];
+  body_text: string;
+  body_html?: string | null;
+}
+
+export interface EmailMessageListResponse {
+  account: GoogleEmailStatusResponse;
+  query: string;
+  label: string;
+  items: EmailMessageSummary[];
+  count: number;
+  draft_count: number;
+}
+
+export interface EmailDraftCreatePayload {
+  to?: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject?: string;
+  body_text?: string;
+  linked_message_id?: string | null;
+  thread_id?: string | null;
+}
+
+export interface EmailDraftUpdatePayload extends EmailDraftCreatePayload {}
+
+export interface EmailDraftRecord {
+  id: string;
+  provider: string;
+  thread_id?: string | null;
+  linked_message_id?: string | null;
+  to: string[];
+  cc: string[];
+  bcc: string[];
+  subject: string;
+  body_text: string;
+  status: string;
+  gmail_message_id?: string | null;
+  created_at: string;
+  updated_at: string;
+  sent_at?: string | null;
+}
+
+export interface EmailDraftListResponse {
+  items: EmailDraftRecord[];
+  count: number;
+}
+
+export interface GoogleEmailConnectResponse {
+  authorization_url: string;
+  redirect_uri: string;
+  state: string;
+}
+
+export interface GoogleCalendarStatusResponse {
+  provider: string;
+  status: string;
+  configured: boolean;
+  connected: boolean;
+  sync_enabled: boolean;
+  calendar_id?: string | null;
+  auth_url_available: boolean;
+  redirect_uri?: string | null;
+  default_calendar_id: string;
+  agenda_days: number;
+  event_limit: number;
+  scopes: string[];
+  last_sync_at?: string | null;
+  last_error?: string | null;
+  detail: string;
+}
+
+export interface GoogleCalendarEventRecord {
+  id: string;
+  calendar_id: string;
+  status: string;
+  summary: string;
+  description?: string | null;
+  location?: string | null;
+  html_link?: string | null;
+  conference_link?: string | null;
+  organizer_email?: string | null;
+  creator_email?: string | null;
+  attendees: string[];
+  start_at?: string | null;
+  end_at?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  is_all_day: boolean;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface GoogleCalendarEventCreatePayload {
+  summary: string;
+  description?: string | null;
+  location?: string | null;
+  attendees?: string[];
+  calendar_id?: string | null;
+  is_all_day?: boolean;
+  start_at?: string | null;
+  end_at?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+}
+
+export interface GoogleCalendarEventUpdatePayload {
+  summary?: string;
+  description?: string | null;
+  location?: string | null;
+  attendees?: string[];
+  calendar_id?: string | null;
+  is_all_day?: boolean;
+  start_at?: string | null;
+  end_at?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+}
+
+export interface GoogleCalendarEventListResponse {
+  account: GoogleCalendarStatusResponse;
+  calendar_id: string;
+  start_date: string;
+  end_date: string;
+  query: string;
+  time_zone?: string | null;
+  items: GoogleCalendarEventRecord[];
+  count: number;
+}
+
+export interface GoogleCalendarConnectResponse {
+  authorization_url: string;
+  redirect_uri: string;
+  state: string;
+}
+
+export interface GoogleCalendarDeleteResponse {
+  status: string;
+  event_id: string;
+  calendar_id: string;
+}
+
+export interface EmailToTaskPayload {
+  title?: string | null;
+  priority?: string;
+  scheduled_date?: string | null;
+  due_at?: string | null;
+  tags?: string[];
+}
+
+export interface BrowserAutomationTemplateField {
+  key: string;
+  label: string;
+  required: boolean;
+  placeholder?: string | null;
+  help_text?: string | null;
+}
+
+export interface BrowserAutomationTemplateRecord {
+  template_id: string;
+  title: string;
+  description: string;
+  step_count: number;
+  fields: BrowserAutomationTemplateField[];
+}
+
+export interface BrowserAutomationTemplateListResponse {
+  items: BrowserAutomationTemplateRecord[];
+  count: number;
+}
+
+export interface BrowserAutomationRunCreatePayload {
+  template_id: string;
+  title: string;
+  goal: string;
+  inputs?: Record<string, unknown>;
+}
+
+export interface BrowserAutomationApprovalPayload {
+  approval_note?: string | null;
+}
+
+export interface BrowserAutomationRejectPayload {
+  reason: string;
+}
+
+export interface BrowserAutomationCancelPayload {
+  reason?: string | null;
+}
+
+export interface BrowserAutomationStepRecord {
+  id: string;
+  position: number;
+  action_type: string;
+  title: string;
+  description: string;
+  status: string;
+  requires_approval: boolean;
+  url?: string | null;
+  approval_note?: string | null;
+  recovery_notes: string;
+  result: Record<string, unknown>;
+  updated_at: string;
+  completed_at?: string | null;
+}
+
+export interface BrowserAutomationLogRecord {
+  id: string;
+  run_id: string;
+  step_id?: string | null;
+  level: string;
+  code: string;
+  message: string;
+  payload: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface BrowserAutomationRunSummary {
+  id: string;
+  template_id: string;
+  title: string;
+  goal: string;
+  status: string;
+  current_step_index: number;
+  step_count: number;
+  pending_step_title?: string | null;
+  last_log_message?: string | null;
+  created_at: string;
+  updated_at: string;
+  completed_at?: string | null;
+  cancelled_at?: string | null;
+}
+
+export interface BrowserAutomationRunDetail extends BrowserAutomationRunSummary {
+  start_url?: string | null;
+  inputs: Record<string, unknown>;
+  steps: BrowserAutomationStepRecord[];
+  logs: BrowserAutomationLogRecord[];
+}
+
+export interface BrowserAutomationRunListResponse {
+  items: BrowserAutomationRunSummary[];
+  count: number;
+}
+
 export interface MemoryItemRecord {
   id: string;
   category: string;
@@ -173,6 +585,18 @@ export interface MemoryItemRecord {
 export interface MemoryListResponse {
   items: MemoryItemRecord[];
   count: number;
+}
+
+export interface SpeechSttResponse {
+  text: string;
+  language: string;
+  confidence: number;
+}
+
+export interface SpeechTtsResponse {
+  audio_url: string;
+  duration_ms: number;
+  cached: boolean;
 }
 
 export interface VoiceSettings {
@@ -222,6 +646,21 @@ export interface MemorySettings {
   [key: string]: unknown;
 }
 
+export interface GoogleEmailSettings {
+  sync_enabled: boolean;
+  default_label: string;
+  query_limit: number;
+  [key: string]: unknown;
+}
+
+export interface GoogleCalendarSettings {
+  sync_enabled: boolean;
+  default_calendar_id: string;
+  agenda_days: number;
+  event_limit: number;
+  [key: string]: unknown;
+}
+
 export interface SettingsResponse {
   voice: VoiceSettings;
   model: ModelSettings;
@@ -230,6 +669,8 @@ export interface SettingsResponse {
   reminder: ReminderSettings;
   startup: StartupSettings;
   memory: MemorySettings;
+  google_email: GoogleEmailSettings;
+  google_calendar: GoogleCalendarSettings;
 }
 
 export interface SettingsPayload {
@@ -240,6 +681,8 @@ export interface SettingsPayload {
   reminder?: Partial<ReminderSettings>;
   startup?: Partial<StartupSettings>;
   memory?: Partial<MemorySettings>;
+  google_email?: Partial<GoogleEmailSettings>;
+  google_calendar?: Partial<GoogleCalendarSettings>;
 }
 
 export interface ChatActionReport {

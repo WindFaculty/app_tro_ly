@@ -55,6 +55,7 @@ Everything else in the non-backend system should now be understood through `ai-d
 
 - `ai-dev-system/workbench/`
 - `ai-dev-system/asset-pipeline/`
+- `docs/architecture/mesh-ai-blender-unity-integration.md`
 
 ### Standardized subsystem entry points
 

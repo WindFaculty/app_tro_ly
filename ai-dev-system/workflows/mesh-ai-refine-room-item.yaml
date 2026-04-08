@@ -1,0 +1,14 @@
+{
+  "id": "mesh-ai-refine-room-item",
+  "name": "Mesh AI Refine Room Item",
+  "summary": "Route Mesh AI room items through deterministic audit, pivot review, validation, and Unity handoff planning.",
+  "entrypoint": "workflows/mesh_ai_refine.py",
+  "planner": "control-plane/planner/mesh_pipeline_planner.py",
+  "executor": "control-plane/executor/mesh_pipeline_executor.py",
+  "profile_id": "unity_room_item_v1",
+  "supported_asset_types": [
+    "room_item"
+  ],
+  "asset_pipeline_schema": "asset-pipeline/schemas/intake-manifest.schema.json",
+  "toolchain_map": "asset-pipeline/toolchain-map.json"
+}

@@ -1,0 +1,11 @@
+Library/
+Logs/
+Temp/
+Obj/
+UserSettings/
+MemoryCaptures/
+*.csproj
+*.sln
+*.slnx
+*.log
+TestResults/

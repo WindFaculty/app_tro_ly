@@ -10,8 +10,24 @@ $aiDevSystemRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptRoot "..\..")
 $controlPlaneRoot = Join-Path $aiDevSystemRoot "control-plane"
 $previousPythonPath = $env:PYTHONPATH
 
+function Resolve-ForwardedArguments {
+    param(
+        [string[]]$Arguments
+    )
+
+    if (-not $Arguments -or $Arguments.Count -eq 0) {
+        return @("--help")
+    }
+
+    if ($Arguments.Count -gt 1 -and (($Arguments | Where-Object { $_.Length -ne 1 }).Count -eq 0)) {
+        return @(-split (($Arguments -join "") -replace "\s+", " ").Trim())
+    }
+
+    return @($Arguments)
+}
+
 $commandArguments = if ($ForwardedArguments.Count -gt 0) {
-    $ForwardedArguments
+    @(Resolve-ForwardedArguments -Arguments $ForwardedArguments)
 }
 else {
     @("--help")
@@ -25,7 +41,8 @@ try {
     else {
         "$controlPlaneRoot;$aiDevSystemRoot;$previousPythonPath"
     }
-    & python -m app.main @commandArguments
+    $allArgs = @("-m", "app.main") + $commandArguments
+    & python @allArgs
     exit $LASTEXITCODE
 }
 finally {

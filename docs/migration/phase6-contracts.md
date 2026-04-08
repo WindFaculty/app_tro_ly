@@ -37,8 +37,8 @@ Chuan hoa command/event giua React, Tauri, va Unity thanh mot schema typed chung
 
 - Chua co runtime evidence xac nhan websocket handshake React -> Tauri -> Unity tren may co Node.js, Rust, va Unity build.
 - Chua co typed event day du cho `avatar.animationFinished` hoac `room.objectClicked`; hien repo-side event scaffold moi phat `bridge.ready`, `bridge.error`, `avatar.stateChanged`, va `room.interactionTriggered`.
-- `wardrobe.equipItem` moi co schema typed, nhung item registry/runtime mapping van la planned work.
-- Chua xac minh compile cho Rust host hoac Unity client trong turn nay.
+- `wardrobe.equipItem` da co runtime item registry mapping cho cac `AvatarItemDefinition` duoc dang ky, nhung catalog hien van placeholder-safe va chua co production prefab hookup rong hon.
+- Rust host compile khong duoc re-verify trong pass nay; Unity client da co EditMode verification o cac pass sau.
 
 ## Manual validation required
 

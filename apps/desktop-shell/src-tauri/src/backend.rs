@@ -1,4 +1,7 @@
 use serde::Serialize;
+use std::fs;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::sync::{
@@ -7,6 +10,8 @@ use std::sync::{
 };
 use std::time::Duration;
 use tauri::{AppHandle, Emitter, Manager};
+#[cfg(windows)]
+use windows_sys::Win32::System::Threading::CREATE_NO_WINDOW;
 
 /// Backend URL - local-backend FastAPI
 pub const BACKEND_URL: &str = "http://127.0.0.1:8096";
@@ -70,6 +75,14 @@ pub struct ShellRuntimeState {
     pub window_maximized: bool,
 }
 
+struct BackendRuntimePaths {
+    data_dir: PathBuf,
+    db_path: PathBuf,
+    audio_dir: PathBuf,
+    cache_dir: PathBuf,
+    log_dir: PathBuf,
+}
+
 struct BackendInner {
     child: Mutex<Option<Child>>,
     last_event: Mutex<BackendLifecycleEvent>,
@@ -117,15 +130,15 @@ impl BackendState {
     pub fn snapshot(&self, app: &AppHandle) -> ShellRuntimeState {
         let event = self.last_event();
         let package_info = app.package_info();
-        let (window_visible, window_maximized) = if let Some(window) = app.get_webview_window("main")
-        {
-            (
-                window.is_visible().unwrap_or(true),
-                window.is_maximized().unwrap_or(false),
-            )
-        } else {
-            (false, false)
-        };
+        let (window_visible, window_maximized) =
+            if let Some(window) = app.get_webview_window("main") {
+                (
+                    window.is_visible().unwrap_or(true),
+                    window.is_maximized().unwrap_or(false),
+                )
+            } else {
+                (false, false)
+            };
 
         let app_data_dir = app.path().app_data_dir().ok();
         let export_dir = app_data_dir.clone().map(|path| path.join("exports"));
@@ -151,7 +164,11 @@ impl BackendState {
         }
     }
 
-    fn spawn_or_restart(&self, app: AppHandle, replace_existing: bool) -> Result<BackendLifecycleEvent, String> {
+    fn spawn_or_restart(
+        &self,
+        app: AppHandle,
+        replace_existing: bool,
+    ) -> Result<BackendLifecycleEvent, String> {
         self.inner.generation.fetch_add(1, Ordering::SeqCst);
         if replace_existing {
             self.stop_child()?;
@@ -162,7 +179,8 @@ impl BackendState {
         if !backend_path.exists() {
             let event = BackendLifecycleEvent {
                 status: "error".to_string(),
-                message: "Backend root was not found. Check local-backend/ in the repo.".to_string(),
+                message: "Backend root was not found. Check local-backend/ in the repo."
+                    .to_string(),
                 backend_path: backend_path_text,
                 ..BackendLifecycleEvent::default()
             };
@@ -187,9 +205,14 @@ impl BackendState {
             }
         };
 
-        let child = spawn_backend_process(&backend_path, &python_exe).map_err(|error| {
-            format!("Failed to spawn backend process from {:?}: {}", backend_path, error)
-        })?;
+        let runtime_paths = resolve_backend_runtime_paths(&app)?;
+        let child =
+            spawn_backend_process(&backend_path, &python_exe, &runtime_paths).map_err(|error| {
+                format!(
+                    "Failed to spawn backend process from {:?}: {}",
+                    backend_path, error
+                )
+            })?;
         let pid = child.id();
         {
             let mut guard = self.inner.child.lock().unwrap();
@@ -379,13 +402,34 @@ impl BackendState {
     }
 }
 
-fn spawn_backend_process(backend_path: &Path, python_exe: &Path) -> std::io::Result<Child> {
-    Command::new(python_exe)
+fn spawn_backend_process(
+    backend_path: &Path,
+    python_exe: &Path,
+    runtime_paths: &BackendRuntimePaths,
+) -> std::io::Result<Child> {
+    let mut command = Command::new(python_exe);
+    command
         .arg("run_local.py")
         .current_dir(backend_path)
+        .env("ASSISTANT_BASE_DIR", backend_path)
+        .env("ASSISTANT_DATA_DIR", &runtime_paths.data_dir)
+        .env("ASSISTANT_DB_PATH", &runtime_paths.db_path)
+        .env("ASSISTANT_AUDIO_DIR", &runtime_paths.audio_dir)
+        .env("ASSISTANT_CACHE_DIR", &runtime_paths.cache_dir)
+        .env("ASSISTANT_LOG_DIR", &runtime_paths.log_dir)
+        .env("APP_TRO_LY_DESKTOP_RUNTIME", "1")
+        .env("PYTHONDONTWRITEBYTECODE", "1")
+        .env("PYTHONUTF8", "1")
+        .env("PYTHONIOENCODING", "utf-8")
         .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .spawn()
+        .stderr(Stdio::null());
+
+    #[cfg(windows)]
+    {
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+
+    command.spawn()
 }
 
 fn show_main_window(app: &AppHandle, focus: bool) {
@@ -437,13 +481,54 @@ fn resolve_backend_path(_app: &AppHandle) -> PathBuf {
         _app.path()
             .resource_dir()
             .expect("resource dir not found")
-            .join("resources")
             .join("local-backend")
     }
 }
 
+fn resolve_backend_runtime_paths(app: &AppHandle) -> Result<BackendRuntimePaths, String> {
+    let app_data_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
+    let app_cache_dir = app
+        .path()
+        .app_cache_dir()
+        .map_err(|error| error.to_string())?;
+    let app_log_dir = app
+        .path()
+        .app_log_dir()
+        .map_err(|error| error.to_string())?;
+
+    let data_dir = app_data_dir.join("data");
+    let db_path = data_dir.join("app.db");
+    let audio_dir = app_cache_dir.join("audio");
+    let cache_dir = app_cache_dir.join("backend");
+    let log_dir = app_log_dir.join("backend");
+
+    for path in [&data_dir, &audio_dir, &cache_dir, &log_dir] {
+        fs::create_dir_all(path).map_err(|error| {
+            format!(
+                "Failed to create backend runtime path {}: {}",
+                path.display(),
+                error
+            )
+        })?;
+    }
+
+    Ok(BackendRuntimePaths {
+        data_dir,
+        db_path,
+        audio_dir,
+        cache_dir,
+        log_dir,
+    })
+}
+
 fn find_python(backend_path: &Path) -> Option<PathBuf> {
-    let venv_python = backend_path.join(".venv").join("Scripts").join("python.exe");
+    let venv_python = backend_path
+        .join(".venv")
+        .join("Scripts")
+        .join("python.exe");
     if venv_python.exists() {
         return Some(venv_python);
     }

@@ -79,8 +79,9 @@ def main() -> int:
         "tauri.conf.json beforeDevCommand must target apps/web-ui",
     )
     expect(
-        build.get("beforeBuildCommand") == "npm --prefix ../web-ui run build",
-        "tauri.conf.json beforeBuildCommand must target apps/web-ui",
+        build.get("beforeBuildCommand")
+        == "py -3 ../../scripts/prepare_desktop_bundle_resources.py && npm --prefix ../web-ui run build",
+        "tauri.conf.json beforeBuildCommand must prepare desktop bundle resources and target apps/web-ui",
     )
     expect(
         build.get("frontendDist") == "../../web-ui/dist",
@@ -97,7 +98,7 @@ def main() -> int:
     print("Desktop execution surface validation passed.")
     print(f"- default backend URL: {backend_url}")
     print("- root workspaces: apps/web-ui, apps/desktop-shell, packages/contracts")
-    print("- tauri host build hooks target apps/web-ui")
+    print("- tauri host build hooks prepare bundle resources and target apps/web-ui")
     return 0
 
 

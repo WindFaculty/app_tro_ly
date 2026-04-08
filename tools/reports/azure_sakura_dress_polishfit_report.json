@@ -1,14 +1,14 @@
 {
-  "baseBlend": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_split15_facial.blend",
-  "sourceBodyBlend": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Avatar_Base_v001_rigclean.blend",
-  "dressFbx": "D:\\Antigaravity_Code\\tro_ly\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
-  "outputBlend": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend",
-  "dressObject": "CHR_Dress_AzureSakura_v001",
-  "dressMesh": "CHR_Dress_AzureSakura_v001_Mesh",
+  "baseBlend": "D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Avatar_Base_v001_split15_facial.blend",
+  "sourceBodyBlend": "D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Avatar_Base_v001_rigclean.blend",
+  "dressFbx": "D:\\antigaravity_code\\app_tro_ly\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx\\Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+  "outputBlend": "D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend",
+  "dressObject": "CHR_Dress_AzureSakuraKimono_v1",
+  "dressMesh": "CHR_Dress_AzureSakuraKimono_v1_Mesh",
   "dressVertexCount": 610170,
   "dressPolygonCount": 1220762,
   "dressMaterial": "MAT_Dress_AzureSakura_v001",
-  "dressVertexGroupCount": 25,
+  "dressVertexGroupCount": 24,
   "armatureTarget": "Armature",
   "hiddenBodyRegions": [
     "Body_TorsoUpper",
@@ -47,21 +47,7 @@
       1.459866
     ]
   },
-  "clothyHelperFit": {
-    "scale": [
-      1.337888,
-      1.099828,
-      1.070665
-    ],
-    "location": [
-      0.0,
-      0.041327,
-      -0.110129
-    ],
-    "helperObject": "Clothy_Helper",
-    "fitVertexGroup": "ClothyFitZone",
-    "fitVertexCount": 357792
-  },
+  "clothyHelperFit": null,
   "polishFit": {
     "neckShoulderGroup": "Fit_NeckShoulder",
     "neckShoulderVertexCount": 65124,
