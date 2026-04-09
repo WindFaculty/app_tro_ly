@@ -2,8 +2,8 @@
   "version": 1,
   "status": "current_implementation",
   "source_runtime_paths": [
-    "ai-dev-system/clients/unity-client/Assets/Scripts/Runtime/RoomRuntime.cs",
-    "ai-dev-system/clients/unity-client/Assets/Scripts/Runtime/SceneStateController.cs"
+    "apps/unity-runtime/Assets/Scripts/Runtime/RoomRuntime.cs",
+    "apps/unity-runtime/Assets/Scripts/Runtime/SceneStateController.cs"
   ],
   "focus_presets": [
     {

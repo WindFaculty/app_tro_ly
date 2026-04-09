@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import re
 
 from app.agent.state import SelectorSpec
+from unity_integration.environment import UnityIntegrationEnvironment
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,16 +19,16 @@ class UnitySurfaceSpec:
 
 
 class UnitySurfaceMap:
-    _REPO_ROOT = Path(__file__).resolve().parents[4]
-    _PROJECT_ROOT_CANDIDATES = (
-        _REPO_ROOT / "ai-dev-system" / "clients" / "unity-client",
-        _REPO_ROOT / "unity-client",
+    _ENVIRONMENT = UnityIntegrationEnvironment().probe()
+    _PROJECT_ROOT = _ENVIRONMENT.project_root
+    _LAYOUT_CANDIDATES = (
+        _PROJECT_ROOT / "UserSettings" / "Layouts" / "default-6000.dwlt",
+        _ENVIRONMENT.repo_root / "apps" / "unity-runtime" / "UserSettings" / "Layouts" / "default-6000.dwlt",
     )
-    _PROJECT_ROOT = next((path for path in _PROJECT_ROOT_CANDIDATES if path.exists()), _PROJECT_ROOT_CANDIDATES[0])
-    _LAYOUT_PATH = _PROJECT_ROOT / "UserSettings" / "Layouts" / "default-6000.dwlt"
-    _EDITOR_PATH = Path(r"D:\6000.3.11f1\Editor\Unity.exe")
+    _LAYOUT_PATH = next((path for path in _LAYOUT_CANDIDATES if path.exists()), _LAYOUT_CANDIDATES[0])
+    _EDITOR_PATH = _ENVIRONMENT.editor_path or Path("Unity.exe")
     _EDITOR_SELECTOR = SelectorSpec(
-        title_re=r"^unity-client\b.*Unity 6\.3 LTS \(6000\.3\.11f1\).*",
+        title_re=rf"^{re.escape(_PROJECT_ROOT.name)}\b.*Unity.*",
         class_name="UnityContainerWndClass",
         backend="uia",
     )

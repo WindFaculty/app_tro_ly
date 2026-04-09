@@ -14,10 +14,10 @@ The room is the 3D living space where the assistant avatar exists. It is the onl
 
 Current implementation in this repo:
 
-- `ai-dev-system/clients/unity-client/Assets/Scripts/App/AssistantBootstrap.cs` now auto-boots `StandaloneRoomApp` instead of the legacy `AssistantApp`.
-- `ai-dev-system/clients/unity-client/Assets/Scripts/App/StandaloneRoomCompositionRoot.cs` builds the current placeholder-safe room stage, warm orthographic camera, directional light, and minimal avatar root used by the standalone Unity runtime.
-- `ai-dev-system/clients/unity-client/Assets/Scripts/Runtime/RoomRuntime.cs` implements four orthographic camera focus presets: `overview` (5.2), `avatar` (3.6), `desk` (4.2), `wardrobe` (3.2).
-- `ai-dev-system/clients/unity-client/Assets/Scripts/Runtime/SceneStateController.cs` maps React page context to room focus presets.
+- `apps/unity-runtime/Assets/Scripts/App/AssistantBootstrap.cs` auto-boots `StandaloneRoomApp`.
+- `apps/unity-runtime/Assets/Scripts/App/StandaloneRoomCompositionRoot.cs` builds the current placeholder-safe room stage, warm orthographic camera, directional light, and minimal avatar root used by the standalone Unity runtime.
+- `apps/unity-runtime/Assets/Scripts/Runtime/RoomRuntime.cs` implements four orthographic camera focus presets: `overview` (5.2), `avatar` (3.6), `desk` (4.2), `wardrobe` (3.2).
+- `apps/unity-runtime/Assets/Scripts/Runtime/SceneStateController.cs` maps React page context to room focus presets.
 - `ai-dev-system/domain/room/contracts/focus-presets.json` documents the current focus preset shape.
 - Current implementation: the standalone Unity runtime now starts from placeholder-safe runtime composition rather than the old UI Toolkit shell, while full room blockout art and production avatar visuals remain planned follow-on work.
 

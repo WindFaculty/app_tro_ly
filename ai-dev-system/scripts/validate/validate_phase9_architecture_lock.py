@@ -43,12 +43,13 @@ TEXT_EXPECTATIONS = (
     ("../tasks/task-queue.md", "Phase 9 shim removal"),
     ("../tasks/ai-dev-system-unification-backlog.md", "U09 | DONE"),
     ("../tasks/done.md", "D049: Completed the `ai-dev-system` unification Phase 9 architecture-lock pass"),
-    ("../scripts/assistant_common.ps1", "ai-dev-system\\clients\\unity-client"),
+    ("../scripts/assistant_common.ps1", "apps\\unity-runtime"),
 )
 
 ABSENCE_EXPECTATIONS = (
     ("../tasks/task-queue.md", "root shim packages remain temporary compatibility paths"),
     ("../scripts/assistant_common.ps1", 'Join-Path $Root "unity-client"'),
+    ("../scripts/assistant_common.ps1", "ai-dev-system\\clients\\unity-client"),
 )
 
 

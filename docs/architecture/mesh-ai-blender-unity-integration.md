@@ -61,7 +61,7 @@ It does not claim that Unity runtime wardrobe equip mapping or room prefab hooku
 
 ### Unity runtime
 
-- Current implementation still uses `ai-dev-system/clients/unity-client/`.
+- Current implementation now uses `apps/unity-runtime/`.
 - No new business UI is added in Unity for this phase.
 - `Assets/Scripts/Runtime/MeshAssetRegistry.cs` now intakes export-ready handoff manifests for wardrobe foundations plus room assets inside the Unity runtime.
 - `Assets/Scripts/Runtime/UnityBridgeClient.cs` now uses that registry for room-focus alias fallback and registry-aware wardrobe diagnostics.

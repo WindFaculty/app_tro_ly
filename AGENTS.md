@@ -7,7 +7,7 @@ Machine-facing operating rules for Codex and similar agents.
 ## Repo Summary
 
 - `local-backend/`: source of truth for backend behavior and remains out of scope for the current non-backend unification
-- `ai-dev-system/clients/unity-client/`: current source of truth for client UI and avatar presentation
+- `apps/unity-runtime/`: current source of truth for the Unity room, avatar, bridge, audio, and runtime-focused tests
 - `ai-dev-system/`: current source of truth for the automation subsystem and planned integration root for the repo's non-backend system
 - `scripts/`: current source of truth for Windows setup, startup, packaging, and backend smoke automation
 - `docs/`: governance and maintained documentation
@@ -21,16 +21,14 @@ Machine-facing operating rules for Codex and similar agents.
   - `local-backend/app/services/`
   - `local-backend/app/models/`
   - `local-backend/app/core/`
-- Unity UI truth lives in:
-  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/MainUI.uxml`
-  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/Shell/AppShell.uxml`
-  - `ai-dev-system/clients/unity-client/Assets/Resources/UI/Styles/*.uss`
-  - `ai-dev-system/clients/unity-client/Assets/Scripts/App/`
-  - `ai-dev-system/clients/unity-client/Assets/Scripts/Core/`
-  - `ai-dev-system/clients/unity-client/Assets/Scripts/Features/`
+- Unity runtime truth lives in:
+  - `apps/unity-runtime/Assets/Scripts/App/`
+  - `apps/unity-runtime/Assets/Scripts/Runtime/`
+  - `apps/unity-runtime/Assets/Scripts/Audio/`
+  - `apps/unity-runtime/Assets/Scripts/Avatar/`
 - Avatar integration truth lives in:
-  - `ai-dev-system/clients/unity-client/Assets/Scripts/Avatar/`
-  - `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`
+  - `apps/unity-runtime/Assets/Scripts/Avatar/`
+  - `apps/unity-runtime/Assets/AvatarSystem/`
 - Shared avatar, customization, and room contract truth lives in:
   - `ai-dev-system/domain/avatar/`
   - `ai-dev-system/domain/customization/`
@@ -41,6 +39,7 @@ Machine-facing operating rules for Codex and similar agents.
   - `ai-dev-system/asset-pipeline/`
 - Current `ai-dev-system/` automation truth lives in:
   - `ai-dev-system/control-plane/app/`
+  - `ai-dev-system/control-plane/unity_integration/`
   - `ai-dev-system/control-plane/catalog/`
   - `ai-dev-system/control-plane/orchestrator/`
   - `ai-dev-system/control-plane/adapters/`

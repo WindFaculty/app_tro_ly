@@ -5,7 +5,7 @@ Current implementation: `ai-dev-system/` is now the main integration root for th
 Important boundary:
 
 - `local-backend/` remains outside this subsystem and is out of scope for the current unification plan.
-- The shipped assistant runtime is now `local-backend/` plus `clients/unity-client/` inside `ai-dev-system/`.
+- The shipped assistant runtime is now `local-backend/` plus `apps/unity-runtime/` at repo root.
 - Phase 1 establishes the target architecture and ownership map inside `ai-dev-system/` before any large path move.
 
 ## Mission
@@ -16,7 +16,7 @@ Its long-term role is to own:
 
 - the shared control plane for GUI automation and Unity automation
 - the optional interactive Blender MCP lane used for scene inspection and viewport capture
-- absorbed client code such as `clients/unity-client/`
+- absorbed client-facing governance and historical migration context under `clients/`
 - non-backend domain contracts for avatar, customization, room, and shared events or models
 - AI context and subsystem-local policies
 - asset-pipeline code and workbench authoring areas
@@ -29,7 +29,7 @@ The target layout after this phase is:
 ```text
 ai-dev-system/
 |- control-plane/   automation runtime, orchestration, profiles, MCP, verification, healing
-|- clients/         absorbed non-backend clients such as `clients/unity-client/`
+|- clients/         absorbed client-governance area and historical migration context
 |- domain/          avatar, customization, room, and shared contracts or models
 |- context/         AI context, prompts, summaries, and local subsystem policies
 |- asset-pipeline/  import, conversion, validation, and export pipeline code
@@ -46,7 +46,7 @@ ai-dev-system/
 ### Current implementation
 
 The current automation subsystem now lives under `control-plane/`, and Phase 9 removed the temporary root-level shim packages that had bridged the old import layout.
-The shared avatar, customization, and room contract layer now lives under `domain/`, while runtime Unity code remains in `clients/unity-client/`.
+The shared avatar, customization, and room contract layer now lives under `domain/`, while runtime Unity code now lives in `../apps/unity-runtime/`.
 For the architecture-lock cleanup details, read `../docs/migration/ai-dev-system-unification-phase9.md`.
 The canonical agent-platform catalog, lifecycle orchestrator, and harness adapters now live under `control-plane/catalog/`, `control-plane/orchestrator/`, and `control-plane/adapters/`.
 
@@ -57,13 +57,14 @@ Current source-of-truth roots:
 - `control-plane/catalog/`
 - `control-plane/orchestrator/`
 - `control-plane/adapters/`
+- `control-plane/unity_integration/`
 - `control-plane/agents/`
 - `control-plane/executor/`
 - `control-plane/planner/`
 - `control-plane/memory/`
 - `control-plane/tools/`
 - `control-plane/mcp_client.py`
-- `clients/unity-client/`
+- `../apps/unity-runtime/`
 - `domain/`
 - `workflows/`
 - `tests/`
@@ -89,7 +90,7 @@ The new Phase 1 layer directories exist to define ownership before larger moves:
 Some directories are still architecture placeholders. Their presence does not mean runtime code has already been migrated into them.
 Current implemented exceptions are:
 
-- `clients/unity-client/`, which is the live Unity project path after the Phase 3 client move
+- `../apps/unity-runtime/`, which is the live Unity project path after the runtime cutover
 - `context/`, which owns subsystem-local AI context after the Phase 2 absorption
 - `control-plane/`, which owns the automation runtime after the Phase 4 move
 - `domain/`, which now owns shared avatar, customization, and room contracts after the Phase 5 domain pass
@@ -108,6 +109,7 @@ Owns the shared non-backend automation runtime:
 - generated Codex and Antigravity surfaces from `control-plane/adapters/`
 - orchestration helpers from `control-plane/agents/`, `control-plane/executor/`, and `control-plane/planner/`
 - Unity MCP client and related workflow control from `control-plane/app/unity/` and `control-plane/mcp_client.py`
+- shared Unity integration routing from `control-plane/unity_integration/`
 - runtime lesson storage or prompts that belong to automation execution rather than repo governance
 
 ### Clients
@@ -116,11 +118,11 @@ Owns absorbed client applications.
 
 Current state:
 
-- `clients/unity-client/` is now the current home of the Unity project.
+- `clients/` no longer contains the live Unity project.
 
 Planned work:
 
-- root-level script and doc references have been updated to use `clients/unity-client/`
+- root-level script and doc references have been updated to use `../apps/unity-runtime/`
 
 ### Domain
 
@@ -134,7 +136,7 @@ Owns non-backend contracts and metadata for:
 Current state:
 
 - `domain/` now owns the shared contract docs and taxonomy snapshots for avatar, customization, and room
-- runtime implementation still lives in `clients/unity-client/Assets/Scripts/` and `clients/unity-client/Assets/AvatarSystem/`
+- runtime implementation now lives in `../apps/unity-runtime/Assets/Scripts/` and `../apps/unity-runtime/Assets/AvatarSystem/`
 
 ### Context
 
@@ -196,7 +198,7 @@ Owns subsystem-level validation for the non-backend system.
 Current state:
 
 - `tests/` now owns the subsystem test catalog and the repo-side structure validation bucket
-- existing subsystem tests still live in `tests/`, `control-plane/app/tests/`, and `clients/unity-client/Assets/Tests/`
+- existing subsystem tests still live in `tests/`, `control-plane/app/tests/`, and `../apps/unity-runtime/Assets/Tests/`
 - `tests/structure/` now provides repeatable repo-side validation for Phase 7, Phase 8, and Phase 9 drift checks
 
 ## Current Source-Of-Truth Inside `ai-dev-system/`
@@ -210,6 +212,7 @@ Use these paths first when the request is about the current automation subsystem
   - `control-plane/app/blender/`
   - `control-plane/app/profiles/`
   - `control-plane/app/unity/`
+  - `control-plane/unity_integration/`
   - `control-plane/app/logging/`
   - `control-plane/app/vision/`
 - autonomous workflow path still in active use:

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "status": "current_implementation",
-  "source_enum_path": "ai-dev-system/clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs",
+  "source_enum_path": "apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs",
   "slots": [
     {
       "unity_enum": "Hair",

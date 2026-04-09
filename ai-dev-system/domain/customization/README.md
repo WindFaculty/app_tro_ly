@@ -1,15 +1,15 @@
 # Customization Domain
 
-Current implementation: customization runtime still lives in the Unity client, while this folder now owns the shared slot taxonomy and contract notes for wardrobe data.
+Current implementation: customization runtime now lives in `apps/unity-runtime/`, while this folder owns the shared slot taxonomy and contract notes for wardrobe data.
 
 Current source-of-truth code:
 
-- `../../clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs`
-- `../../clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarEquipmentManager.cs`
-- `../../clients/unity-client/Assets/AvatarSystem/Core/Scripts/Data/AvatarItemDefinition.cs`
-- `../../clients/unity-client/Assets/Scripts/Runtime/AvatarItemRegistry.cs`
-- `../../clients/unity-client/Assets/AvatarSystem/Core/Scripts/Data/OutfitPresetDefinition.cs`
-- `../../clients/unity-client/Assets/AvatarSystem/AvatarProduction/Editor/Validators/AvatarValidator.cs`
+- `../../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs`
+- `../../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarEquipmentManager.cs`
+- `../../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/Data/AvatarItemDefinition.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/Runtime/AvatarItemRegistry.cs`
+- `../../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/Data/OutfitPresetDefinition.cs`
+- `../../../apps/unity-runtime/Assets/AvatarSystem/AvatarProduction/Editor/Validators/AvatarValidator.cs`
 
 Current implementation notes:
 

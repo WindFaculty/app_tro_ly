@@ -4,7 +4,7 @@ Current implementation: `ai-dev-system/domain/` is now the source of truth for s
 
 Important boundary:
 
-- Live Unity runtime code and assets still execute from `ai-dev-system/clients/unity-client/`.
+- Live Unity runtime code and assets now execute from `apps/unity-runtime/`.
 - `domain/` currently owns contract documentation, taxonomy snapshots, and metadata shapes that describe the shared model.
 - `packages/contracts/` still owns the typed React or Tauri bridge transport envelopes.
 
@@ -30,24 +30,24 @@ Important boundary:
 Use these paths first when the request is about current avatar, customization, or room behavior:
 
 - avatar runtime composition:
-  - `../clients/unity-client/Assets/Scripts/App/AppCompositionRoot.cs`
-  - `../clients/unity-client/Assets/Scripts/Runtime/AvatarRuntime.cs`
-  - `../clients/unity-client/Assets/Scripts/Avatar/AvatarStateMachine.cs`
-  - `../clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarConversationBridge.cs`
-  - `../clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarRootController.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/App/StandaloneRoomCompositionRoot.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/Runtime/AvatarRuntime.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/Avatar/AvatarStateMachine.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarConversationBridge.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarRootController.cs`
 - customization runtime and data:
-  - `../clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs`
-  - `../clients/unity-client/Assets/AvatarSystem/Core/Scripts/AvatarEquipmentManager.cs`
-  - `../clients/unity-client/Assets/AvatarSystem/Core/Scripts/Data/AvatarItemDefinition.cs`
-  - `../clients/unity-client/Assets/Scripts/Runtime/AvatarItemRegistry.cs`
-  - `../clients/unity-client/Assets/AvatarSystem/Core/Scripts/Data/OutfitPresetDefinition.cs`
-  - `../clients/unity-client/Assets/AvatarSystem/AvatarProduction/Editor/Validators/AvatarValidator.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarEnums.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/AvatarEquipmentManager.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/Data/AvatarItemDefinition.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/Runtime/AvatarItemRegistry.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/Core/Scripts/Data/OutfitPresetDefinition.cs`
+  - `../../apps/unity-runtime/Assets/AvatarSystem/AvatarProduction/Editor/Validators/AvatarValidator.cs`
 - room runtime:
-  - `../clients/unity-client/Assets/Scripts/Runtime/RoomRuntime.cs`
-  - `../clients/unity-client/Assets/Scripts/Runtime/SceneStateController.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/Runtime/RoomRuntime.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/Runtime/SceneStateController.cs`
 - shared bridge transport:
   - `../../packages/contracts/src/unity.ts`
-  - `../clients/unity-client/Assets/Scripts/Runtime/RuntimeModels.cs`
+  - `../../apps/unity-runtime/Assets/Scripts/Runtime/RuntimeModels.cs`
 
 ## Planned Work Still Not Done
 

@@ -4,11 +4,11 @@ Current implementation: room behavior is still implemented by Unity runtime code
 
 Current source-of-truth code:
 
-- `../../clients/unity-client/Assets/Scripts/App/AssistantBootstrap.cs`
-- `../../clients/unity-client/Assets/Scripts/App/StandaloneRoomApp.cs`
-- `../../clients/unity-client/Assets/Scripts/App/StandaloneRoomCompositionRoot.cs`
-- `../../clients/unity-client/Assets/Scripts/Runtime/RoomRuntime.cs`
-- `../../clients/unity-client/Assets/Scripts/Runtime/SceneStateController.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/App/AssistantBootstrap.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/App/StandaloneRoomApp.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/App/StandaloneRoomCompositionRoot.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/Runtime/RoomRuntime.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/Runtime/SceneStateController.cs`
 
 Current scope:
 

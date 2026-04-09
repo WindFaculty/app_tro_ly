@@ -13,8 +13,8 @@ This section describes what the repo currently implements.
 - Today, week, overdue, inbox, and completed task queries
 - Text chat through `POST /v1/chat`
 - Streaming assistant turns through `WS /v1/assistant/stream`
-- Push-to-talk style microphone capture in the Unity client
-- Subtitle overlay, reminder overlay, settings panel, and task summaries in the Unity client
+- React desktop rebuild surfaces under `apps/web-ui/` and `apps/desktop-shell/`
+- Unity room and avatar runtime bootstrap under `apps/unity-runtime/`
 - Health diagnostics and degraded-mode messaging
 
 ### Partially implemented now
@@ -36,7 +36,7 @@ These remain valid product goals even where the current client is still partial.
 ### G1. Assistant shell
 
 - Show one assistant in the desktop app
-- Keep Home, Schedule, and Settings understandable without hidden state
+- Keep desktop business UI understandable without hidden state
 - Surface `ready`, `partial`, and `error` runtime health clearly
 
 ### G2. Local task management
@@ -69,8 +69,8 @@ These remain valid product goals even where the current client is still partial.
 - Compact mini-assistant mode
 - Fully local LLM routing as the main default path
 - Fully finished production-avatar experience
-- Rich schedule visualization beyond the current placeholder calendar panel
-- Design-target UI details from `ai-dev-system/clients/unity-client/Assets/Resources/UI/ui_feature_map.md`
+- Rich schedule visualization beyond the current desktop rebuild baseline
+- Design-target notes from older retired Unity UI planning docs
 
 ## Non-Goals For Current Scope
 

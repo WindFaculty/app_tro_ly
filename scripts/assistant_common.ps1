@@ -145,7 +145,7 @@ function Resolve-UnityProjectDirectory {
     param([string]$Root)
 
     $candidates = @(
-        (Join-Path $Root "ai-dev-system\clients\unity-client")
+        (Join-Path $Root "apps\unity-runtime")
     )
 
     foreach ($candidate in $candidates) {

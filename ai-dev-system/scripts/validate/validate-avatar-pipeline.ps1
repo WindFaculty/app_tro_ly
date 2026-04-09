@@ -45,7 +45,7 @@ $requiredPaths = @(
         Description = "Current item catalog snapshot"
     },
     @{
-        Path = (Join-Path $aiDevSystemRoot "clients\unity-client\Assets\AvatarSystem\AvatarProduction\Editor\Validators\AvatarValidator.cs")
+        Path = (Join-Path $repoRoot "apps\unity-runtime\Assets\AvatarSystem\AvatarProduction\Editor\Validators\AvatarValidator.cs")
         Description = "Unity avatar validator"
     },
     @{

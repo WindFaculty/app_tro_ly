@@ -274,15 +274,12 @@ fn resolve_repo_candidate(app: &AppHandle) -> Option<RuntimeCandidate> {
     let roots = repo_roots(app);
     let suffixes = [
         PathBuf::from("release").join("client"),
-        PathBuf::from("release").join("unity-client"),
         PathBuf::from("release").join("unity-runtime"),
-        PathBuf::from("ai-dev-system")
-            .join("clients")
-            .join("unity-client")
+        PathBuf::from("apps")
+            .join("unity-runtime")
             .join("Build"),
-        PathBuf::from("ai-dev-system")
-            .join("clients")
-            .join("unity-client")
+        PathBuf::from("apps")
+            .join("unity-runtime")
             .join("Builds"),
     ];
 

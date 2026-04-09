@@ -23,7 +23,7 @@ It defines who owns what across:
 Current implementation in this repo is still a transition state:
 
 - `local-backend/` is the current source of truth for backend logic, SQLite persistence, scheduler, speech, and assistant orchestration.
-- `ai-dev-system/clients/unity-client/` is still the current end-user shell and avatar runtime.
+- `apps/unity-runtime/` is the current Unity room and avatar runtime.
 - `apps/desktop-shell/` now contains the repo-side Tauri host with backend process ownership, startup status plus retry entry points, window controls, Unity runtime inspection, Unity bridge state, JSON-backed desktop restore files under the app data root, bundle-resource staging for packaged builds, and the current desktop hardening surface in `src-tauri/tauri.conf.json` plus `src-tauri/capabilities/default.json`.
 - `apps/web-ui/` now contains the React startup shell, desktop window chrome, runtime status surfaces, route auto-restore, a shared design system, and module-shell page framing on top of the typed backend plus Tauri plus Unity bridge adapters.
 - `packages/contracts/` already contains typed Tauri command or event names plus typed Unity bridge envelopes, including desktop restore-state surfaces.

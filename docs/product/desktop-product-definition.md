@@ -22,7 +22,7 @@ Unity is not part of the desktop app done criteria for Workstream A. The desktop
 Current implementation in this repo is still transition-state software:
 
 - `local-backend/` is the current source of truth for backend business logic and persistence.
-- `ai-dev-system/clients/unity-client/` is still the current end-user shell and avatar presentation runtime.
+- `apps/unity-runtime/` is the current Unity room and avatar runtime.
 - `apps/web-ui/` and `apps/desktop-shell/` already exist as rebuild scaffolds, not as the shipped product baseline.
 
 Do not describe the planned desktop product below as already shipped behavior.

@@ -1,78 +1,41 @@
 # Architecture - Current Assistant Runtime
 
-Updated: 2026-04-05
+Updated: 2026-04-09
 
 This document describes the current implementation in the repo. It does not treat target-state design notes as already shipped.
 
 ## High-Level Topology
 
 ```text
-Unity client
-  -> REST and WebSocket clients
+Unity runtime
+  -> Unity bridge and runtime services
      -> FastAPI backend
         -> AssistantOrchestrator
-           -> ActionValidator
-           -> RouterService
-           -> PlanningService
-           -> FastResponseService
-           -> MemoryService
-           -> TaskService / PlannerService
-           -> SpeechService
-        -> SchedulerService
+        -> RouterService / PlanningService / FastResponseService
+        -> MemoryService / TaskService / PlannerService
+        -> SpeechService / SchedulerService
         -> SQLiteRepository
 ```
 
-## Unity Client
+## Unity Runtime
 
 ### Entry and composition
 
-- `Assets/Scripts/Core/AssistantApp.cs` is the runtime coordinator.
-- `Assets/Scripts/App/AppCompositionRoot.cs` creates the runtime camera, UI document, audio playback, subtitle presenter, reminder presenter, and placeholder avatar-state runtime pieces.
-- `Assets/Scripts/Core/UiDocumentLoader.cs` loads `Assets/Resources/UI/MainUI.uxml`.
-- `Assets/Scripts/Core/AssistantEventBus.cs` plus `Assets/Scripts/Core/AppModuleEvents.cs` now carry planner handoff, subtitle visibility, and avatar-state signals across the Unity client runtime.
-
-### UI structure
-
-- `Assets/Resources/UI/MainUI.uxml` only wraps `Shell/AppShell.uxml`.
-- `Assets/Resources/UI/Shell/AppShell.uxml` composes the visible shell from:
-  - left control rail
-  - center-stage presentation area
-  - bottom planner sheet
-  - right-side chat panel
-  - settings drawer
-  - subtitle overlay
-  - reminder overlay
-- Runtime styles live in `Assets/Resources/UI/Styles/*.uss`.
-- `Assets/Resources/UI/MainStyle.uss` is deprecated and not the active style source.
-
-### Screen flow and controllers
-
-- `IShellModule` and `AppShellState` manage four-zone shell state such as planner-sheet expansion, chat visibility, and settings drawer visibility.
-- `HomeScreenController` renders the orbit-style center stage, task summary, quick-add input, focus lanes, and stage-status copy.
-- `ScheduleScreenController` renders today, week, inbox, and completed planner views into the bottom-sheet schedule canvas with date navigation and direct task actions.
-- `SettingsScreenController` binds backend-backed toggles and save or reload actions inside the drawer.
-- `ChatPanelController` binds the text input, send button, mic button, and transcript rendering.
-- `AppShellController` renders health and stage status in the shell rail and stage header areas.
-- `AssistantApp` now routes planner screen or date or task-action requests through shared event contracts before they reach planner mutations and shell-region updates.
+- `Assets/Scripts/App/AssistantBootstrap.cs` ensures the runtime boots through `StandaloneRoomApp`.
+- `Assets/Scripts/App/StandaloneRoomCompositionRoot.cs` creates the room stage, camera anchors, avatar-facing runtime services, bridge wiring, and audio playback support.
+- `Assets/Scripts/Runtime/RoomRuntime.cs` owns room focus presets and runtime scene state.
+- `Assets/Scripts/Runtime/UnityBridgeClient.cs` plus `TauriBridgeRuntime.cs` own typed runtime bridge behavior.
 
 ### Network integration
 
-- `LocalApiClient` handles REST requests for health, tasks, settings, STT, TTS, and compatibility chat.
-- `EventsClient` consumes `WS /v1/events`.
-- `AssistantStreamClient` consumes `WS /v1/assistant/stream`.
-- `AssistantApp` prefers the streaming path and falls back to compatibility chat when the stream is unavailable.
-- `AssistantApp` now feeds compatibility replies and assistant-stream transcript or route or chunk or final events into `ChatModule` APIs so transcript and diagnostics state stay chat-owned before shell refresh or audio playback.
-
-### Client-side state
-
-- `TaskViewModelStore` keeps today, week, inbox, and completed snapshots.
-- `ChatViewModelStore` keeps transcript, assistant draft, transcript preview, routing diagnostics, system-status copy, and task-action summaries for both compatibility and streaming chat paths.
-- `SettingsViewModelStore` keeps the backend-backed settings snapshot currently used by the client.
+- The backend remains the business-logic source of truth under `local-backend/`.
+- Unity-side bridge models live under `Assets/Scripts/Runtime/RuntimeModels.cs`.
+- The control-plane Unity integration layer under `ai-dev-system/control-plane/unity_integration/` is external automation infrastructure, not runtime business logic.
 
 ### Avatar and presentation
 
 - `AvatarStateMachine` drives placeholder state visuals.
-- `AudioPlaybackController` manages spoken reply playback while subtitle visibility and avatar-state transitions are now triggered from shared event contracts in `AssistantApp`.
+- `AudioPlaybackController` manages spoken reply playback.
 - `LipSyncController` applies amplitude-based lip sync to a fallback face mesh or transform.
 - `Assets/AvatarSystem/` contains the production-avatar groundwork:
   - `AvatarConversationBridge`

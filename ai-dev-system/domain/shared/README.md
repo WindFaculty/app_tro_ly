@@ -5,7 +5,7 @@ Current implementation: `ai-dev-system/domain/shared/` holds boundary notes for 
 Current transport truth still lives in:
 
 - `../../../packages/contracts/src/unity.ts`
-- `../../clients/unity-client/Assets/Scripts/Runtime/RuntimeModels.cs`
+- `../../../apps/unity-runtime/Assets/Scripts/Runtime/RuntimeModels.cs`
 
 Current shared-domain role:
 

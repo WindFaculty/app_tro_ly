@@ -19,7 +19,7 @@ All room art production for B01–B11 should follow this spec. Changes to these 
 - **MSAA**: 4x or 8x (target smooth edges on prop silhouettes)
 - **Depth texture**: Enabled (required for some post-processing effects)
 
-Current implementation note: `ai-dev-system/clients/unity-client/Assets/UniversalRenderPipelineGlobalSettings.asset` already exists. B01 should verify its settings match these targets.
+Current implementation note: `apps/unity-runtime/Assets/UniversalRenderPipelineGlobalSettings.asset` already exists. B01 should verify its settings match these targets.
 
 ## Art Style Definition
 

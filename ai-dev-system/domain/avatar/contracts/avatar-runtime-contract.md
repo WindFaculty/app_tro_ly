@@ -1,11 +1,11 @@
 # Avatar Runtime Contract
 
-Current implementation: the Unity shell composes avatar runtime services in `ai-dev-system/clients/unity-client/Assets/Scripts/App/AppCompositionRoot.cs`.
+Current implementation: the standalone room runtime composes avatar runtime services in `apps/unity-runtime/Assets/Scripts/App/StandaloneRoomCompositionRoot.cs`.
 
 ## Loading Path
 
-1. `AppCompositionRoot.Compose(...)` creates `AvatarStateMachine`, `AvatarRuntime`, `AnimationRuntime`, and `LipSyncRuntime`.
-2. The composition root resolves scene-owned components with `FindFirstObjectByType<AvatarRootController>()` and `FindFirstObjectByType<AvatarConversationBridge>()`.
+1. `StandaloneRoomCompositionRoot.Compose(...)` creates `AvatarStateMachine`, `AvatarRuntime`, `AnimationRuntime`, and `LipSyncRuntime`.
+2. The composition root resolves scene-owned components with `FindAnyObjectByType<AvatarRootController>()` and `FindAnyObjectByType<AvatarConversationBridge>()`.
 3. `AvatarRuntime.Bind(...)` receives:
    - `AvatarStateMachine`
    - `AvatarConversationBridge`
@@ -68,4 +68,4 @@ Observed bridge entry points:
 
 - Scene setup still depends on `AvatarRootController` and `AvatarConversationBridge` existing in the loaded Unity scene.
 - Production-avatar completion is still blocked by `P04`.
-- The placeholder-safe shell flow is implemented; a production asset handoff is not yet verified from terminal work.
+- The placeholder-safe room-runtime flow is implemented; a production asset handoff is not yet verified from terminal work.

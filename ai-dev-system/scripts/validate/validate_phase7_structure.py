@@ -10,7 +10,7 @@ EXPECTED_FILES = (
     "scripts/run/run-unity-automation.ps1",
     "scripts/validate/validate-structure.ps1",
     "scripts/validate/validate-avatar-pipeline.ps1",
-    "scripts/package/package-unity-client.ps1",
+    "scripts/package/package-unity-runtime.ps1",
     "scripts/migrate/README.md",
     "tests/control-plane/README.md",
     "tests/unity-integration/README.md",
@@ -46,7 +46,7 @@ WRAPPER_EXPECTATIONS = (
     ("scripts/validate/validate-structure.ps1", "validate-phase6-structure.ps1"),
     ("scripts/validate/validate-structure.ps1", "validate_phase7_structure.py"),
     ("scripts/validate/validate-avatar-pipeline.ps1", "AvatarValidator.cs"),
-    ("scripts/package/package-unity-client.ps1", "scripts\\package_release.ps1"),
+    ("scripts/package/package-unity-runtime.ps1", "scripts\\package_release.ps1"),
 )
 
 

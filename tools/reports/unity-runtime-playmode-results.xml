@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.0922981">
+  <test-suite type="TestSuite" id="1012" name="Local Desktop Assistant" fullname="Local Desktop Assistant" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.092298" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1005" name="LocalAssistant.PlayModeTests.dll" fullname="D:/antigaravity_code/app_tro_ly/apps/unity-runtime/Library/ScriptAssemblies/LocalAssistant.PlayModeTests.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.076925" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="18908" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1006" name="LocalAssistant" fullname="LocalAssistant" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.075683" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1007" name="Tests" fullname="LocalAssistant.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.074330" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1008" name="PlayMode" fullname="LocalAssistant.Tests.PlayMode" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.073483" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="AvatarConversationBridgePlayModeTests" fullname="LocalAssistant.Tests.PlayMode.AvatarConversationBridgePlayModeTests" classname="LocalAssistant.Tests.PlayMode.AvatarConversationBridgePlayModeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.062140" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1002" name="AvatarConversationBridgeTransitionsThroughConversationFlow" fullname="LocalAssistant.Tests.PlayMode.AvatarConversationBridgePlayModeTests.AvatarConversationBridgeTransitionsThroughConversationFlow" methodname="AvatarConversationBridgeTransitionsThroughConversationFlow" classname="LocalAssistant.Tests.PlayMode.AvatarConversationBridgePlayModeTests" runstate="Runnable" seed="2040836594" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.038981" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1003" name="AvatarStateMachinePlayModeTests" fullname="LocalAssistant.Tests.PlayMode.AvatarStateMachinePlayModeTests" classname="LocalAssistant.Tests.PlayMode.AvatarStateMachinePlayModeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.008862" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1004" name="AvatarStateChangesWhenSet" fullname="LocalAssistant.Tests.PlayMode.AvatarStateMachinePlayModeTests.AvatarStateChangesWhenSet" methodname="AvatarStateChangesWhenSet" classname="LocalAssistant.Tests.PlayMode.AvatarStateMachinePlayModeTests" runstate="Runnable" seed="1932396424" result="Passed" start-time="2026-04-08 17:53:40Z" end-time="2026-04-08 17:53:40Z" duration="0.007221" asserts="0">
+                <properties>
+                  <property name="_JOINTYPE" value="UnityCombinatorial" />
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/tranx/AppData/LocalLow/DefaultCompany/Local Desktop Assistant\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

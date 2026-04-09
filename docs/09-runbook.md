@@ -34,7 +34,7 @@ Not fully covered here:
 Useful paths:
 
 - `local-backend/`
-- `ai-dev-system/clients/unity-client/`
+- `apps/unity-runtime/`
 - `scripts/`
 - `tasks/task-queue.md`
 - `tasks/task-people.md`

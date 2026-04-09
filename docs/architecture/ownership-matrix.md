@@ -4,10 +4,12 @@
 **Phase:** Phase 1 — Thiết kế boundary mới  
 **Ngày tạo:** 2026-04-07  
 **Nguồn sự thật:**
-- `ai-dev-system/clients/unity-client/Assets/Scripts/` — kiểm tra thực tế
+- historical pre-cutover Unity shell tree inventory captured on 2026-04-07
 - `local-backend/app/api/routes.py` — API endpoints thực tế
 - `docs/migration/rebuild-target.md` — kiến trúc đích
 - `docs/migration/rebuild-rules.md` — 8 luật cứng
+
+Historical note: references to `AssistantApp`, shell controllers, and legacy UI rows below describe the retired pre-cutover Unity shell inventory, not the current `apps/unity-runtime/` implementation.
 
 ---
 
@@ -292,7 +294,7 @@ Communication:
 | **keep** | ~15 | Avatar system, audio playback, mic capture, animation, room, camera |
 | **partial-keep** | ~4 | Subtitle (giữ 3D layer), event bus, health utilities, module contracts |
 
-**Số script cần retire:** ~55 files trong `ai-dev-system/clients/unity-client/Assets/Scripts/`  
+**Số script cần retire:** ~55 files trong retired pre-cutover Unity shell tree  
 **Số script cần giữ:** ~20 files trong `AvatarSystem/` và `Scripts/Avatar/`, `Audio/`
 
 ---

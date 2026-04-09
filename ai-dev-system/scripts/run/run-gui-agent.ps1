@@ -5,6 +5,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Wrapper contract: equivalent to `python -m app.main ...`
+
 $scriptRoot = Split-Path -Parent $PSCommandPath
 $aiDevSystemRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptRoot "..\.."))
 $controlPlaneRoot = Join-Path $aiDevSystemRoot "control-plane"
@@ -23,7 +25,7 @@ function Resolve-ForwardedArguments {
         return @(-split (($Arguments -join "") -replace "\s+", " ").Trim())
     }
 
-    return @($Arguments)
+    return ,$Arguments
 }
 
 $commandArguments = if ($ForwardedArguments.Count -gt 0) {

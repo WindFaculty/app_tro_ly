@@ -31,12 +31,15 @@ Current implementation: this directory is now the source of truth for the automa
   - Mesh AI pipeline planning and Blender wrapper rendering
 - `mcp_client.py`
   - shared MCP stdio client for the older autonomous workflow path
+- `unity_integration/`
+  - shared Unity environment probe, capability catalog, CLI Loop adapter, and consolidated MCP runtime
 
 ## Ownership Map
 
 - GUI automation: `app/automation/`
 - Blender MCP automation runtime: `app/blender/`
 - Unity automation runtime: `app/unity/` and `mcp_client.py`
+- Shared Unity integration core: `unity_integration/`
 - canonical platform definitions: `catalog/`
 - workflow lifecycle and run history: `orchestrator/`
 - harness export rendering: `adapters/`

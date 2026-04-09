@@ -30,20 +30,12 @@ Coverage present in repo includes:
 
 ### Unity
 
-Unity test files exist under `ai-dev-system/clients/unity-client/Assets/Tests/` for:
+Unity test files exist under `apps/unity-runtime/Assets/Tests/` for:
 
 - EditMode:
-  - view-model stores
-  - health mapping and normalization
-  - settings serialization
+  - standalone room bootstrap
+  - mesh asset registry
 - PlayMode:
-  - `AssistantApp`
-  - `UiDocumentLoader`
-  - `AppShellController`
-  - `ShellModule`
-  - screen controllers
-  - subtitle presenter
-  - reminder presenter
   - avatar bridge and avatar state machine
 
 Manual note:
@@ -83,7 +75,7 @@ Evidence should stay split between:
 These still require human-run verification:
 
 - Unity Editor visual behavior
-- built client behavior on a target machine
+- built runtime behavior on a target machine
 - microphone capture and playback quality
 - speech runtime installs and model paths
 - production-avatar integration in a real scene

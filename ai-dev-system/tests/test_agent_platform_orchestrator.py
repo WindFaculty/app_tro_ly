@@ -84,7 +84,7 @@ class _MissingObjectsExecutor:
                 },
                 "screenshot": {
                     "structured_content": {
-                        "data": {"fullPath": "D:/repo/ai-dev-system/clients/unity-client/Assets/Screenshots/demo.png"}
+                        "data": {"fullPath": "D:/repo/apps/unity-runtime/Assets/Screenshots/demo.png"}
                     }
                 },
             },
