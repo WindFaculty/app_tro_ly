@@ -1,0 +1,19 @@
+{
+  "name": "app-tro-ly-rebuild",
+  "private": true,
+  "packageManager": "npm@11.11.0",
+  "workspaces": [
+    "apps/web-ui",
+    "apps/desktop-shell",
+    "packages/contracts"
+  ],
+  "scripts": {
+    "web:dev": "npm run dev --workspace apps/web-ui",
+    "web:check": "npm run check --workspace apps/web-ui",
+    "web:build": "npm run build --workspace apps/web-ui",
+    "desktop:dev": "npm run dev --workspace apps/desktop-shell",
+    "desktop:check": "npm run check --workspace apps/desktop-shell",
+    "desktop:build": "npm run build --workspace apps/desktop-shell",
+    "rebuild:check": "npm run web:build && npm run desktop:check"
+  }
+}

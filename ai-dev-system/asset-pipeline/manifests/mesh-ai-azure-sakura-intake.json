@@ -1,0 +1,40 @@
+{
+  "asset_id": "azure-sakura-kimono-0326010047",
+  "asset_name": "Azure Sakura Kimono",
+  "asset_type": "avatar_clothing",
+  "category": "clothing_foundation",
+  "source": "mesh_ai",
+  "source_path": "Meshy_AI_Azure_Sakura_Kimono_0326010047_texture_fbx/Meshy_AI_Azure_Sakura_Kimono_0326010047_texture.fbx",
+  "quality_estimate": "8/10",
+  "status": "raw",
+  "profile_id": "unity_avatar_clothing_v1",
+  "target_runtime": "unity",
+  "target_unity_path": "Assets/AvatarSystem/AvatarProduction/Wardrobe/Foundations/AzureSakuraKimono",
+  "slot": "dress",
+  "room_focus_preset": "wardrobe",
+  "toolchain_steps": [],
+  "validation_report_path": "tools/reports/azure_sakura_dress_polishfit_verify_report.json",
+  "preview_render_path": "tools/renders/azure_sakura_polishfit/current.png",
+  "notes": [
+    "This intake example is grounded in the current repo Mesh AI kimono import.",
+    "The input mesh is treated as raw intake and not as a runtime-ready Unity asset."
+  ],
+  "manual_gates": [
+    "Blender wrapper execution still requires a target machine with Blender installed.",
+    "Unity wardrobe runtime item registry mapping remains planned work."
+  ],
+  "dependencies": {
+    "base_avatar_blend": "bleder/CHR_Avatar_Base_v001_split15_facial.blend",
+    "source_body_blend": "bleder/CHR_Avatar_Base_v001_rigclean.blend",
+    "clothy_helper_fbx": null
+  },
+  "artifact_targets": {
+    "audit_report_path": "tools/reports/azure_kimono_asset_audit.json",
+    "cleaned_source_path": "bleder/CHR_Dress_AzureSakura_v001_polishfit.blend",
+    "refinement_report_path": "tools/reports/azure_sakura_dress_polishfit_report.json",
+    "scene_state_report_path": "tools/reports/azure_sakura_dress_polishfit_scene_state.json",
+    "validation_report_path": "tools/reports/azure_sakura_dress_polishfit_verify_report.json",
+    "preview_render_path": "tools/renders/azure_sakura_polishfit/current.png",
+    "export_handoff_manifest_path": "ai-dev-system/asset-pipeline/manifests/mesh-ai-azure-sakura-handoff.json"
+  }
+}

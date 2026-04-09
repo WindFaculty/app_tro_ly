@@ -1,6 +1,6 @@
 # Customization Validator Rules
 
-Current implementation: the checked-in validator logic currently lives in `ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/Editor/Validators/AvatarValidator.cs`.
+Current implementation: the checked-in validator logic currently lives in `apps/unity-runtime/Assets/AvatarSystem/AvatarProduction/Editor/Validators/AvatarValidator.cs`.
 
 ## Item Definition Checks
 

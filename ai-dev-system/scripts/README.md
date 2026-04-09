@@ -9,7 +9,7 @@ Current implementation: this directory now owns the standardized non-backend ent
 - `run/inspect-unity-profile.ps1`
   - standard inspect entry point for the `unity-editor` profile
 - `run/run-unity-automation.ps1`
-  - forwards to the current MCP-driven workflow demo in `run_demo.py`
+  - now selects between the legacy workflow demo, GUI-agent lane, and shared Unity integration lane
 - `validate/validate-structure.ps1`
   - runs the Phase 6, Phase 7, and Phase 9 structure validators
 - `validate/validate-avatar-pipeline.ps1`
@@ -18,7 +18,11 @@ Current implementation: this directory now owns the standardized non-backend ent
   - validates the unification overview docs and task-governance tracker links for drift
 - `validate/validate-architecture-lock.ps1`
   - validates the Phase 9 architecture lock for shim absence, bootstrap surface, and stale active-path drift
-- `package/package-unity-client.ps1`
+- `validate/validate-mesh-ai-pipeline.ps1`
+  - validates the Mesh AI lifecycle contracts, workflow specs, wrapper mapping, and task/doc references
+- `validate/validate-unity-integration.ps1`
+  - validates the shared Unity integration layer, capability catalog, and required docs
+- `package/package-unity-runtime.ps1`
   - forwards to the current release-packaging script at repo root
 
 ## Ownership Boundary

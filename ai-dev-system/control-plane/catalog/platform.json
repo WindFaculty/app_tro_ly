@@ -1,0 +1,473 @@
+{
+  "version": 1,
+  "agents": [
+    {
+      "id": "planner",
+      "name": "Planner",
+      "summary": "Deterministic task decomposition for Unity and desktop automation work.",
+      "prompt": "context/prompts/automation/planner.md",
+      "responsibilities": [
+        "break bounded tasks into explicit steps",
+        "identify required verification before execution",
+        "keep plans aligned with supported goals and tool policy"
+      ],
+      "outputs": [
+        "plan steps",
+        "execution order",
+        "verification expectations"
+      ],
+      "codex": {
+        "file_name": "planner",
+        "model": "gpt-5.4",
+        "reasoning_effort": "high",
+        "sandbox_mode": "read-only"
+      },
+      "antigravity": {
+        "file_name": "planner.md"
+      }
+    },
+    {
+      "id": "executor",
+      "name": "Executor",
+      "summary": "MCP-backed Unity execution engine for bounded plan steps.",
+      "prompt": "context/prompts/automation/executor.md",
+      "responsibilities": [
+        "execute approved steps with minimal MCP calls",
+        "capture evidence for every mutation",
+        "surface structured step results"
+      ],
+      "outputs": [
+        "execution records",
+        "captured artifacts",
+        "transport retry evidence"
+      ]
+    },
+    {
+      "id": "debugger",
+      "name": "Debugger",
+      "summary": "Console-aware verification and lesson extraction for Unity runs.",
+      "prompt": "context/prompts/automation/debugger.md",
+      "responsibilities": [
+        "summarize console output",
+        "separate app issues from transport noise",
+        "capture reusable lessons from verification"
+      ],
+      "outputs": [
+        "console analysis",
+        "lessons",
+        "verification notes"
+      ]
+    },
+    {
+      "id": "architect",
+      "name": "Architect",
+      "summary": "Design repo-native architecture changes before adapter or harness work.",
+      "prompt": "context/prompts/automation/architect.md",
+      "responsibilities": [
+        "shape internal architecture before harness-specific surfaces",
+        "record tradeoffs and migration steps",
+        "prevent adapter-driven drift"
+      ],
+      "outputs": [
+        "target architecture",
+        "migration notes",
+        "risk summary"
+      ],
+      "codex": {
+        "file_name": "architect",
+        "model": "gpt-5.4",
+        "reasoning_effort": "high",
+        "sandbox_mode": "read-only"
+      },
+      "antigravity": {
+        "file_name": "architect.md"
+      }
+    },
+    {
+      "id": "code-reviewer",
+      "name": "Code Reviewer",
+      "summary": "Reviews code and workflow outputs for regressions and missing validation.",
+      "prompt": "context/prompts/automation/reviewer.md",
+      "responsibilities": [
+        "identify concrete bugs and regressions",
+        "flag docs drift and missing tests",
+        "check lifecycle and verification completeness"
+      ],
+      "outputs": [
+        "review findings",
+        "residual risks",
+        "verification follow-ups"
+      ],
+      "codex": {
+        "file_name": "reviewer",
+        "model": "gpt-5.4",
+        "reasoning_effort": "medium",
+        "sandbox_mode": "read-only"
+      },
+      "antigravity": {
+        "file_name": "reviewer.md"
+      }
+    },
+    {
+      "id": "security-reviewer",
+      "name": "Security Reviewer",
+      "summary": "Checks automation and harness changes for secrets, unsafe commands, and permission drift.",
+      "prompt": "context/prompts/automation/security-reviewer.md",
+      "responsibilities": [
+        "review secrets and permission boundaries",
+        "flag unsafe execution patterns",
+        "enforce no-secrets and least-surprise harness guidance"
+      ],
+      "outputs": [
+        "security findings",
+        "safe remediation advice",
+        "permission drift notes"
+      ],
+      "codex": {
+        "file_name": "security-reviewer",
+        "model": "gpt-5.4",
+        "reasoning_effort": "high",
+        "sandbox_mode": "read-only"
+      },
+      "antigravity": {
+        "file_name": "security-reviewer.md"
+      }
+    },
+    {
+      "id": "build-error-resolver",
+      "name": "Build Error Resolver",
+      "summary": "Repairs build, import, and toolchain failures with minimal safe changes.",
+      "prompt": "context/prompts/automation/build-error-resolver.md",
+      "responsibilities": [
+        "repair build and import failures",
+        "keep fixes aligned with the canonical catalog",
+        "leave evidence for the resolved failure mode"
+      ],
+      "outputs": [
+        "repair notes",
+        "validation evidence",
+        "follow-up checks"
+      ],
+      "codex": {
+        "file_name": "build-error-resolver",
+        "model": "gpt-5.4",
+        "reasoning_effort": "medium",
+        "sandbox_mode": "workspace-write"
+      },
+      "antigravity": {
+        "file_name": "build-error-resolver.md"
+      }
+    },
+    {
+      "id": "loop-operator",
+      "name": "Loop Operator",
+      "summary": "Supervises long-running automation loops with bounded retries and visible state.",
+      "prompt": "context/prompts/automation/loop-operator.md",
+      "responsibilities": [
+        "track lifecycle checkpoints",
+        "bound retries and replans",
+        "escalate stalls before evidence goes stale"
+      ],
+      "outputs": [
+        "loop checkpoints",
+        "retry decisions",
+        "escalation notes"
+      ],
+      "codex": {
+        "file_name": "loop-operator",
+        "model": "gpt-5.4",
+        "reasoning_effort": "medium",
+        "sandbox_mode": "read-only"
+      },
+      "antigravity": {
+        "file_name": "loop-operator.md"
+      }
+    }
+  ],
+  "skills": [
+    {
+      "id": "search-first",
+      "name": "Search First",
+      "summary": "Research the repo and available capabilities before adding new automation code.",
+      "triggers": [
+        "starting a new feature",
+        "considering a new tool or dependency",
+        "before creating a new helper or adapter"
+      ],
+      "checklist": [
+        "search the repo for an existing implementation",
+        "check the canonical catalog before creating new harness surfaces",
+        "prefer extension or reuse over net-new duplication"
+      ],
+      "outputs": [
+        "repo findings",
+        "reuse decision",
+        "implementation direction"
+      ],
+      "openai": {
+        "display_name": "Search First",
+        "brand_color": "#0EA5E9",
+        "default_prompt": "Research the repo and available integrations before implementing automation changes.",
+        "allow_implicit_invocation": true
+      }
+    },
+    {
+      "id": "tdd-workflow",
+      "name": "TDD Workflow",
+      "summary": "Add tests before modifying critical lifecycle, export, or verification behavior.",
+      "triggers": [
+        "changing orchestrator lifecycle logic",
+        "adding export or validation code",
+        "fixing regressions in control-plane behavior"
+      ],
+      "checklist": [
+        "write or update focused failing tests first when practical",
+        "keep fixes small and evidence-backed",
+        "rerun the relevant test target after green"
+      ],
+      "outputs": [
+        "test plan",
+        "red to green evidence",
+        "coverage notes"
+      ],
+      "openai": {
+        "display_name": "TDD Workflow",
+        "brand_color": "#2563EB",
+        "default_prompt": "Add or update tests before changing critical behavior.",
+        "allow_implicit_invocation": true
+      }
+    },
+    {
+      "id": "verification-loop",
+      "name": "Verification Loop",
+      "summary": "Run build, test, diff, and security checks before closing agent-platform work.",
+      "triggers": [
+        "after a significant code change",
+        "before updating task status to done",
+        "after regenerating harness surfaces"
+      ],
+      "checklist": [
+        "run the relevant tests",
+        "check generated surfaces for drift",
+        "record concrete evidence"
+      ],
+      "outputs": [
+        "verification report",
+        "blocking issues",
+        "ready or not-ready call"
+      ],
+      "openai": {
+        "display_name": "Verification Loop",
+        "brand_color": "#10B981",
+        "default_prompt": "Run verification: tests, surface drift checks, and focused review.",
+        "allow_implicit_invocation": true
+      }
+    },
+    {
+      "id": "strategic-context-compaction",
+      "name": "Strategic Context Compaction",
+      "summary": "Compact context at stable phase boundaries instead of mid-implementation.",
+      "triggers": [
+        "after audit is complete",
+        "after a migration milestone lands",
+        "before switching from architecture to implementation"
+      ],
+      "checklist": [
+        "write down the stable plan before compacting",
+        "keep active file and artifact references",
+        "avoid compacting mid-fix"
+      ],
+      "outputs": [
+        "phase checkpoint",
+        "preserved references",
+        "next-step summary"
+      ],
+      "openai": {
+        "display_name": "Strategic Compact",
+        "brand_color": "#F59E0B",
+        "default_prompt": "Compact only at stable phase boundaries with a preserved next-step summary.",
+        "allow_implicit_invocation": true
+      }
+    },
+    {
+      "id": "docs-sync",
+      "name": "Docs Sync",
+      "summary": "Update architecture, governance, and harness docs when the canonical catalog changes.",
+      "triggers": [
+        "changing canonical agent specs",
+        "changing exported Codex or Antigravity surfaces",
+        "changing lifecycle or verification logic"
+      ],
+      "checklist": [
+        "update architecture docs with current implementation",
+        "update guidance files that point at moved truths",
+        "avoid planned-only language when code has landed"
+      ],
+      "outputs": [
+        "doc updates",
+        "truth-source adjustments",
+        "task-tracker sync"
+      ],
+      "openai": {
+        "display_name": "Docs Sync",
+        "brand_color": "#7C3AED",
+        "default_prompt": "Sync architecture and harness docs with the implemented control plane.",
+        "allow_implicit_invocation": true
+      }
+    },
+    {
+      "id": "continuous-learning",
+      "name": "Continuous Learning",
+      "summary": "Capture reusable lessons from workflow runs and refactors.",
+      "triggers": [
+        "after verification identifies a repeatable pattern",
+        "after a workflow recovery path succeeds",
+        "after a structural refactor lands"
+      ],
+      "checklist": [
+        "record the smallest reusable lesson",
+        "attach evidence from logs or tests",
+        "prefer durable patterns over one-off anecdotes"
+      ],
+      "outputs": [
+        "lessons",
+        "reusable patterns",
+        "future guardrails"
+      ],
+      "openai": {
+        "display_name": "Continuous Learning",
+        "brand_color": "#EC4899",
+        "default_prompt": "Extract reusable lessons from the workflow and save them with evidence.",
+        "allow_implicit_invocation": true
+      }
+    }
+  ],
+  "rule_packs": [
+    {
+      "id": "agent-platform-governance",
+      "name": "Agent Platform Governance",
+      "summary": "Canonical source of truth and adapter discipline for the control plane.",
+      "policy_paths": [
+        "context/policies/agent-platform-governance.md"
+      ],
+      "rules": [
+        "keep the canonical catalog as the source of truth",
+        "do not maintain disconnected harness instructions",
+        "treat adapters as exported surfaces, not the platform core"
+      ]
+    },
+    {
+      "id": "verification-gates",
+      "name": "Verification Gates",
+      "summary": "Quality gates for lifecycle completion, evidence capture, and surface drift checks.",
+      "policy_paths": [
+        "context/policies/verification-gates.md"
+      ],
+      "rules": [
+        "record lifecycle transitions for each workflow run",
+        "block done status on failed verification",
+        "validate generated surfaces against the canonical catalog"
+      ]
+    }
+  ],
+  "tool_policies": [
+    {
+      "id": "control-plane-default",
+      "name": "Control Plane Default",
+      "summary": "Default tool policy for bounded Unity automation and harness export work.",
+      "allowed_tools": [
+        "manage_scene",
+        "manage_editor",
+        "manage_camera",
+        "batch_execute",
+        "read_console",
+        "find_gameobjects",
+        "create_script",
+        "manage_script"
+      ],
+      "blocked_patterns": [
+        "unbounded retries",
+        "manual harness edits without catalog sync",
+        "completion without tests or artifact evidence"
+      ],
+      "review_required_for": [
+        "destructive scene mutations",
+        "permission model changes",
+        "generated surface changes"
+      ]
+    }
+  ],
+  "evals": [
+    {
+      "id": "unity-scene-verification",
+      "name": "Unity Scene Verification",
+      "summary": "Reject workflow completion when step failures or verification health issues remain.",
+      "blocking_failure_categories": [
+        "editor_unsaved_changes",
+        "missing_resource",
+        "execution_failure",
+        "timeout",
+        "transport_retryable"
+      ],
+      "blocking_verification_statuses": [
+        "console-errors",
+        "console-errors-and-missing-objects",
+        "missing-objects"
+      ],
+      "required_artifacts": [
+        "workflow report",
+        "run log",
+        "lessons log"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "unity-autonomous-loop",
+      "name": "Unity Autonomous Loop",
+      "summary": "Plan, execute, review, and verify bounded Unity MCP workflows with explicit lifecycle state.",
+      "entrypoint": "workflows/autonomous_loop.py",
+      "planner_agent": "planner",
+      "executor_agent": "executor",
+      "review_agent": "code-reviewer",
+      "verifier_agent": "debugger",
+      "supporting_agents": [
+        "architect",
+        "security-reviewer",
+        "build-error-resolver",
+        "loop-operator"
+      ],
+      "skills": [
+        "search-first",
+        "verification-loop",
+        "docs-sync",
+        "continuous-learning"
+      ],
+      "rule_packs": [
+        "agent-platform-governance",
+        "verification-gates"
+      ],
+      "tool_policy": "control-plane-default",
+      "eval": "unity-scene-verification",
+      "phases": [
+        "queued",
+        "planning",
+        "ready",
+        "executing",
+        "reviewing",
+        "verifying",
+        "done"
+      ],
+      "side_states": [
+        "blocked",
+        "failed",
+        "replanning"
+      ],
+      "max_replans": 1,
+      "supported_goals": [
+        "basic_3d_game",
+        "scene_smoke_check"
+      ]
+    }
+  ]
+}

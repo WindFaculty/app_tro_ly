@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-tro-ly.local/ai-dev-system/asset-pipeline/schemas/intake-manifest.schema.json",
+  "title": "Mesh AI Intake Manifest",
+  "description": "Current implementation: schema for repo-side Mesh AI intake metadata before Blender refinement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "asset_name",
+    "asset_type",
+    "category",
+    "source",
+    "source_path",
+    "quality_estimate",
+    "status",
+    "profile_id",
+    "target_runtime",
+    "target_unity_path",
+    "toolchain_steps",
+    "validation_report_path",
+    "preview_render_path",
+    "notes",
+    "manual_gates"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asset_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "asset_type": {
+      "type": "string",
+      "enum": [
+        "prop",
+        "room_item",
+        "avatar_accessory",
+        "avatar_clothing"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "mesh_ai"
+      ]
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quality_estimate": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "status": {
+      "$ref": "#/$defs/lifecycle_status"
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_runtime": {
+      "type": "string",
+      "enum": [
+        "unity"
+      ]
+    },
+    "target_unity_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "slot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "room_focus_preset": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "toolchain_steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/toolchain_step"
+      }
+    },
+    "validation_report_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preview_render_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "$ref": "#/$defs/string_list"
+    },
+    "manual_gates": {
+      "$ref": "#/$defs/string_list"
+    },
+    "dependencies": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    "artifact_targets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "raw",
+        "cleaned",
+        "validated",
+        "export-ready"
+      ]
+    },
+    "string_list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "toolchain_step": {
+      "type": "object",
+      "required": [
+        "step_id",
+        "stage",
+        "step_type",
+        "description"
+      ],
+      "properties": {
+        "step_id": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "step_type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

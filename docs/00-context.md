@@ -14,11 +14,10 @@ Last updated: 2026-03-26
 ## Current Implementation
 
 - The backend is implemented in `local-backend/` and owns task logic, orchestration, routing, memory, reminders, settings, and persistence.
-- The Unity client is implemented in `ai-dev-system/clients/unity-client/` as a UI Toolkit shell loaded from `Assets/Resources/UI/MainUI.uxml`.
-- Current top-level client screens are Home, Schedule, and Settings.
-- Current task views exposed through the client are Today, Week, Inbox, and Completed.
-- Current voice flow supports microphone capture, STT, streamed or compatibility chat, TTS playback, subtitle overlay, and reminder overlay.
-- Avatar presentation is only partially production-ready. The app has placeholder avatar-state UI plus optional integration points for `Assets/AvatarSystem/`.
+- The live Unity project is `apps/unity-runtime/`.
+- Current Unity scope is runtime-only: room bootstrap, avatar runtime, bridge wiring, audio playback, and runtime-focused tests.
+- Business UI now belongs to the desktop rebuild under `apps/web-ui/` and `apps/desktop-shell/`, not to Unity.
+- Avatar presentation is only partially production-ready. The repo has placeholder-safe room and avatar runtime composition plus checked-in `Assets/AvatarSystem/` foundations.
 
 ## Current Phase
 
@@ -46,8 +45,8 @@ These are product goals, not all of them are implemented in the current repo sta
 
 - The current default LLM path is not fully offline.
 - Speech runtime reliability depends on machine-local installs and models.
-- Unity client behavior still requires Unity Editor or built-client validation.
-- Some design docs describe target-state UI rather than implemented UI.
+- Unity runtime behavior still requires Unity Editor or built-runtime validation.
+- Some older docs still describe retired Unity shell surfaces as historical context.
 
 ## Evidence Snapshot
 

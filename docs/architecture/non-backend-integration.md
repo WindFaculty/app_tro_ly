@@ -16,7 +16,7 @@ Everything else in the non-backend system should now be understood through `ai-d
 | --- | --- | --- |
 | Backend | Business logic, storage, API routes, scheduling, speech adapters | `local-backend/` |
 | Control Plane | GUI automation, Unity automation, MCP runtime, profiles, verification, healing | `ai-dev-system/control-plane/` |
-| Unity Client | Runtime shell, 3D presentation, overlays, audio playback, input wiring | `ai-dev-system/clients/unity-client/` |
+| Unity Runtime | room bootstrap, avatar presentation, bridge wiring, audio playback, runtime tests | `apps/unity-runtime/` |
 | Domain | Shared avatar, customization, room, and shared contracts | `ai-dev-system/domain/` |
 | Context | Subsystem-local prompts, summaries, policies, memory notes | `ai-dev-system/context/` |
 | Asset Pipeline | Tool catalogs, structure validation, migration-owned pipeline rules | `ai-dev-system/asset-pipeline/` |
@@ -37,12 +37,14 @@ Everything else in the non-backend system should now be understood through `ai-d
 - `ai-dev-system/control-plane/tools/`
 - `ai-dev-system/control-plane/mcp_client.py`
 
-### Unity client
+### Unity runtime
 
-- `ai-dev-system/clients/unity-client/Assets/Resources/UI/`
-- `ai-dev-system/clients/unity-client/Assets/Scripts/`
-- `ai-dev-system/clients/unity-client/Assets/AvatarSystem/`
-- `ai-dev-system/clients/unity-client/Assets/Tests/`
+- `apps/unity-runtime/Assets/Scripts/App/`
+- `apps/unity-runtime/Assets/Scripts/Runtime/`
+- `apps/unity-runtime/Assets/Scripts/Audio/`
+- `apps/unity-runtime/Assets/Scripts/Avatar/`
+- `apps/unity-runtime/Assets/AvatarSystem/`
+- `apps/unity-runtime/Assets/Tests/`
 
 ### Domain
 
@@ -55,6 +57,7 @@ Everything else in the non-backend system should now be understood through `ai-d
 
 - `ai-dev-system/workbench/`
 - `ai-dev-system/asset-pipeline/`
+- `docs/architecture/mesh-ai-blender-unity-integration.md`
 
 ### Standardized subsystem entry points
 
@@ -68,7 +71,7 @@ Everything else in the non-backend system should now be understood through `ai-d
 ### Current implementation
 
 - `ai-dev-system/` is already the main non-backend integration root.
-- The Unity project no longer lives at a separate repo root.
+- The live Unity project now lives at `apps/unity-runtime/`.
 - The automation runtime no longer treats `ai-dev-system/app/` as the real home; the current runtime lives under `ai-dev-system/control-plane/`.
 - Shared avatar, customization, and room contracts now have a subsystem-local home under `ai-dev-system/domain/`.
 - Scripts and test ownership now have a subsystem-local surface under `ai-dev-system/scripts/` and `ai-dev-system/tests/`.
@@ -84,4 +87,4 @@ Everything else in the non-backend system should now be understood through `ai-d
 - Treat `ai-dev-system/` as the first stop for non-backend ownership questions.
 - Treat `docs/` and `tasks/` as governance roots that should remain outside runtime code.
 - Treat `local-backend/` as intentionally outside this unification scope.
-- When a doc mentions old root paths such as `unity-client/`, it should be explicit that the reference is historical or planned-only.
+- When a doc mentions old Unity shell paths under the retired absorbed-client tree, it should be explicit that the reference is historical or planned-only.

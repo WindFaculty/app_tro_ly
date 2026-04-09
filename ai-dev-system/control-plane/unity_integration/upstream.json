@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "references": [
+    {
+      "name": "unity-cli-loop",
+      "repo": "https://github.com/hatayama/unity-cli-loop",
+      "role": "execution_layer_reference",
+      "reviewed_on": "2026-04-08"
+    },
+    {
+      "name": "Unity-Skills",
+      "repo": "https://github.com/Besty0728/Unity-Skills",
+      "role": "capability_model_reference",
+      "reviewed_on": "2026-04-08"
+    }
+  ],
+  "notes": [
+    "Current implementation uses Unity CLI Loop as an optional external dependency and does not vendor upstream code into this repo.",
+    "Current implementation borrows taxonomy and workflow concepts from Unity-Skills while keeping a curated repo-native capability catalog."
+  ]
+}

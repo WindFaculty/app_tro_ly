@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import time
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -74,10 +74,8 @@ class AgentController:
         logger = GuiAgentLogger(artifacts.run_dir / "run.jsonl")
         logger.log("run_started", command="inspect", profile=profile.name, artifact_dir=str(artifacts.run_dir))
         target = self._attach_or_launch(profile)
-        root_uia = self._pywinauto.resolve_window(SelectorSpec(handle=target.handle, backend="uia"), backend="uia")
-        root_win32 = self._pywinauto.resolve_window(SelectorSpec(handle=target.handle, backend="win32"), backend="win32")
-        uia_tree = self._pywinauto.dump_control_tree(root_uia)
-        win32_tree = self._pywinauto.dump_control_tree(root_win32)
+        uia_tree, uia_error = self._try_dump_inspect_tree(target, profile, backend="uia")
+        win32_tree, win32_error = self._try_dump_inspect_tree(target, profile, backend="win32")
         screenshot_path = artifacts.screenshot_path("inspect")
         self._capture_window(target, screenshot_path)
         artifacts.write_json("control-tree-uia.json", uia_tree)
@@ -99,6 +97,10 @@ class AgentController:
             "control_tree_uia_path": str(artifacts.run_dir / "control-tree-uia.json"),
             "control_tree_win32_path": str(artifacts.run_dir / "control-tree-win32.json"),
         }
+        if uia_error is not None:
+            payload["control_tree_uia_error"] = uia_error
+        if win32_error is not None:
+            payload["control_tree_win32_error"] = win32_error
         payload.update(extra_payload)
         return payload
 
@@ -404,6 +406,21 @@ class AgentController:
             self._screenshots.capture(path, region=(left, top, right, bottom))
             return
         self._screenshots.capture(path)
+
+    def _resolve_inspect_root(self, target: WindowTarget, profile: BaseProfile, *, backend: str):
+        primary = SelectorSpec(handle=target.handle, backend=backend)
+        try:
+            return self._pywinauto.resolve_window(primary, backend=backend)
+        except LookupError:
+            fallback = replace(profile.window_selector, backend=backend)
+            return self._pywinauto.resolve_window(fallback, backend=backend)
+
+    def _try_dump_inspect_tree(self, target: WindowTarget, profile: BaseProfile, *, backend: str) -> tuple[list[dict[str, Any]], str | None]:
+        try:
+            root = self._resolve_inspect_root(target, profile, backend=backend)
+            return self._pywinauto.dump_control_tree(root), None
+        except Exception as exc:
+            return [], str(exc)
 
     @staticmethod
     def _default_strategies(action: ActionRequest) -> list[str]:

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Strategic Compact"
+  short_description: "Compact context at stable phase boundaries instead of mid-implementation."
+  brand_color: "#F59E0B"
+  default_prompt: "Compact only at stable phase boundaries with a preserved next-step summary."
+policy:
+  allow_implicit_invocation: true

@@ -10,6 +10,7 @@ from app.config.settings import Settings
 
 # Import profiles so they self-register via @ProfileRegistry.register(...)
 import app.profiles.calculator_profile  # noqa: F401
+import app.profiles.blender_editor_profile  # noqa: F401
 import app.profiles.explorer_profile  # noqa: F401
 import app.profiles.notepad_profile  # noqa: F401
 import app.profiles.unity_editor_profile  # noqa: F401

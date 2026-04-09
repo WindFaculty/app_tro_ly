@@ -17,6 +17,10 @@ class PywinautoAdapter:
     def resolve_window(self, selector: SelectorSpec, backend: str | None = None) -> BaseWrapper:
         selected_backend = backend or selector.backend or "uia"
         desktop = Desktop(backend=selected_backend)
+        if selector.handle is not None:
+            direct = self._resolve_by_handle(desktop, selector.handle, selector.visible_only)
+            if direct is not None:
+                return direct
         candidates = desktop.windows(**selector.to_window_criteria())
         unique = self._dedupe_by_handle(candidates)
         visible = [window for window in unique if not selector.visible_only or window.is_visible()]
@@ -166,3 +170,13 @@ class PywinautoAdapter:
                 seen.add(handle)
             deduped.append(candidate)
         return deduped
+
+    @staticmethod
+    def _resolve_by_handle(desktop: Desktop, handle: int, visible_only: bool) -> BaseWrapper | None:
+        try:
+            wrapper = desktop.window(handle=handle).wrapper_object()
+        except Exception:
+            return None
+        if visible_only and not wrapper.is_visible():
+            return None
+        return wrapper

@@ -23,3 +23,10 @@ This Phase 6 document defines the intended status labels for authoring flow with
 
 - The current repo mostly encodes these states in filenames rather than directory stages.
 - The actual directory migration into `ai-dev-system/workbench/` and `ai-dev-system/asset-pipeline/` is still planned work.
+
+## Mesh AI Guidance
+
+- Keep the source Mesh AI filename untouched in the raw import root when possible.
+- Use the intake manifest to record lifecycle status when the physical filename cannot change.
+- Treat `bleder/` outputs as the current logical home for `cleaned` and some `export-ready` authoring intermediates.
+- Treat `tools/reports/` and `tools/renders/` as the current logical evidence roots for `validated` and review artifacts.

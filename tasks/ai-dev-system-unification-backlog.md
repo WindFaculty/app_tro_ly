@@ -37,7 +37,7 @@ Ownership: `Uxx` = AI-executable root-unification work | `Pxx` = manual or off-r
 - `U00 | DONE | Phase 0 | Lane: Governance + Validation | Purpose: freeze the non-backend repo state before root-level unification. | Scope: baseline docs, root-directory inventory, and old-to-new mapping. | Evidence: docs/migration/ai-dev-system-unification-phase0.md`
 - `U01 | DONE | Phase 1 | Lane: Governance + Validation | Purpose: define `ai-dev-system/` as the non-backend integration root before deeper path moves. | Scope: layer scaffolding, subsystem README, subsystem AGENTS rules. | Evidence: docs/migration/ai-dev-system-unification-phase1.md`
 - `U02 | DONE | Phase 2 | Lane: Governance + Validation | Purpose: absorb repo AI context into the subsystem context root. | Scope: `ai-dev-system/context/` plus docs and guidance rewrites. | Evidence: docs/migration/ai-dev-system-unification-phase2.md`
-- `U03 | DONE | Phase 3 | Lane: Unity Client | Purpose: absorb the Unity project into `ai-dev-system/clients/unity-client/`. | Scope: project move, path rewrites, and current-state docs or script updates. | Evidence: docs/migration/ai-dev-system-unification-phase3.md`
+- `U03 | DONE | Phase 3 | Lane: Unity Client | Purpose: absorb the Unity project into `ai-dev-system/clients/`. | Scope: project move, path rewrites, and current-state docs or script updates. | Evidence: docs/migration/ai-dev-system-unification-phase3.md`
 - `U04 | DONE | Phase 4 | Lane: Control Plane | Purpose: move automation runtime truth under `ai-dev-system/control-plane/`. | Scope: control-plane move, MCP client move, and compatibility shims. | Evidence: docs/migration/ai-dev-system-unification-phase4.md`
 - `U05 | DONE | Phase 5 | Lane: Avatar + Customization | Purpose: establish shared avatar, customization, room, and shared contract ownership under `ai-dev-system/domain/`. | Scope: domain docs, slot taxonomy snapshot, validator ownership notes, room contract snapshots. | Evidence: docs/migration/ai-dev-system-unification-phase5.md`
 - `U06 | DONE | Phase 6 | Lane: Asset Pipeline | Purpose: establish workbench and asset-pipeline ownership before large authoring-file moves. | Scope: source inventories, naming guidance, tool catalog, and structure validation. | Evidence: docs/migration/ai-dev-system-unification-phase6.md`
@@ -47,7 +47,7 @@ Ownership: `Uxx` = AI-executable root-unification work | `Pxx` = manual or off-r
 
 ## Current Notes
 
-- Current implementation already uses `ai-dev-system/clients/unity-client/` as the live client root.
+- Historical note: Phase 3 absorbed the Unity project into `ai-dev-system/clients/` during the earlier unification pass.
 - Current implementation already uses `ai-dev-system/control-plane/` as the live automation root.
 - Current implementation already uses `ai-dev-system/domain/` plus `ai-dev-system/workbench/` plus `ai-dev-system/asset-pipeline/` for contract and governance ownership.
 - Phase 9 is now landed for the absorbed control-plane roots, active bootstrap surface, and stale-path drift checks.

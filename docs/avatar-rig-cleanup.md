@@ -4,18 +4,18 @@ Updated: 2026-03-17
 
 ## Outputs
 
-- Source FBX: `ai-dev-system/clients/unity-client/Assets/Avatar/Model/Meshy_AI_Character_output.fbx`
+- Source FBX: `apps/unity-runtime/Assets/Avatar/Model/Meshy_AI_Character_output.fbx`
 - Blender working file: `bleder/CHR_Avatar_Base_v001_work.blend`
 - Rig-clean Blender file: `bleder/CHR_Avatar_Base_v001_rigclean.blend`
-- Rig-clean FBX: `ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_rigclean.fbx`
-- Synced split avatar FBX: `ai-dev-system/clients/unity-client/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_split15.fbx`
+- Rig-clean FBX: `apps/unity-runtime/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_rigclean.fbx`
+- Synced split avatar FBX: `apps/unity-runtime/Assets/AvatarSystem/AvatarProduction/BaseAvatar/Model/CHR_Avatar_Base_v001_split15.fbx`
 - Audit reports:
   - `tools/reports/avatar_source_audit.json`
   - `tools/reports/avatar_rigclean_report.json`
   - `tools/reports/avatar_rigclean_audit.json`
   - `tools/reports/avatar_split15_validation.json`
   - `tools/reports/avatar_split15_reaudit.json`
-  - `ai-dev-system/clients/unity-client/Logs/BaseAvatarHumanoidValidation.json`
+  - `apps/unity-runtime/Logs/BaseAvatarHumanoidValidation.json`
 
 ## Rig Cleanup Applied
 

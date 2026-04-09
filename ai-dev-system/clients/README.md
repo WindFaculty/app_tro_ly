@@ -2,10 +2,8 @@
 
 Current implementation: this directory owns absorbed non-backend client applications.
 
-Current source of truth:
+Current note:
 
-- the absorbed Unity project folder
-
-Current path:
-
-- `ai-dev-system/clients/unity-client/`
+- no live Unity project remains under `ai-dev-system/clients/`
+- the current Unity runtime source of truth is `apps/unity-runtime/`
+- this directory now exists only as historical unification context unless future absorbed clients are added here

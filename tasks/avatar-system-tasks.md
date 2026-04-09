@@ -2,6 +2,8 @@
 
 Cập nhật: 2026-03-17
 
+Historical note: references to `unity-client/Logs/...` and `AssistantApp` below describe pre-cutover evidence captured before `D076`; the live Unity runtime now lives in `apps/unity-runtime/`.
+
 ---
 
 ## Phase 1 — Chốt chuẩn kỹ thuật và naming

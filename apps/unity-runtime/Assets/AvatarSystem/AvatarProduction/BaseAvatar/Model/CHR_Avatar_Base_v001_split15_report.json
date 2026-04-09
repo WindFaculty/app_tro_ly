@@ -1,0 +1,154 @@
+{
+  "input": "D:\\antigaravity_code\\app_tro_ly\\apps\\unity-runtime\\Assets\\AvatarSystem\\AvatarProduction\\BaseAvatar\\Model\\CHR_Avatar_Base_v001_rigclean.fbx",
+  "output": "D:\\antigaravity_code\\app_tro_ly\\apps\\unity-runtime\\Assets\\AvatarSystem\\AvatarProduction\\BaseAvatar\\Model\\CHR_Avatar_Base_v001_split15.fbx",
+  "armature": "Armature",
+  "regions": {
+    "Head": {
+      "vertices": 10072,
+      "polygons": 20054,
+      "weight_assignments": 16872
+    },
+    "TorsoUpper": {
+      "vertices": 8792,
+      "polygons": 17203,
+      "weight_assignments": 41807
+    },
+    "TorsoLower": {
+      "vertices": 5259,
+      "polygons": 10119,
+      "weight_assignments": 16485
+    },
+    "ArmUpperL": {
+      "vertices": 2456,
+      "polygons": 4679,
+      "weight_assignments": 8899
+    },
+    "ForearmL": {
+      "vertices": 1719,
+      "polygons": 3300,
+      "weight_assignments": 2831
+    },
+    "HandL": {
+      "vertices": 3649,
+      "polygons": 7237,
+      "weight_assignments": 4132
+    },
+    "ArmUpperR": {
+      "vertices": 3016,
+      "polygons": 5789,
+      "weight_assignments": 10690
+    },
+    "ForearmR": {
+      "vertices": 1668,
+      "polygons": 3210,
+      "weight_assignments": 2547
+    },
+    "HandR": {
+      "vertices": 3735,
+      "polygons": 7410,
+      "weight_assignments": 4202
+    },
+    "ThighL": {
+      "vertices": 4677,
+      "polygons": 9116,
+      "weight_assignments": 10030
+    },
+    "CalfL": {
+      "vertices": 3126,
+      "polygons": 6067,
+      "weight_assignments": 4755
+    },
+    "FootL": {
+      "vertices": 3487,
+      "polygons": 6892,
+      "weight_assignments": 5549
+    },
+    "ThighR": {
+      "vertices": 4689,
+      "polygons": 9133,
+      "weight_assignments": 9683
+    },
+    "CalfR": {
+      "vertices": 3104,
+      "polygons": 6016,
+      "weight_assignments": 4656
+    },
+    "FootR": {
+      "vertices": 3567,
+      "polygons": 7047,
+      "weight_assignments": 6244
+    }
+  },
+  "polygonRegionCounts": {
+    "CalfL": 6067,
+    "CalfR": 6016,
+    "Head": 20054,
+    "TorsoLower": 10119,
+    "ThighL": 9116,
+    "ThighR": 9133,
+    "FootL": 6892,
+    "FootR": 7047,
+    "ArmUpperR": 5789,
+    "ArmUpperL": 4679,
+    "TorsoUpper": 17203,
+    "HandR": 7410,
+    "HandL": 7237,
+    "ForearmL": 3300,
+    "ForearmR": 3210
+  },
+  "boneMap": {
+    "Head": [
+      "Head",
+      "Neck",
+      "neck"
+    ],
+    "TorsoUpper": [
+      "Spine",
+      "Spine01",
+      "Spine02"
+    ],
+    "TorsoLower": [
+      "Hips"
+    ],
+    "ArmUpperL": [
+      "LeftShoulder",
+      "LeftArm"
+    ],
+    "ForearmL": [
+      "LeftForeArm"
+    ],
+    "HandL": [
+      "LeftHand"
+    ],
+    "ArmUpperR": [
+      "RightShoulder",
+      "RightArm"
+    ],
+    "ForearmR": [
+      "RightForeArm"
+    ],
+    "HandR": [
+      "RightHand"
+    ],
+    "ThighL": [
+      "LeftUpLeg"
+    ],
+    "CalfL": [
+      "LeftLeg"
+    ],
+    "FootL": [
+      "LeftFoot",
+      "LeftToeBase"
+    ],
+    "ThighR": [
+      "RightUpLeg"
+    ],
+    "CalfR": [
+      "RightLeg"
+    ],
+    "FootR": [
+      "RightFoot",
+      "RightToeBase"
+    ]
+  }
+}

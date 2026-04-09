@@ -1,0 +1,37 @@
+{
+  "id": "unity_avatar_accessory_v1",
+  "asset_type": "avatar_accessory",
+  "category": "accessory_foundation",
+  "source_expectation": {
+    "accepted_sources": [
+      "mesh_ai"
+    ],
+    "quality_estimate_target": "8/10 or better intake for accessory cleanup and anchor review",
+    "source_formats": [
+      ".fbx",
+      ".obj",
+      ".blend"
+    ]
+  },
+  "refinement_checklist": [
+    "Run raw asset audit and preview render.",
+    "Assign intended wardrobe slot and anchor strategy.",
+    "Record any avatar-body or bone dependency needed for fitting.",
+    "Escalate to manual gate when anchor review or weight transfer is still human-only."
+  ],
+  "validation_checklist": [
+    "Audit report exists.",
+    "Preview render exists.",
+    "slot is assigned.",
+    "Manual gate notes make registry and attachment assumptions explicit."
+  ],
+  "export_expectation": {
+    "target_runtime": "unity",
+    "handoff_shape": "export_handoff_manifest",
+    "target_unity_path_pattern": "Assets/AvatarSystem/AvatarProduction/Wardrobe/Accessories/<AssetName>"
+  },
+  "manual_gate_notes": [
+    "Current implementation has no generic auto-fit helper for every accessory class.",
+    "Unity runtime accessory handoff registry intake now exists, but live equip mapping still remains planned work."
+  ]
+}

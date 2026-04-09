@@ -1,0 +1,214 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "notes": [
+    "This map defines deterministic wrapper planning for Mesh AI refinement without moving the root Blender helper scripts.",
+    "Steps with step_type manual_gate are intentional boundaries where current implementation still requires a person or a target machine."
+  ],
+  "profiles": {
+    "unity_prop_v1": {
+      "workflow_spec": "workflows/mesh-ai-refine-prop.yaml",
+      "steps": [
+        {
+          "step_id": "asset_audit",
+          "stage": "raw",
+          "step_type": "blender_script",
+          "description": "Audit the raw Mesh AI prop before cleanup.",
+          "script_path": "tools/blender_asset_audit.py",
+          "args": {
+            "input": "{source_path}",
+            "report": "{audit_report_path}"
+          },
+          "outputs": {
+            "report_path": "{audit_report_path}"
+          }
+        },
+        {
+          "step_id": "pivot_origin_review",
+          "stage": "cleaned",
+          "step_type": "manual_gate",
+          "description": "Review pivot, floor contact, and naming for Unity placement.",
+          "manual_gate": "Current implementation has no generic prop pivot-normalization script in root tools."
+        },
+        {
+          "step_id": "preview_render",
+          "stage": "validated",
+          "step_type": "blender_script",
+          "description": "Capture a front preview render for review.",
+          "script_path": "tools/blender_render_asset_front.py",
+          "args": {
+            "input": "{source_path}",
+            "output": "{preview_render_path}"
+          },
+          "outputs": {
+            "preview_render_path": "{preview_render_path}"
+          }
+        }
+      ]
+    },
+    "unity_room_item_v1": {
+      "workflow_spec": "workflows/mesh-ai-refine-room-item.yaml",
+      "steps": [
+        {
+          "step_id": "asset_audit",
+          "stage": "raw",
+          "step_type": "blender_script",
+          "description": "Audit the room item geometry before refinement.",
+          "script_path": "tools/blender_asset_audit.py",
+          "args": {
+            "input": "{source_path}",
+            "report": "{audit_report_path}"
+          },
+          "outputs": {
+            "report_path": "{audit_report_path}"
+          }
+        },
+        {
+          "step_id": "origin_pivot_review",
+          "stage": "cleaned",
+          "step_type": "manual_gate",
+          "description": "Review origin, pivot, and placement constraints for the room item.",
+          "manual_gate": "Current implementation has no generic room-item pivot normalization helper."
+        },
+        {
+          "step_id": "preview_render",
+          "stage": "validated",
+          "step_type": "blender_script",
+          "description": "Capture a front preview render for room review.",
+          "script_path": "tools/blender_render_asset_front.py",
+          "args": {
+            "input": "{source_path}",
+            "output": "{preview_render_path}"
+          },
+          "outputs": {
+            "preview_render_path": "{preview_render_path}"
+          }
+        }
+      ]
+    },
+    "unity_avatar_accessory_v1": {
+      "workflow_spec": "workflows/mesh-ai-refine-avatar-accessory.yaml",
+      "steps": [
+        {
+          "step_id": "asset_audit",
+          "stage": "raw",
+          "step_type": "blender_script",
+          "description": "Audit the accessory before attachment review.",
+          "script_path": "tools/blender_asset_audit.py",
+          "args": {
+            "input": "{source_path}",
+            "report": "{audit_report_path}"
+          },
+          "outputs": {
+            "report_path": "{audit_report_path}"
+          }
+        },
+        {
+          "step_id": "attachment_review",
+          "stage": "cleaned",
+          "step_type": "manual_gate",
+          "description": "Review slot assignment, anchor strategy, and fit assumptions for the accessory.",
+          "manual_gate": "Accessory attachment and weight transfer still require human review in current implementation."
+        },
+        {
+          "step_id": "preview_render",
+          "stage": "validated",
+          "step_type": "blender_script",
+          "description": "Capture an accessory preview render for handoff review.",
+          "script_path": "tools/blender_render_asset_front.py",
+          "args": {
+            "input": "{source_path}",
+            "output": "{preview_render_path}"
+          },
+          "outputs": {
+            "preview_render_path": "{preview_render_path}"
+          }
+        }
+      ]
+    },
+    "unity_avatar_clothing_v1": {
+      "workflow_spec": "workflows/mesh-ai-refine-avatar-clothing.yaml",
+      "steps": [
+        {
+          "step_id": "asset_audit",
+          "stage": "raw",
+          "step_type": "blender_script",
+          "description": "Audit the raw clothing mesh from Mesh AI.",
+          "script_path": "tools/blender_asset_audit.py",
+          "args": {
+            "input": "{source_path}",
+            "report": "{audit_report_path}"
+          },
+          "outputs": {
+            "report_path": "{audit_report_path}"
+          }
+        },
+        {
+          "step_id": "dress_fit",
+          "stage": "cleaned",
+          "step_type": "blender_script",
+          "description": "Run the current clothing fit wrapper against the base avatar scene.",
+          "script_path": "tools/blender_fit_dress_scene.py",
+          "args": {
+            "base-blend": "{base_avatar_blend}",
+            "source-body-blend": "{source_body_blend}",
+            "dress-fbx": "{source_path}",
+            "output-blend": "{cleaned_source_path}",
+            "report": "{refinement_report_path}",
+            "dress-name": "{dress_object_name}"
+          },
+          "optional_args": {
+            "clothy-helper-fbx": "{clothy_helper_fbx}"
+          },
+          "outputs": {
+            "cleaned_source_path": "{cleaned_source_path}",
+            "report_path": "{refinement_report_path}"
+          }
+        },
+        {
+          "step_id": "scene_state_report",
+          "stage": "validated",
+          "step_type": "blender_script",
+          "description": "Record scene visibility and review state for the cleaned clothing blend.",
+          "script_path": "tools/blender_scene_state_report.py",
+          "args": {
+            "input": "{cleaned_source_path}",
+            "report": "{scene_state_report_path}"
+          },
+          "outputs": {
+            "report_path": "{scene_state_report_path}"
+          }
+        },
+        {
+          "step_id": "verify_fit",
+          "stage": "validated",
+          "step_type": "blender_script",
+          "description": "Verify that the fitted clothing deforms with the current avatar rig.",
+          "script_path": "tools/blender_verify_dress_scene.py",
+          "args": {
+            "input": "{cleaned_source_path}",
+            "dress-name": "{dress_object_name}",
+            "report": "{validation_report_path}"
+          },
+          "outputs": {
+            "report_path": "{validation_report_path}"
+          }
+        },
+        {
+          "step_id": "preview_render",
+          "stage": "export-ready",
+          "step_type": "blender_script",
+          "description": "Capture a front preview render for the cleaned clothing asset.",
+          "script_path": "tools/blender_render_asset_front.py",
+          "args": {
+            "input": "{cleaned_source_path}",
+            "output": "{preview_render_path}"
+          },
+          "outputs": {
+            "preview_render_path": "{preview_render_path}"
+          }
+        }
+      ]
+    }
+  }
+}

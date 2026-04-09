@@ -6,6 +6,7 @@ node_modules/
 target/
 **/target/
 dist/
+apps/desktop-shell/.tauri-bundle-resources/
 
 .venv/
 __pycache__/

@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-tro-ly.local/ai-dev-system/asset-pipeline/schemas/export-handoff-manifest.schema.json",
+  "title": "Mesh AI Export Handoff Manifest",
+  "description": "Current implementation: export-ready handoff metadata for future Unity import work without claiming runtime registry completion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "asset_name",
+    "asset_type",
+    "category",
+    "source",
+    "source_path",
+    "quality_estimate",
+    "status",
+    "profile_id",
+    "target_runtime",
+    "target_unity_path",
+    "toolchain_steps",
+    "validation_report_path",
+    "preview_render_path",
+    "artifact_ingestion",
+    "notes",
+    "manual_gates"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string"
+    },
+    "asset_name": {
+      "type": "string"
+    },
+    "asset_type": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "source": {
+      "type": "string"
+    },
+    "source_path": {
+      "type": "string"
+    },
+    "quality_estimate": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "status": {
+      "$ref": "#/$defs/lifecycle_status"
+    },
+    "profile_id": {
+      "type": "string"
+    },
+    "target_runtime": {
+      "type": "string"
+    },
+    "target_unity_path": {
+      "type": "string"
+    },
+    "slot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "room_focus_preset": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "toolchain_steps": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/toolchain_step"
+      }
+    },
+    "validation_report_path": {
+      "type": "string"
+    },
+    "preview_render_path": {
+      "type": "string"
+    },
+    "handoff_source_path": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "artifact_ingestion": {
+      "$ref": "#/$defs/artifact_ingestion"
+    },
+    "notes": {
+      "$ref": "#/$defs/string_list"
+    },
+    "manual_gates": {
+      "$ref": "#/$defs/string_list"
+    }
+  },
+  "$defs": {
+    "lifecycle_status": {
+      "type": "string",
+      "enum": [
+        "raw",
+        "cleaned",
+        "validated",
+        "export-ready"
+      ]
+    },
+    "string_list": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "toolchain_step": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "artifact_ingestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "highest_completed_stage",
+        "completed_step_count",
+        "pending_step_count",
+        "pending_manual_gates",
+        "steps",
+        "notes"
+      ],
+      "properties": {
+        "highest_completed_stage": {
+          "$ref": "#/$defs/lifecycle_status"
+        },
+        "completed_step_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending_step_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending_manual_gates": {
+          "$ref": "#/$defs/string_list"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact_ingestion_step"
+          }
+        },
+        "notes": {
+          "$ref": "#/$defs/string_list"
+        }
+      }
+    },
+    "artifact_ingestion_step": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "step_id",
+        "stage",
+        "step_type",
+        "description",
+        "output_evidence",
+        "missing_outputs",
+        "completed"
+      ],
+      "properties": {
+        "step_id": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "step_type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "output_evidence": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "missing_outputs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completed": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

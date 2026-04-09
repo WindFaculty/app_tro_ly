@@ -1,45 +1,104 @@
 .shell {
-  display: grid;
-  grid-template-columns: 72px 1fr 380px;
-  grid-template-rows: 100vh;
-  height: 100vh;
+  display: flex;
+  flex-direction: column;
   width: 100vw;
+  height: 100vh;
   overflow: hidden;
-  background: var(--bg-base);
+  background: transparent;
 }
 
-/* ── Left nav rail ── */
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1.4fr) minmax(360px, 0.92fr);
+  gap: 14px;
+  padding: 14px;
+}
+
 .sideNav {
-  grid-column: 1;
-  background: var(--bg-nav);
-  border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 20px 0 16px;
-  gap: 0;
-  z-index: 10;
+  gap: 14px;
+  min-width: 0;
 }
 
-.logo {
+.brandCard,
+.runtimeCard {
+  background: var(--bg-shell);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.brandCard {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  margin-bottom: 28px;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px;
 }
 
-.logoIcon {
-  font-size: 22px;
-  color: var(--accent-primary);
+.brandMark {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, rgba(15, 118, 110, 0.18), rgba(194, 91, 55, 0.14));
+  border: 1px solid rgba(57, 45, 29, 0.12);
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: 1.8rem;
   line-height: 1;
 }
 
-.logoText {
-  font-size: 9px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.06em;
+.brandCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.brandEyebrow {
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.brandTitle {
+  color: var(--text-strong);
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.brandLead {
+  color: var(--text-body);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.navSection {
+  flex: 1;
+  min-height: 0;
+  padding: 18px;
+  background: var(--bg-shell);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.navSectionLabel {
+  display: inline-block;
+  margin-bottom: 14px;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -49,229 +108,387 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 100%;
-  flex: 1;
+  gap: 10px;
 }
 
 .navItem {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
   align-items: center;
-  gap: 3px;
-  padding: 10px 8px;
-  border-radius: 10px;
-  margin: 0 6px;
-  text-decoration: none;
-  color: var(--text-muted);
-  transition: background 0.15s, color 0.15s;
-  cursor: pointer;
+  padding: 12px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
 .navItem:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  transform: translateX(3px);
+  border-color: rgba(57, 45, 29, 0.1);
+  background: rgba(255, 255, 255, 0.62);
 }
 
 .navItemActive {
-  background: var(--accent-primary-dim);
-  color: var(--accent-primary);
+  border-color: rgba(15, 118, 110, 0.18);
+  background:
+    linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(194, 91, 55, 0.08)),
+    rgba(255, 255, 255, 0.7);
 }
 
 .navIcon {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.navLabel {
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.03em;
-}
-
-.runtimeBlock {
-  width: calc(100% - 12px);
-  margin: 16px 6px 0;
-  padding: 10px 8px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  display: flex;
-  flex-direction: column;
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
-}
-
-.runtimeLabel {
-  font-size: 8px;
-  color: var(--text-dim);
-  text-transform: uppercase;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(57, 45, 29, 0.1);
+  color: var(--text-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
   letter-spacing: 0.08em;
 }
 
-.runtimeValue {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-primary);
+.navItemActive .navIcon {
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--accent-strong);
+  border-color: rgba(15, 118, 110, 0.14);
 }
 
-.runtimeHint {
-  font-size: 8px;
-  color: var(--text-muted);
-  text-align: center;
-  line-height: 1.4;
-}
-
-/* ── Center — Unity region ── */
-.center {
-  grid-column: 2;
-  background: var(--bg-unity);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.unityPlaceholder {
+.navCopy {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, var(--bg-unity-inner) 0%, var(--bg-unity) 70%);
-  padding: 28px;
+  gap: 2px;
+  min-width: 0;
 }
 
-.unityLabel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  opacity: 0.75;
+.navLabel {
+  color: var(--text-strong);
+  font-size: 0.92rem;
+  font-weight: 700;
 }
 
-.unityIcon {
-  font-size: 48px;
-  line-height: 1;
-  margin-bottom: 8px;
+.navHint {
+  color: var(--text-soft);
+  font-size: 0.78rem;
 }
 
-.unityLabel p {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: 0.02em;
-}
-
-.unitySubtext {
-  font-size: 12px !important;
-  color: var(--text-muted) !important;
-  font-weight: 400 !important;
-}
-
-.unityNote {
-  font-size: 11px !important;
-  color: var(--text-dim) !important;
-  font-weight: 400 !important;
-  font-style: italic;
-}
-
-.unityStatusCard {
-  width: min(560px, 100%);
+.runtimeCard {
   padding: 18px;
-  border: 1px solid var(--border-medium);
-  border-radius: 18px;
-  background: rgba(8, 10, 15, 0.68);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.28);
 }
 
-.unityStatusHeader {
+.runtimeHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
-.unityStatusLabel {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-}
-
-.unityStatusBadge {
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border-medium);
-  color: var(--accent-secondary);
-  background: var(--accent-primary-dim);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.unityStatusMessage {
-  margin: 0 0 10px;
-  color: var(--text-primary);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.unityMeta {
-  margin: 0 0 6px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  overflow-wrap: anywhere;
-}
-
-.unityMeta code {
-  user-select: text;
-}
-
-.unityActions {
-  display: flex;
-  gap: 10px;
+.runtimeNote {
   margin-top: 14px;
+  color: var(--text-body);
+  font-size: 0.84rem;
 }
 
-.unityActionButton {
-  border: 1px solid var(--border-medium);
-  border-radius: 999px;
-  padding: 9px 14px;
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+.center {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-stage);
 }
 
-.unityActionButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.22);
+.stageBackdrop,
+.stageGlow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.unityActionButton:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.stageBackdrop {
+  background:
+    linear-gradient(180deg, rgba(9, 25, 28, 0.86), rgba(20, 49, 51, 0.92)),
+    radial-gradient(circle at 16% 18%, rgba(203, 111, 63, 0.18), transparent 34%),
+    radial-gradient(circle at 84% 10%, rgba(44, 179, 164, 0.24), transparent 26%);
 }
 
-.unityFootnote {
-  margin: 14px 0 0;
-  color: var(--text-muted);
-  font-size: 11px;
-  line-height: 1.5;
+.stageGlow {
+  background:
+    radial-gradient(circle at 22% 74%, rgba(215, 166, 62, 0.14), transparent 24%),
+    radial-gradient(circle at 74% 24%, rgba(15, 118, 110, 0.18), transparent 22%);
+  animation: stageFloat 10s ease-in-out infinite alternate;
 }
 
-/* ── Right panel ── */
-.rightPanel {
-  grid-column: 3;
-  background: var(--bg-panel);
-  border-left: 1px solid var(--border-subtle);
-  overflow-y: auto;
+.stageFrame {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  height: 100%;
+  padding: 22px;
+}
+
+.stageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.stageCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 48ch;
+}
+
+.stageTitle {
+  margin: 0;
+  color: var(--text-on-dark);
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5vw, 3.7rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+}
+
+.stageLead {
+  color: rgba(247, 243, 235, 0.72);
+  font-size: 0.96rem;
+}
+
+.sceneGrid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.82fr);
+  gap: 14px;
+}
+
+.scenePanel,
+.sceneSidebar {
+  min-height: 0;
+}
+
+.scenePanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.scenePanelHeader,
+.signalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scenePanelCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scenePanelTitle {
+  margin: 0;
+  color: var(--text-on-dark);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.scenePanelLead {
+  color: rgba(247, 243, 235, 0.68);
+  font-size: 0.9rem;
+}
+
+.sceneViewport {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    radial-gradient(circle at top right, rgba(203, 111, 63, 0.14), transparent 28%),
+    rgba(6, 20, 21, 0.52);
+  overflow: hidden;
+}
+
+.sceneViewport::before {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 24px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.sceneViewportInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+  height: 100%;
+  padding: 26px;
+}
+
+.sceneBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-on-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.viewportTitle {
+  margin: 0;
+  color: var(--text-on-dark);
+  font-size: 2rem;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+
+.viewportText {
+  max-width: 36ch;
+  color: rgba(247, 243, 235, 0.74);
+  font-size: 0.92rem;
+}
+
+.sceneMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.signalCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signalValue {
+  color: var(--text-strong);
+  font-size: 0.96rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.sceneActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sceneSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.rightPanel {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg-shell);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+@keyframes stageFloat {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+@media (max-width: 1480px) {
+  .body {
+    grid-template-columns: 260px minmax(0, 1.2fr) minmax(320px, 0.92fr);
+  }
+
+  .sceneGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sceneViewport {
+    min-height: 260px;
+  }
+}
+
+@media (max-width: 1240px) {
+  .body {
+    grid-template-columns: 260px minmax(0, 1fr);
+  }
+
+  .rightPanel {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .sideNav {
+    order: 2;
+  }
+
+  .center {
+    order: 1;
+    min-height: 72vh;
+  }
+
+  .navSection {
+    padding-bottom: 14px;
+  }
+
+  .navList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .body {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .navList,
+  .sceneMetaGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stageFrame {
+    padding: 16px;
+  }
+
+  .stageHeader,
+  .scenePanelHeader,
+  .signalHeader {
+    flex-direction: column;
+  }
 }

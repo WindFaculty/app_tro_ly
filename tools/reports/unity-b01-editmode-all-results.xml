@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="37" result="Passed" total="37" passed="37" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.6156672">
+  <test-suite type="TestSuite" id="1000" name="Local Desktop Assistant" fullname="Local Desktop Assistant" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.615667" total="37" passed="37" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1053" name="LocalAssistant.EditModeTests.dll" fullname="D:/antigaravity_code/app_tro_ly/ai-dev-system/clients/unity-client/Library/ScriptAssemblies/LocalAssistant.EditModeTests.dll" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.594522" total="37" passed="37" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="19040" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1054" name="LocalAssistant" fullname="LocalAssistant" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.593513" total="37" passed="37" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1055" name="Tests" fullname="LocalAssistant.Tests" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.592967" total="37" passed="37" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1056" name="EditMode" fullname="LocalAssistant.Tests.EditMode" runstate="Runnable" testcasecount="37" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.590664" total="37" passed="37" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1002" name="AssistantEventBusTests" fullname="LocalAssistant.Tests.EditMode.AssistantEventBusTests" classname="LocalAssistant.Tests.EditMode.AssistantEventBusTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.081092" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1004" name="DisposedSubscriptionStopsReceivingEvents" fullname="LocalAssistant.Tests.EditMode.AssistantEventBusTests.DisposedSubscriptionStopsReceivingEvents" methodname="DisposedSubscriptionStopsReceivingEvents" classname="LocalAssistant.Tests.EditMode.AssistantEventBusTests" runstate="Runnable" seed="1751033645" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.032260" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="PublishDeliversEventsToTypedSubscribers" fullname="LocalAssistant.Tests.EditMode.AssistantEventBusTests.PublishDeliversEventsToTypedSubscribers" methodname="PublishDeliversEventsToTypedSubscribers" classname="LocalAssistant.Tests.EditMode.AssistantEventBusTests" runstate="Runnable" seed="1690583164" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.006593" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1005" name="AvatarOutfitSystemTests" fullname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests" classname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.072618" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1008" name="BodyVisibilityManagerHidesAndRestoresMappedRegionsForLongClothes" fullname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests.BodyVisibilityManagerHidesAndRestoresMappedRegionsForLongClothes" methodname="BodyVisibilityManagerHidesAndRestoresMappedRegionsForLongClothes" classname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests" runstate="Runnable" seed="1470460612" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.046936" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1006" name="EquipAndUnequipItemUpdatesSlotOccupancy" fullname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests.EquipAndUnequipItemUpdatesSlotOccupancy" methodname="EquipAndUnequipItemUpdatesSlotOccupancy" classname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests" runstate="Runnable" seed="601160324" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.002010" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1007" name="EquipDressUnequipsTopAndBottom" fullname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests.EquipDressUnequipsTopAndBottom" methodname="EquipDressUnequipsTopAndBottom" classname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests" runstate="Runnable" seed="419330559" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.001284" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1009" name="PresetManagerCanApplySaveAndLoadOutfit" fullname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests.PresetManagerCanApplySaveAndLoadOutfit" methodname="PresetManagerCanApplySaveAndLoadOutfit" classname="LocalAssistant.Tests.EditMode.AvatarOutfitSystemTests" runstate="Runnable" seed="874345513" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:00Z" duration="0.010531" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1010" name="ChatModuleTests" fullname="LocalAssistant.Tests.EditMode.ChatModuleTests" classname="LocalAssistant.Tests.EditMode.ChatModuleTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.191805" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1011" name="RenderUsesOwnedStateAndUpdatesRouteBadge" fullname="LocalAssistant.Tests.EditMode.ChatModuleTests.RenderUsesOwnedStateAndUpdatesRouteBadge" methodname="RenderUsesOwnedStateAndUpdatesRouteBadge" classname="LocalAssistant.Tests.EditMode.ChatModuleTests" runstate="Runnable" seed="41909579" result="Passed" start-time="2026-04-08 05:06:00Z" end-time="2026-04-08 05:06:01Z" duration="0.189644" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1012" name="ChatViewModelStoreTests" fullname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" classname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.010904" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1017" name="ApplyPlannerActionResultBuildsChatOwnedActionSummary" fullname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests.ApplyPlannerActionResultBuildsChatOwnedActionSummary" methodname="ApplyPlannerActionResultBuildsChatOwnedActionSummary" classname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" runstate="Runnable" seed="267742547" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002087" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1014" name="BuildPanelSnapshotIncludesDiagnosticsActionConfirmationAndTranscriptPreview" fullname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests.BuildPanelSnapshotIncludesDiagnosticsActionConfirmationAndTranscriptPreview" methodname="BuildPanelSnapshotIncludesDiagnosticsActionConfirmationAndTranscriptPreview" classname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" runstate="Runnable" seed="25309878" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000617" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1015" name="BuildPanelSnapshotUsesSystemStatusWhenIdle" fullname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests.BuildPanelSnapshotUsesSystemStatusWhenIdle" methodname="BuildPanelSnapshotUsesSystemStatusWhenIdle" classname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" runstate="Runnable" seed="861136701" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000500" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1013" name="BuildTranscriptIncludesDraftAssistantReply" fullname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests.BuildTranscriptIncludesDraftAssistantReply" methodname="BuildTranscriptIncludesDraftAssistantReply" classname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" runstate="Runnable" seed="1311262184" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000824" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1016" name="CompatibilityAndStreamingRepliesShareDiagnosticsAndActionFormatting" fullname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests.CompatibilityAndStreamingRepliesShareDiagnosticsAndActionFormatting" methodname="CompatibilityAndStreamingRepliesShareDiagnosticsAndActionFormatting" classname="LocalAssistant.Tests.EditMode.ChatViewModelStoreTests" runstate="Runnable" seed="359224400" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002670" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1018" name="HealthRecoveryAdvisorTests" fullname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests" classname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.003069" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1021" name="ErrorHealthDisablesTaskActions" fullname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests.ErrorHealthDisablesTaskActions" methodname="ErrorHealthDisablesTaskActions" classname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests" runstate="Runnable" seed="848808860" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000775" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="PartialHealthBuildsRecoveryMessageAndDisablesMicWhenSttIsOff" fullname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests.PartialHealthBuildsRecoveryMessageAndDisablesMicWhenSttIsOff" methodname="PartialHealthBuildsRecoveryMessageAndDisablesMicWhenSttIsOff" classname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests" runstate="Runnable" seed="218545882" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000809" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1019" name="ReadyHealthKeepsControlsEnabledAndShowsNoRecoveryMessage" fullname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests.ReadyHealthKeepsControlsEnabledAndShowsNoRecoveryMessage" methodname="ReadyHealthKeepsControlsEnabledAndShowsNoRecoveryMessage" classname="LocalAssistant.Tests.EditMode.HealthRecoveryAdvisorTests" runstate="Runnable" seed="2014683688" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000261" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1022" name="HealthResponseNormalizerTests" fullname="LocalAssistant.Tests.EditMode.HealthResponseNormalizerTests" classname="LocalAssistant.Tests.EditMode.HealthResponseNormalizerTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.004012" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1024" name="NormalizeCreatesFallbackPayloadWhenInputIsNull" fullname="LocalAssistant.Tests.EditMode.HealthResponseNormalizerTests.NormalizeCreatesFallbackPayloadWhenInputIsNull" methodname="NormalizeCreatesFallbackPayloadWhenInputIsNull" classname="LocalAssistant.Tests.EditMode.HealthResponseNormalizerTests" runstate="Runnable" seed="2027798332" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.001138" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1023" name="NormalizeCreatesSafeDefaultsForSparsePayload" fullname="LocalAssistant.Tests.EditMode.HealthResponseNormalizerTests.NormalizeCreatesSafeDefaultsForSparsePayload" methodname="NormalizeCreatesSafeDefaultsForSparsePayload" classname="LocalAssistant.Tests.EditMode.HealthResponseNormalizerTests" runstate="Runnable" seed="314339253" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.001431" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1025" name="HealthStatusMapperTests" fullname="LocalAssistant.Tests.EditMode.HealthStatusMapperTests" classname="LocalAssistant.Tests.EditMode.HealthStatusMapperTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.005192" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1026" name="ReadyStatusMapsToGreenLabel" fullname="LocalAssistant.Tests.EditMode.HealthStatusMapperTests.ReadyStatusMapsToGreenLabel" methodname="ReadyStatusMapsToGreenLabel" classname="LocalAssistant.Tests.EditMode.HealthStatusMapperTests" runstate="Runnable" seed="168217703" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002075" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1027" name="UnknownStatusFallsBackToError" fullname="LocalAssistant.Tests.EditMode.HealthStatusMapperTests.UnknownStatusFallsBackToError" methodname="UnknownStatusFallsBackToError" classname="LocalAssistant.Tests.EditMode.HealthStatusMapperTests" runstate="Runnable" seed="320532762" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000575" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1028" name="MeshAssetRegistryTests" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.093374" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1029" name="ReloadRegistersWardrobeAndRoomHandoffManifests" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.ReloadRegistersWardrobeAndRoomHandoffManifests" methodname="ReloadRegistersWardrobeAndRoomHandoffManifests" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="1842309766" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.057594" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1030" name="TryApplyRoomFocusPresetUsesRegistryAliasWhenSceneObjectIsMissing" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.TryApplyRoomFocusPresetUsesRegistryAliasWhenSceneObjectIsMissing" methodname="TryApplyRoomFocusPresetUsesRegistryAliasWhenSceneObjectIsMissing" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="298947205" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.007072" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1032" name="UnityBridgeClientEquipsWardrobeItemFromManifestAliasWhenRuntimeItemExists" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.UnityBridgeClientEquipsWardrobeItemFromManifestAliasWhenRuntimeItemExists" methodname="UnityBridgeClientEquipsWardrobeItemFromManifestAliasWhenRuntimeItemExists" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="1377173205" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.011997" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1031" name="UnityBridgeClientRejectsWardrobeEquipWhenManifestHasNoRuntimeItemMapping" fullname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests.UnityBridgeClientRejectsWardrobeEquipWhenManifestHasNoRuntimeItemMapping" methodname="UnityBridgeClientRejectsWardrobeEquipWhenManifestHasNoRuntimeItemMapping" classname="LocalAssistant.Tests.EditMode.MeshAssetRegistryTests" runstate="Runnable" seed="468347759" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.014623" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[[InteractionRuntime] Could not find target object 'DeskLantern'.
+[UnityBridgeClient] Wardrobe key 'AzureSakuraKimono' matched handoff manifest 'azure-sakura-kimono-0326010047', nhung AvatarItemRegistry chua co AvatarItemDefinition tuong ung.
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1033" name="PlannerBackendIntegrationTests" fullname="LocalAssistant.Tests.EditMode.PlannerBackendIntegrationTests" classname="LocalAssistant.Tests.EditMode.PlannerBackendIntegrationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.038502" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1034" name="LoadSnapshotAsyncMapsPlannerResponsesIntoTypedSnapshot" fullname="LocalAssistant.Tests.EditMode.PlannerBackendIntegrationTests.LoadSnapshotAsyncMapsPlannerResponsesIntoTypedSnapshot" methodname="LoadSnapshotAsyncMapsPlannerResponsesIntoTypedSnapshot" classname="LocalAssistant.Tests.EditMode.PlannerBackendIntegrationTests" runstate="Runnable" seed="508961462" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.023304" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1035" name="MutationCallsMapBackIntoPlannerResult" fullname="LocalAssistant.Tests.EditMode.PlannerBackendIntegrationTests.MutationCallsMapBackIntoPlannerResult" methodname="MutationCallsMapBackIntoPlannerResult" classname="LocalAssistant.Tests.EditMode.PlannerBackendIntegrationTests" runstate="Runnable" seed="1954048174" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.013191" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1036" name="SettingsSerializationTests" fullname="LocalAssistant.Tests.EditMode.SettingsSerializationTests" classname="LocalAssistant.Tests.EditMode.SettingsSerializationTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002200" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1037" name="SettingsPayloadRoundTripsWithUnityJson" fullname="LocalAssistant.Tests.EditMode.SettingsSerializationTests.SettingsPayloadRoundTripsWithUnityJson" methodname="SettingsPayloadRoundTripsWithUnityJson" classname="LocalAssistant.Tests.EditMode.SettingsSerializationTests" runstate="Runnable" seed="887784675" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.001051" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1038" name="SettingsViewModelStoreTests" fullname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests" classname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.004089" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1039" name="ApplyClonesPayloadAndBuildsReadableSummary" fullname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests.ApplyClonesPayloadAndBuildsReadableSummary" methodname="ApplyClonesPayloadAndBuildsReadableSummary" classname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests" runstate="Runnable" seed="1114609710" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.001277" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1041" name="HasUnsavedChangesTracksBaselineAfterApply" fullname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests.HasUnsavedChangesTracksBaselineAfterApply" methodname="HasUnsavedChangesTracksBaselineAfterApply" classname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests" runstate="Runnable" seed="1327127294" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000683" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1040" name="SnapshotPreservesToggleUpdates" fullname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests.SnapshotPreservesToggleUpdates" methodname="SnapshotPreservesToggleUpdates" classname="LocalAssistant.Tests.EditMode.SettingsViewModelStoreTests" runstate="Runnable" seed="731423243" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000484" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1042" name="ShellStageSnapshotBuilderTests" fullname="LocalAssistant.Tests.EditMode.ShellStageSnapshotBuilderTests" classname="LocalAssistant.Tests.EditMode.ShellStageSnapshotBuilderTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.004806" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1043" name="BuildIncludesSelectedDateRouteAndVoiceFlags" fullname="LocalAssistant.Tests.EditMode.ShellStageSnapshotBuilderTests.BuildIncludesSelectedDateRouteAndVoiceFlags" methodname="BuildIncludesSelectedDateRouteAndVoiceFlags" classname="LocalAssistant.Tests.EditMode.ShellStageSnapshotBuilderTests" runstate="Runnable" seed="934655418" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002764" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1044" name="BuildUsesRecoveryCopyWhenHealthIsPartial" fullname="LocalAssistant.Tests.EditMode.ShellStageSnapshotBuilderTests.BuildUsesRecoveryCopyWhenHealthIsPartial" methodname="BuildUsesRecoveryCopyWhenHealthIsPartial" classname="LocalAssistant.Tests.EditMode.ShellStageSnapshotBuilderTests" runstate="Runnable" seed="970080791" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.000495" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1045" name="StandaloneRoomRuntimeTests" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.061934" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1046" name="ComposeBuildsStandaloneRuntimeWithoutLegacyUiShell" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests.ComposeBuildsStandaloneRuntimeWithoutLegacyUiShell" methodname="ComposeBuildsStandaloneRuntimeWithoutLegacyUiShell" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" seed="320816478" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.042508" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="ComposeCreatesPlaceholderRoomZonesAndAvatarRoot" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests.ComposeCreatesPlaceholderRoomZonesAndAvatarRoot" methodname="ComposeCreatesPlaceholderRoomZonesAndAvatarRoot" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" seed="1705124341" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.004615" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1048" name="SceneStateControllerMovesCameraBetweenStandaloneFocusAnchors" fullname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests.SceneStateControllerMovesCameraBetweenStandaloneFocusAnchors" methodname="SceneStateControllerMovesCameraBetweenStandaloneFocusAnchors" classname="LocalAssistant.Tests.EditMode.StandaloneRoomRuntimeTests" runstate="Runnable" seed="1868239816" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.013542" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1049" name="TaskViewModelStoreTests" fullname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests" classname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.008239" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1052" name="BuildOverviewTextIncludesKeyCounters" fullname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests.BuildOverviewTextIncludesKeyCounters" methodname="BuildOverviewTextIncludesKeyCounters" classname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests" runstate="Runnable" seed="483025515" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002587" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1051" name="BuildTodayTextIncludesOverdueSection" fullname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests.BuildTodayTextIncludesOverdueSection" methodname="BuildTodayTextIncludesOverdueSection" classname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests" runstate="Runnable" seed="310750778" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.001577" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1050" name="GroupWeekByDayUsesBucketDate" fullname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests.GroupWeekByDayUsesBucketDate" methodname="GroupWeekByDayUsesBucketDate" classname="LocalAssistant.Tests.EditMode.TaskViewModelStoreTests" runstate="Runnable" seed="635065622" result="Passed" start-time="2026-04-08 05:06:01Z" end-time="2026-04-08 05:06:01Z" duration="0.002264" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[<b><color=#2EA3FF>MCP-FOR-UNITY</color></b>: [TestRunnerNoThrottle] Restored Interaction Mode after test run.
+Saving results to: C:/Users/tranx/AppData/LocalLow/DefaultCompany/Local Desktop Assistant\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

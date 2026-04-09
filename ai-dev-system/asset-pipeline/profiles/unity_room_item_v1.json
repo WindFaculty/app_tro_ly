@@ -1,0 +1,37 @@
+{
+  "id": "unity_room_item_v1",
+  "asset_type": "room_item",
+  "category": "room_static_asset",
+  "source_expectation": {
+    "accepted_sources": [
+      "mesh_ai"
+    ],
+    "quality_estimate_target": "8/10 or better intake for static room dressing",
+    "source_formats": [
+      ".fbx",
+      ".obj",
+      ".blend"
+    ]
+  },
+  "refinement_checklist": [
+    "Run raw asset audit and capture dimensions.",
+    "Review world origin, pivot intent, and floor contact.",
+    "Capture a front preview render for room-art review.",
+    "Record room focus preset and target Unity room path."
+  ],
+  "validation_checklist": [
+    "Audit report exists.",
+    "Preview render exists.",
+    "room_focus_preset is assigned.",
+    "Manual gate notes cover pivot or placement review when automation is insufficient."
+  ],
+  "export_expectation": {
+    "target_runtime": "unity",
+    "handoff_shape": "export_handoff_manifest",
+    "target_unity_path_pattern": "Assets/Environment/RoomItems/<AssetName>"
+  },
+  "manual_gate_notes": [
+    "Current implementation does not include a generic room-item pivot normalization script in root tools.",
+    "Unity now has room-item handoff registry intake, but live prefab hookup and broader room interaction mapping remain follow-up work."
+  ]
+}

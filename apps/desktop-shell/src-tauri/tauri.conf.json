@@ -1,11 +1,11 @@
 {
-  "productName": "App Trợ Lý",
+  "productName": "App Tro Ly",
   "version": "0.1.0",
   "identifier": "com.apptroly.desktop",
   "build": {
     "beforeDevCommand": "npm --prefix ../web-ui run dev -- --host 127.0.0.1 --port 1420",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm --prefix ../web-ui run build",
+    "beforeBuildCommand": "py -3 ../../scripts/prepare_desktop_bundle_resources.py && npm --prefix ../web-ui run build",
     "frontendDist": "../../web-ui/dist"
   },
   "app": {
@@ -13,20 +13,21 @@
     "windows": [
       {
         "label": "main",
-        "title": "App Trợ Lý",
+        "title": "App Tro Ly",
         "width": 1400,
         "height": 900,
         "minWidth": 1100,
         "minHeight": 700,
         "resizable": true,
         "fullscreen": false,
-        "decorations": true,
         "center": true,
+        "decorations": false,
+        "transparent": true,
         "visible": false
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' asset: http://127.0.0.1:8096 http://localhost:8096 data: blob:; font-src 'self' data:; connect-src 'self' ipc: http://127.0.0.1:8096 ws://127.0.0.1:8096 http://localhost:8096 ws://localhost:8096; media-src 'self' http://127.0.0.1:8096 http://localhost:8096 data: blob:; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     }
   },
   "bundle": {
@@ -40,12 +41,16 @@
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": {
+      "../.tauri-bundle-resources/local-backend/": "local-backend/",
+      "../.tauri-bundle-resources/ai-dev-system/domain/customization/contracts/": "ai-dev-system/domain/customization/contracts/",
+      "../.tauri-bundle-resources/ai-dev-system/domain/customization/sample-data/": "ai-dev-system/domain/customization/sample-data/"
+    }
   },
   "plugins": {
     "shell": {
       "open": true
-    },
-    "process": {}
+    }
   }
 }

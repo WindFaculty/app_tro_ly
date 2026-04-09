@@ -139,3 +139,84 @@ def test_chat_falls_back_to_text_when_tts_fails(client) -> None:
     assert payload["speak"] is False
     assert payload["audio_url"] is None
     assert payload["task_actions"][0]["type"] == "create_task"
+
+
+def test_chat_conversations_list_returns_recent_threads_with_previews(client) -> None:
+    first = client.post(
+        "/v1/chat",
+        json={
+            "message": "Create task finish release note draft tomorrow",
+            "conversation_id": None,
+            "mode": "text",
+            "selected_date": None,
+            "include_voice": False,
+        },
+    )
+    assert first.status_code == 200
+
+    second = client.post(
+        "/v1/chat",
+        json={
+            "message": "Summarize my day and call out the biggest risk",
+            "conversation_id": None,
+            "mode": "text",
+            "selected_date": None,
+            "include_voice": False,
+        },
+    )
+    assert second.status_code == 200
+
+    response = client.get("/v1/chat/conversations?limit=10")
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert payload["count"] >= 2
+    assert len(payload["items"]) >= 2
+    assert payload["items"][0]["updated_at"] >= payload["items"][1]["updated_at"]
+
+    latest_ids = {item["conversation_id"] for item in payload["items"][:2]}
+    assert first.json()["conversation_id"] in latest_ids
+    assert second.json()["conversation_id"] in latest_ids
+
+    latest_thread = next(
+        item
+        for item in payload["items"]
+        if item["conversation_id"] == second.json()["conversation_id"]
+    )
+    assert latest_thread["message_count"] == 2
+    assert latest_thread["last_message_role"] == "assistant"
+    assert latest_thread["last_message_preview"]
+
+
+def test_chat_conversation_detail_returns_messages_with_metadata(client) -> None:
+    chat_response = client.post(
+        "/v1/chat",
+        json={
+            "message": "Create task review planner rebuild on Friday",
+            "conversation_id": None,
+            "mode": "text",
+            "selected_date": None,
+            "include_voice": False,
+        },
+    )
+    assert chat_response.status_code == 200
+    conversation_id = chat_response.json()["conversation_id"]
+
+    response = client.get(f"/v1/chat/conversations/{conversation_id}")
+    assert response.status_code == 200
+    payload = response.json()
+
+    assert payload["conversation_id"] == conversation_id
+    assert payload["message_count"] == 2
+    assert len(payload["messages"]) == 2
+    assert payload["messages"][0]["role"] == "user"
+    assert payload["messages"][0]["content"] == "Create task review planner rebuild on Friday"
+    assert payload["messages"][0]["metadata"]["notes_context"] == ""
+    assert payload["messages"][1]["role"] == "assistant"
+    assert payload["messages"][1]["metadata"]["route"]
+    assert payload["messages"][1]["metadata"]["provider"]
+
+
+def test_chat_conversation_detail_returns_not_found_for_missing_thread(client) -> None:
+    response = client.get("/v1/chat/conversations/conv_missing")
+    assert response.status_code == 404

@@ -1,9 +1,9 @@
 {
-  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend",
-  "dressObject": "CHR_Dress_AzureSakura_v001",
+  "input": "D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend",
+  "dressObject": "CHR_Dress_AzureSakuraKimono_v1",
   "dressVertexCount": 610170,
   "dressPolygonCount": 1220762,
-  "dressVertexGroupCount": 25,
+  "dressVertexGroupCount": 24,
   "dressMaterialSlots": [
     "MAT_Dress_AzureSakura_v001"
   ],
@@ -59,7 +59,7 @@
       ]
     },
     "maxVertexDelta": 0.369472,
-    "meanVertexDelta": 0.120751,
+    "meanVertexDelta": 0.120749,
     "deformationDetected": true
   }
 }

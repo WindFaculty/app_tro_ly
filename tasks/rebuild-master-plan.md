@@ -1,6 +1,6 @@
 # Rebuild Master Plan
 
-**Status:** Active planning document  
+**Status:** Historical planning context - superseded by the active A/B/S execution model in `tasks/task-queue.md` and `docs/product/`
 **Ngày tạo:** 2026-04-07  
 **Nguồn gốc:** `tai_cau_truc.md` — Kế hoạch tái thiết hoàn chỉnh  
 

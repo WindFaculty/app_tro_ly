@@ -15,11 +15,11 @@ from app.profiles.registry import ProfileRegistry
 from app.unity.assertions import UnityAssertionRunner
 from app.unity.capabilities import UnityCapabilityRegistry
 from app.unity.macros import UnityMacroRegistry
-from app.unity.mcp_runtime import UnityMcpRuntime
 from app.unity.preflight import UnityPreflight
 from app.unity.surfaces import UnitySurfaceMap, UnitySurfaceSpec
 from app.unity.task_planner import UnityTaskPlanner
 from app.vision.screenshot import ScreenshotService
+from unity_integration.service import UnityIntegrationService
 
 
 @ProfileRegistry.register("unity-editor")
@@ -38,6 +38,7 @@ class UnityEditorProfile(BaseProfile):
         self._preflight = UnityPreflight()
         self._planner = UnityTaskPlanner()
         self._assertions = UnityAssertionRunner()
+        self._integration = UnityIntegrationService()
         self._last_run_context: dict[str, Any] = {}
 
     def build_plan(self, task: str, working_directory: Path):
@@ -88,7 +89,7 @@ class UnityEditorProfile(BaseProfile):
             "tool_groups": [],
             "capability_matrix": [],
         }
-        runtime = UnityMcpRuntime(UnitySurfaceMap.project_root().parent)
+        runtime = self._integration.mcp_runtime()
         try:
             runtime.connect()
             snapshot = runtime.capability_snapshot()
@@ -100,6 +101,7 @@ class UnityEditorProfile(BaseProfile):
                     "available_tools": list(snapshot.get("tools") or []),
                     "available_resources": list(snapshot.get("resources") or []),
                     "tool_groups": (tool_groups_result.get("structured_content") or {}).get("groups") or [],
+                    "unity_environment": self._integration.environment.to_dict(),
                 }
             )
             context["capability_matrix"] = UnityCapabilityRegistry.build_matrix(
@@ -233,22 +235,24 @@ class UnityEditorProfile(BaseProfile):
         settings: Settings,
     ) -> dict[str, Any]:
         del settings
-        runtime = UnityMcpRuntime(UnitySurfaceMap.project_root().parent)
+        payload = self._integration.list_capabilities(profile=self.name)
+        runtime = self._integration.mcp_runtime()
         try:
             runtime.connect()
             snapshot = runtime.capability_snapshot()
             tool_groups = (runtime.call_tool("manage_tools", {"action": "list_groups"}).get("structured_content") or {}).get("groups") or []
-            return {
-                "profile": self.name,
-                "project_root": str(UnitySurfaceMap.project_root()),
-                "available_tools": snapshot.get("tools") or [],
-                "available_resources": snapshot.get("resources") or [],
-                "tool_groups": tool_groups,
-                "capabilities": UnityCapabilityRegistry.build_matrix(
-                    tools=list(snapshot.get("tools") or []),
-                    resources=list(snapshot.get("resources") or []),
-                ),
-            }
+            payload.update(
+                {
+                    "available_tools": snapshot.get("tools") or [],
+                    "available_resources": snapshot.get("resources") or [],
+                    "tool_groups": tool_groups,
+                    "legacy_capability_matrix": UnityCapabilityRegistry.build_matrix(
+                        tools=list(snapshot.get("tools") or []),
+                        resources=list(snapshot.get("resources") or []),
+                    ),
+                }
+            )
+            return payload
         finally:
             runtime.close()
 

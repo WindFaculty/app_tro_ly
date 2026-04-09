@@ -6,6 +6,7 @@ from typing import Any
 from app.agent.state import ActionRequest, VerificationCheck
 from app.agent.task_spec import TaskActionSpec, TaskSpec
 from app.unity.macros import UnityMacroRegistry
+from unity_integration.capability_catalog import UnityCapabilityCatalog
 
 
 _CAPABILITY_STATUSES = {
@@ -69,7 +70,27 @@ class UnityCapabilitySpec:
         }
 
 
+def _build_specs() -> dict[str, UnityCapabilitySpec]:
+    specs: dict[str, UnityCapabilitySpec] = {}
+    for item in UnityCapabilityCatalog.all():
+        specs[item.capability] = UnityCapabilitySpec(
+            capability=item.capability,
+            category=item.category,
+            description=item.description,
+            preferred_backend=item.preferred_backend,
+            tool_name=item.mcp_tool_name,
+            default_params=dict(item.mcp_default_params),
+            gui_macro=item.gui_macro,
+            gui_fallback_macro=item.gui_fallback_macro,
+            fallbackable=item.fallbackable,
+            manual_validation_required=item.manual_validation_required,
+        )
+    return specs
+
+
 class UnityCapabilityRegistry:
+    _SPECS: dict[str, UnityCapabilitySpec] = _build_specs()
+
     @classmethod
     def names(cls) -> list[str]:
         return sorted(cls._SPECS)
@@ -282,262 +303,18 @@ class UnityCapabilityRegistry:
             surface = str(action.params.get("surface") or "game").strip().lower()
             return {"name": "capture_view", "args": {"surface": surface}}
 
+        if spec.capability == "editor.playmode.control":
+            action_name = str(action.params.get("action") or "Play").strip().lower()
+            mapping = {
+                "play": "play_mode",
+                "stop": "stop_mode",
+                "pause": "pause_mode",
+            }
+            if action_name not in mapping:
+                raise ValueError("editor.playmode.control requires params.action in {Play, Stop, Pause}.")
+            return {"name": mapping[action_name], "args": {}}
+
         macro = spec.gui_macro or spec.gui_fallback_macro
         if not macro:
             raise ValueError(f"Capability '{spec.capability}' does not define a GUI macro.")
         return {"name": macro, "args": dict(action.params)}
-
-    _SPECS: dict[str, UnityCapabilitySpec] = {
-        "animation.manage": UnityCapabilitySpec(
-            capability="animation.manage",
-            category="animation",
-            description="Run supported animation and animator-controller operations exposed by manage_animation.",
-            preferred_backend="mcp",
-            tool_name="manage_animation",
-        ),
-        "animator.graph.manage": UnityCapabilitySpec(
-            capability="animator.graph.manage",
-            category="animation",
-            description="Manage Animator controller graphs through manage_animation controller_* operations.",
-            preferred_backend="mcp",
-            tool_name="manage_animation",
-            manual_validation_required=True,
-        ),
-        "asset.manage": UnityCapabilitySpec(
-            capability="asset.manage",
-            category="asset",
-            description="Run any supported manage_asset operation.",
-            preferred_backend="mcp",
-            tool_name="manage_asset",
-        ),
-        "build.manage": UnityCapabilitySpec(
-            capability="build.manage",
-            category="build",
-            description="Run any supported manage_build operation.",
-            preferred_backend="mcp",
-            tool_name="manage_build",
-            manual_validation_required=True,
-        ),
-        "camera.manage": UnityCapabilitySpec(
-            capability="camera.manage",
-            category="camera",
-            description="Run any supported manage_camera operation.",
-            preferred_backend="mcp",
-            tool_name="manage_camera",
-        ),
-        "component.manage": UnityCapabilitySpec(
-            capability="component.manage",
-            category="component",
-            description="Run any supported manage_components operation.",
-            preferred_backend="mcp",
-            tool_name="manage_components",
-        ),
-        "editor.attach": UnityCapabilitySpec(
-            capability="editor.attach",
-            category="editor",
-            description="Attach to or launch the current Unity editor window.",
-            preferred_backend="gui",
-            gui_macro="attach_editor",
-        ),
-        "editor.console.snapshot": UnityCapabilitySpec(
-            capability="editor.console.snapshot",
-            category="editor",
-            description="Copy and persist the visible Unity console text.",
-            preferred_backend="gui",
-            gui_macro="snapshot_console",
-            manual_validation_required=True,
-        ),
-        "editor.control_tree.dump": UnityCapabilitySpec(
-            capability="editor.control_tree.dump",
-            category="editor",
-            description="Dump UI Automation control trees for the active Unity editor window.",
-            preferred_backend="gui",
-            gui_macro="dump_control_tree",
-        ),
-        "editor.layout.assert": UnityCapabilitySpec(
-            capability="editor.layout.assert",
-            category="editor",
-            description="Assert the pinned Unity layout and modal state before automation.",
-            preferred_backend="gui",
-            gui_macro="assert_layout_ready",
-        ),
-        "editor.layout.normalize": UnityCapabilitySpec(
-            capability="editor.layout.normalize",
-            category="editor",
-            description="Normalize the Unity editor layout through MCP-backed menu execution before GUI fallback work.",
-            preferred_backend="mcp",
-            tool_name="batch_execute",
-            manual_validation_required=True,
-        ),
-        "editor.manage": UnityCapabilitySpec(
-            capability="editor.manage",
-            category="editor",
-            description="Run any supported manage_editor operation.",
-            preferred_backend="mcp",
-            tool_name="manage_editor",
-            fallbackable=True,
-        ),
-        "editor.pause": UnityCapabilitySpec(
-            capability="editor.pause",
-            category="editor",
-            description="Pause play mode.",
-            preferred_backend="mcp",
-            tool_name="manage_editor",
-            default_params={"action": "pause"},
-            gui_fallback_macro="pause_mode",
-            fallbackable=True,
-        ),
-        "editor.play": UnityCapabilitySpec(
-            capability="editor.play",
-            category="editor",
-            description="Enter play mode.",
-            preferred_backend="mcp",
-            tool_name="manage_editor",
-            default_params={"action": "play"},
-            gui_fallback_macro="play_mode",
-            fallbackable=True,
-        ),
-        "editor.stop": UnityCapabilitySpec(
-            capability="editor.stop",
-            category="editor",
-            description="Stop play mode.",
-            preferred_backend="mcp",
-            tool_name="manage_editor",
-            default_params={"action": "stop"},
-            gui_fallback_macro="stop_mode",
-            fallbackable=True,
-        ),
-        "editor.surface.focus": UnityCapabilitySpec(
-            capability="editor.surface.focus",
-            category="editor",
-            description="Focus a pinned Unity surface in the current layout.",
-            preferred_backend="gui",
-            gui_macro="focus_hierarchy",
-        ),
-        "editor.view.capture": UnityCapabilitySpec(
-            capability="editor.view.capture",
-            category="editor",
-            description="Capture a pinned Unity surface by GUI coordinates.",
-            preferred_backend="gui",
-            gui_macro="capture_view",
-            manual_validation_required=True,
-        ),
-        "editor.window.open": UnityCapabilitySpec(
-            capability="editor.window.open",
-            category="editor",
-            description="Open a Unity editor window through the Window menu.",
-            preferred_backend="gui",
-            gui_macro="open_window",
-            manual_validation_required=True,
-        ),
-        "gameobject.manage": UnityCapabilitySpec(
-            capability="gameobject.manage",
-            category="gameobject",
-            description="Run any supported manage_gameobject operation.",
-            preferred_backend="mcp",
-            tool_name="manage_gameobject",
-        ),
-        "graphics.manage": UnityCapabilitySpec(
-            capability="graphics.manage",
-            category="graphics",
-            description="Run any supported manage_graphics operation.",
-            preferred_backend="mcp",
-            tool_name="manage_graphics",
-            manual_validation_required=True,
-        ),
-        "material.manage": UnityCapabilitySpec(
-            capability="material.manage",
-            category="material",
-            description="Run any supported manage_material operation.",
-            preferred_backend="mcp",
-            tool_name="manage_material",
-        ),
-        "package.manage": UnityCapabilitySpec(
-            capability="package.manage",
-            category="package",
-            description="Run any supported manage_packages operation.",
-            preferred_backend="mcp",
-            tool_name="manage_packages",
-            manual_validation_required=True,
-        ),
-        "prefab.manage": UnityCapabilitySpec(
-            capability="prefab.manage",
-            category="prefab",
-            description="Run any supported manage_prefabs operation.",
-            preferred_backend="mcp",
-            tool_name="manage_prefabs",
-        ),
-        "scene.manage": UnityCapabilitySpec(
-            capability="scene.manage",
-            category="scene",
-            description="Run any supported manage_scene operation.",
-            preferred_backend="mcp",
-            tool_name="manage_scene",
-        ),
-        "shader.graph.manage": UnityCapabilitySpec(
-            capability="shader.graph.manage",
-            category="graphics",
-            description="Planned Shader Graph node-graph mutations. Backend graph operations are not yet available.",
-            preferred_backend="mcp",
-        ),
-        "shader.manage": UnityCapabilitySpec(
-            capability="shader.manage",
-            category="graphics",
-            description="Run supported manage_shader operations for shader script assets.",
-            preferred_backend="mcp",
-            tool_name="manage_shader",
-            manual_validation_required=True,
-        ),
-        "texture.manage": UnityCapabilitySpec(
-            capability="texture.manage",
-            category="graphics",
-            description="Run supported manage_texture operations for generated or procedural textures.",
-            preferred_backend="mcp",
-            tool_name="manage_texture",
-            manual_validation_required=True,
-        ),
-        "timeline.manage": UnityCapabilitySpec(
-            capability="timeline.manage",
-            category="animation",
-            description="Planned Timeline graph mutations. Backend timeline graph operations are not yet available.",
-            preferred_backend="mcp",
-        ),
-        "tests.run": UnityCapabilitySpec(
-            capability="tests.run",
-            category="tests",
-            description="Start a Unity test run.",
-            preferred_backend="mcp",
-            tool_name="run_tests",
-            manual_validation_required=True,
-        ),
-        "tests.status": UnityCapabilitySpec(
-            capability="tests.status",
-            category="tests",
-            description="Poll a running Unity test job.",
-            preferred_backend="mcp",
-            tool_name="get_test_job",
-            manual_validation_required=True,
-        ),
-        "ui.manage": UnityCapabilitySpec(
-            capability="ui.manage",
-            category="ui",
-            description="Run any supported manage_ui operation.",
-            preferred_backend="mcp",
-            tool_name="manage_ui",
-            manual_validation_required=True,
-        ),
-        "vfx.graph.manage": UnityCapabilitySpec(
-            capability="vfx.graph.manage",
-            category="graphics",
-            description="Planned VFX Graph node-graph mutations. Backend graph operations are not yet available.",
-            preferred_backend="mcp",
-        ),
-        "vfx.manage": UnityCapabilitySpec(
-            capability="vfx.manage",
-            category="graphics",
-            description="Run supported manage_vfx operations for particle and visual-effect components.",
-            preferred_backend="mcp",
-            tool_name="manage_vfx",
-            manual_validation_required=True,
-        ),
-    }

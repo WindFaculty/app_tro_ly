@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "status": "current_implementation",
+  "upstream": {
+    "repo": "https://github.com/ahujasid/blender-mcp",
+    "readme": "https://github.com/ahujasid/blender-mcp#readme",
+    "ref": "7636d13bded82eca58eb93c3f4cd8708dfdfbe8b",
+    "reviewed_on": "2026-04-08"
+  },
+  "required_safe_tools": [
+    "get_scene_info",
+    "get_object_info",
+    "get_viewport_screenshot"
+  ],
+  "optional_tool_aliases": {
+    "execute_code": [
+      "execute_blender_code",
+      "execute_code"
+    ]
+  },
+  "default_env": {
+    "BLENDER_HOST": "127.0.0.1",
+    "BLENDER_PORT": "9876",
+    "DISABLE_TELEMETRY": "true"
+  },
+  "policy_defaults": {
+    "allow_execute_code_env": "APP_TRO_LY_BLENDER_ALLOW_EXECUTE_CODE",
+    "allow_execute_code_default": "false",
+    "localhost_only": true,
+    "allow_remote_host": false,
+    "allow_asset_download_tools": false,
+    "allow_generated_asset_tools": false
+  },
+  "notes": [
+    "This repo treats blender-mcp as an optional interactive layer, not the production-safe Blender pipeline.",
+    "Current implementation intentionally limits the surfaced capabilities to scene inspection, object inspection, viewport capture, and policy-gated code execution."
+  ]
+}

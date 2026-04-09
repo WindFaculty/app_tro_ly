@@ -15,6 +15,8 @@ Important boundary:
   - ownership note for Blender authoring material
 - `imports/`
   - ownership note for raw import sources such as Meshy exports
+  - Mesh AI intake guidance for the new lifecycle contract
+  - `imports/mesh-ai-intake.md`
 - `reports/`
   - ownership note for renders, audits, and review artifacts
 - `naming-convention.md`
@@ -35,3 +37,4 @@ Important boundary:
 - The actual workbench materials have not been physically moved under `ai-dev-system/workbench/` yet.
 - No `Clothy3D_Studio/` root is present in the current repo snapshot, so there is nothing to migrate for that slice in this phase.
 - Unity asset consumption rules are still enforced by current code and docs, not by a new automated import pipeline inside `workbench/`.
+- Mesh AI lifecycle ownership is documented here, but the current raw imports and Blender outputs still live in their existing root folders.

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Search First"
+  short_description: "Research the repo and available capabilities before adding new automation code."
+  brand_color: "#0EA5E9"
+  default_prompt: "Research the repo and available integrations before implementing automation changes."
+policy:
+  allow_implicit_invocation: true

@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     gemini_model: str = "gemini-2.5-flash"
     gemini_timeout_sec: float = 15.0
     gemini_temperature: float = 0.2
+    google_oauth_client_id: str | None = Field(default=None, repr=False)
+    google_oauth_client_secret: str | None = Field(default=None, repr=False)
+    google_oauth_redirect_uri: str | None = None
+    google_calendar_redirect_uri: str | None = None
+    gmail_timeout_sec: float = 15.0
     llm_recent_failure_window_sec: int = 120
 
     stt_provider: str = "faster_whisper"
@@ -117,6 +122,10 @@ class Settings(BaseSettings):
         self.ollama_base_url = self.ollama_base_url.rstrip("/")
         self.groq_base_url = self.groq_base_url.rstrip("/")
         self.gemini_base_url = self.gemini_base_url.rstrip("/")
+        if self.google_oauth_redirect_uri is not None:
+            self.google_oauth_redirect_uri = self.google_oauth_redirect_uri.strip() or None
+        if self.google_calendar_redirect_uri is not None:
+            self.google_calendar_redirect_uri = self.google_calendar_redirect_uri.strip() or None
         if self.data_dir is None:
             self.data_dir = self.base_dir / "data"
         if self.db_path is None:
@@ -149,3 +158,15 @@ class Settings(BaseSettings):
         if self.llm_provider == "hybrid":
             return f"{self.fast_provider}->{self.deep_provider}"
         return self.llm_provider
+
+    @property
+    def gmail_oauth_redirect_uri(self) -> str:
+        if self.google_oauth_redirect_uri:
+            return self.google_oauth_redirect_uri
+        return f"http://{self.api_host}:{self.api_port}/v1/email/google/callback"
+
+    @property
+    def google_calendar_oauth_redirect_uri(self) -> str:
+        if self.google_calendar_redirect_uri:
+            return self.google_calendar_redirect_uri
+        return f"http://{self.api_host}:{self.api_port}/v1/calendar/google/callback"

@@ -1,5 +1,5 @@
 {
-  "input": "D:\\Antigaravity_Code\\tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend",
+  "input": "D:\\antigaravity_code\\app_tro_ly\\bleder\\CHR_Dress_AzureSakura_v001_polishfit.blend",
   "mode": "OBJECT",
   "activeObject": null,
   "selectedObjects": [],
@@ -125,7 +125,7 @@
       "displayType": "TEXTURED"
     },
     {
-      "name": "CHR_Dress_AzureSakura_v001",
+      "name": "CHR_Dress_AzureSakuraKimono_v1",
       "hiddenViewport": false,
       "hiddenRender": false,
       "selected": false,

@@ -98,6 +98,29 @@ class MpcToolStrategy:
         return result
 
 
+class BlenderMcpToolStrategy:
+    """Execute a single Blender MCP tool call inside the GUI-agent flow."""
+
+    def can_handle(self, strategy_name: str) -> bool:
+        return strategy_name == "blender_mcp_tool"
+
+    def execute(self, ctx) -> None:
+        run_context = ctx.metadata.get("run_context") or {}
+        runtime = run_context.get("blender_runtime")
+        if runtime is None:
+            raise RuntimeError("Blender MCP runtime is not available for this action.")
+
+        tool_name = str(ctx.action.metadata.get("tool_name") or ctx.action.value or "")
+        if not tool_name:
+            raise RuntimeError("Blender MCP action is missing a tool name.")
+
+        params = dict(ctx.action.metadata.get("tool_params") or {})
+        result = runtime.call_tool(tool_name, params)
+        ctx.metadata["mcp_tool_name"] = tool_name
+        ctx.metadata["mcp_tool_params"] = params
+        ctx.metadata["mcp_result"] = result
+
+
 class MpcBatchStrategy:
     """Execute a Unity MCP batch command payload."""
 

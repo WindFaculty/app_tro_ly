@@ -170,7 +170,11 @@ def test_settings_update_roundtrip(client) -> None:
     update = client.put(
         "/v1/settings",
         json={
-            "voice": {"speak_replies": False},
+            "voice": {
+                "input_mode": "continuous",
+                "speak_replies": False,
+                "show_transcript_preview": False,
+            },
             "window_mode": {"mini_assistant_enabled": False},
         },
     )
@@ -178,7 +182,9 @@ def test_settings_update_roundtrip(client) -> None:
     current = client.get("/v1/settings")
     assert current.status_code == 200
     payload = current.json()
+    assert payload["voice"]["input_mode"] == "push_to_talk"
     assert payload["voice"]["speak_replies"] is False
+    assert payload["voice"]["show_transcript_preview"] is False
 
 
 def test_settings_partial_updates_preserve_other_groups(client) -> None:
@@ -208,7 +214,51 @@ def test_settings_partial_updates_preserve_other_groups(client) -> None:
     assert second_payload["startup"]["launch_main_app"] is True
     assert second_payload["reminder"]["lead_minutes"] == 30
     assert second_payload["reminder"]["speech_enabled"] is False
+    assert second_payload["voice"]["input_mode"] == "push_to_talk"
     assert second_payload["voice"]["tts_voice"] == default_payload["voice"]["tts_voice"]
+
+
+def test_settings_reset_restores_runtime_defaults(client) -> None:
+    updated = client.put(
+        "/v1/settings",
+        json={
+            "voice": {"speak_replies": False, "tts_voice": "custom-voice"},
+            "startup": {"launch_backend": False},
+            "memory": {"short_term_turn_limit": 24},
+        },
+    )
+    assert updated.status_code == 200
+
+    reset = client.post("/v1/settings/reset")
+    assert reset.status_code == 200
+    payload = reset.json()
+
+    assert payload["voice"]["input_mode"] == "push_to_talk"
+    assert payload["voice"]["speak_replies"] is True
+    assert payload["voice"]["show_transcript_preview"] is True
+    assert payload["voice"]["tts_voice"] == client.app.state.container.settings.default_tts_voice
+    assert payload["startup"]["launch_backend"] is True
+    assert (
+        payload["memory"]["short_term_turn_limit"]
+        == client.app.state.container.settings.short_term_turn_limit
+    )
+
+
+def test_settings_force_push_to_talk_even_when_unsupported_mode_is_requested(client) -> None:
+    update = client.put(
+        "/v1/settings",
+        json={
+            "voice": {
+                "input_mode": "continuous",
+                "show_transcript_preview": True,
+            }
+        },
+    )
+
+    assert update.status_code == 200
+    payload = update.json()
+    assert payload["voice"]["input_mode"] == "push_to_talk"
+    assert payload["voice"]["show_transcript_preview"] is True
 
 
 def test_stt_endpoint_returns_503_when_runtime_is_missing(client) -> None:

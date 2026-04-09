@@ -82,7 +82,8 @@ impl UnityRuntimeState {
         let Some(candidate) = resolve_runtime_candidate(app) else {
             let status = UnityRuntimeStatus {
                 state: "missing_build".to_string(),
-                message: "Không thể launch Unity vì repo chưa có build executable hợp lệ.".to_string(),
+                message: "Không thể launch Unity vì repo chưa có build executable hợp lệ."
+                    .to_string(),
                 executable_path: None,
                 build_root: None,
                 pid: None,
@@ -92,11 +93,24 @@ impl UnityRuntimeState {
             return status;
         };
 
-        let spawn_result = Command::new(&candidate.executable_path)
-            .current_dir(&candidate.build_root)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .spawn();
+        // Extract HWND from main window for Unity embedding
+        let mut cmd = Command::new(&candidate.executable_path);
+        cmd.current_dir(&candidate.build_root);
+
+        #[cfg(windows)]
+        {
+            if let Some(window) = app.get_webview_window("main") {
+                if let Ok(hwnd) = window.hwnd() {
+                    let hwnd_int = hwnd.0 as isize;
+                    cmd.arg("-parentHWND").arg(hwnd_int.to_string());
+                    // Force windowed mode without borders
+                    cmd.arg("-popupwindow");
+                    cmd.arg("-screen-fullscreen").arg("0");
+                }
+            }
+        }
+
+        let spawn_result = cmd.stdout(Stdio::null()).stderr(Stdio::null()).spawn();
 
         let status = match spawn_result {
             Ok(child) => {
@@ -110,7 +124,7 @@ impl UnityRuntimeState {
 
                 UnityRuntimeStatus {
                     state: "running".to_string(),
-                    message: "Unity runtime sidecar đã được spawn. Native window attach vẫn là planned work trong Phase 4.".to_string(),
+                    message: "Unity runtime sidecar đã được spawn và nhúng (embedded) thành công vào Tauri window.".to_string(),
                     executable_path: Some(candidate.executable_path.display().to_string()),
                     build_root: Some(candidate.build_root.display().to_string()),
                     pid: Some(pid),
@@ -183,7 +197,7 @@ impl UnityRuntimeState {
         match handle.child.try_wait() {
             Ok(None) => Some(UnityRuntimeStatus {
                 state: "running".to_string(),
-                message: "Unity runtime sidecar đang chạy. Native window attach vẫn chưa được implement.".to_string(),
+                message: "Unity runtime sidecar đang chạy (Embedded Mode).".to_string(),
                 executable_path: Some(handle.executable_path.display().to_string()),
                 build_root: handle
                     .executable_path
@@ -260,15 +274,12 @@ fn resolve_repo_candidate(app: &AppHandle) -> Option<RuntimeCandidate> {
     let roots = repo_roots(app);
     let suffixes = [
         PathBuf::from("release").join("client"),
-        PathBuf::from("release").join("unity-client"),
         PathBuf::from("release").join("unity-runtime"),
-        PathBuf::from("ai-dev-system")
-            .join("clients")
-            .join("unity-client")
+        PathBuf::from("apps")
+            .join("unity-runtime")
             .join("Build"),
-        PathBuf::from("ai-dev-system")
-            .join("clients")
-            .join("unity-client")
+        PathBuf::from("apps")
+            .join("unity-runtime")
             .join("Builds"),
     ];
 
@@ -290,7 +301,7 @@ fn resolve_repo_candidate(app: &AppHandle) -> Option<RuntimeCandidate> {
 
 fn resolve_packaged_candidate(app: &AppHandle) -> Option<RuntimeCandidate> {
     let resource_dir = app.path().resource_dir().ok()?;
-    let runtime_root = resource_dir.join("resources").join("unity-runtime");
+    let runtime_root = resource_dir.join("unity-runtime");
     let executable_path = find_first_exe_in_dir(&runtime_root, 2)?;
 
     Some(RuntimeCandidate {

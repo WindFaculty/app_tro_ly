@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "catalog": "ai-dev-system/control-plane/catalog/platform.json",
+  "catalog_sha256": "3f5c5a1d7bc9a12e195f3d7a0e7f2096c6b3302511c6aafc82403bffab4c3565",
+  "files": [
+    ".agent/agent-platform-install-state.json",
+    ".agent/rules/agent-platform-governance.md",
+    ".agent/rules/verification-gates.md",
+    ".agent/skills/architect.md",
+    ".agent/skills/build-error-resolver.md",
+    ".agent/skills/loop-operator.md",
+    ".agent/skills/planner.md",
+    ".agent/skills/reviewer.md",
+    ".agent/skills/security-reviewer.md",
+    ".agent/workflows/unity-autonomous-loop.md"
+  ]
+}

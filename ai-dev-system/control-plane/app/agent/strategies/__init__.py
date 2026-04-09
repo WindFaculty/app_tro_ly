@@ -5,7 +5,7 @@ from typing import Sequence
 from app.agent.strategies.base_strategy import ActionStrategy, ExecutionContext
 from app.agent.strategies.coordinate_strategy import CoordinateClickStrategy
 from app.agent.strategies.healing_strategies import UiHealStrategy
-from app.agent.strategies.mcp_strategies import MpcBatchStrategy, MpcToolStrategy
+from app.agent.strategies.mcp_strategies import BlenderMcpToolStrategy, MpcBatchStrategy, MpcToolStrategy
 from app.agent.strategies.pyautogui_strategies import (
     ImageClickStrategy,
     ImageTypeStrategy,
@@ -65,6 +65,7 @@ def _built_in_strategies(*, vision_locator: VisionLlmLocator | None = None) -> l
     locator = vision_locator or VisionLlmLocator()
     return [
         MpcToolStrategy(),
+        BlenderMcpToolStrategy(),
         MpcBatchStrategy(),
         PywinautoClickStrategy(),
         PywinautoInvokeStrategy(),
@@ -84,6 +85,7 @@ def _built_in_strategies(*, vision_locator: VisionLlmLocator | None = None) -> l
 
 _ALL_KNOWN_NAMES = [
     "mcp_tool",
+    "blender_mcp_tool",
     "mcp_batch",
     "pywinauto_click",
     "pywinauto_invoke",

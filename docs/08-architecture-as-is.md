@@ -1,13 +1,13 @@
 # Architecture As-Is
 
-Updated: 2026-04-04
+Updated: 2026-04-09
 
 This document is the implementation snapshot for the repo as it exists now.
 
 ## Repo Topology
 
 - `local-backend/` is the active assistant backend.
-- `ai-dev-system/clients/unity-client/` is the active assistant client.
+- `apps/unity-runtime/` is the active Unity runtime project.
 - `agent-platform/` is not present in the current repo snapshot; if used as an adjacent subsystem elsewhere, it remains optional and not required for the assistant runtime.
 - `docs/` and `tasks/` now track the assistant rather than the older project direction.
 
@@ -26,13 +26,13 @@ This document is the implementation snapshot for the repo as it exists now.
 - speech adapters for STT and TTS
 - Windows setup, startup, packaging, and smoke helpers
 
-### Unity client
+### Unity runtime
 
-- UI Toolkit shell loaded from `Assets/Resources/UI/MainUI.uxml`
-- `AppShell.uxml` with Home, Schedule, and Settings content areas
-- orbit-style Home shell, list-first Schedule canvas, chat status cards, subtitle overlay, reminder overlay, health display, and backend-backed settings
-- REST and WebSocket clients for backend integration
-- placeholder avatar-state handling, audio playback, and lip-sync fallback behavior
+- standalone room bootstrap under `Assets/Scripts/App/`
+- room runtime, bridge, and registry services under `Assets/Scripts/Runtime/`
+- avatar state, lip-sync, and conversation bridge support
+- Unity-side audio playback and WAV helpers
+- runtime-focused EditMode and PlayMode coverage
 
 ### Avatar groundwork
 
@@ -42,11 +42,8 @@ This document is the implementation snapshot for the repo as it exists now.
 
 ## What Is Still Partial
 
-- The schedule center panel is list-first and interactive, but it is still not a real calendar-grid UI.
-- The schedule-side panel is still a shell-owned helper surface with mostly static advisory content.
-- The Home avatar stage still uses placeholder presentation until a production scene binding is finalized.
 - Production-avatar integration still depends on Unity scene setup and manual validation.
-- A compact mini-assistant mode is not implemented.
+- Room art, broader prop population, and production-avatar hookup remain partial.
 
 ## Verification Snapshot
 
@@ -67,7 +64,7 @@ If you need current implementation truth, read in this order:
 1. `local-backend/app/api/routes.py`
 2. `local-backend/app/container.py`
 3. `local-backend/app/services/`
-4. `ai-dev-system/clients/unity-client/Assets/Scripts/Core/AssistantApp.cs`
-5. `ai-dev-system/clients/unity-client/Assets/Scripts/App/`
-6. `ai-dev-system/clients/unity-client/Assets/Scripts/Features/`
-7. `ai-dev-system/clients/unity-client/Assets/Resources/UI/`
+4. `apps/unity-runtime/Assets/Scripts/App/`
+5. `apps/unity-runtime/Assets/Scripts/Runtime/`
+6. `apps/unity-runtime/Assets/Scripts/Avatar/`
+7. `apps/unity-runtime/Assets/AvatarSystem/`

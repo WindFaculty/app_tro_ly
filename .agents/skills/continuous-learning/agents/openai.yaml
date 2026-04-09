@@ -1,0 +1,7 @@
+interface:
+  display_name: "Continuous Learning"
+  short_description: "Capture reusable lessons from workflow runs and refactors."
+  brand_color: "#EC4899"
+  default_prompt: "Extract reusable lessons from the workflow and save them with evidence."
+policy:
+  allow_implicit_invocation: true

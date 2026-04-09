@@ -54,7 +54,7 @@ class _FakeRuntime:
 def _unity_window() -> WindowTarget:
     return WindowTarget(
         handle=100,
-        title="unity-client - SampleScene - Windows, Mac, Linux - Unity 6.3 LTS (6000.3.11f1) <DX12>",
+        title="unity-runtime - SampleScene - Windows, Mac, Linux - Unity 6.3 LTS (6000.3.11f1) <DX12>",
         class_name="UnityContainerWndClass",
         pid=42,
         bounds=(0, 0, 1920, 1080),

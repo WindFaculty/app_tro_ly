@@ -4,8 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "bundle:prepare": "py -3 ../../scripts/prepare_desktop_bundle_resources.py",
     "dev": "tauri dev",
     "build": "tauri build",
+    "check": "py -3 ../../scripts/validate_desktop_bundle.py && cargo check --manifest-path src-tauri/Cargo.toml",
     "tauri": "tauri"
   },
   "devDependencies": {

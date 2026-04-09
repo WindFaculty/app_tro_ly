@@ -8,10 +8,17 @@ def now_local() -> datetime:
     return datetime.now().replace(microsecond=0)
 
 
+def _normalize_datetime(value: datetime) -> datetime:
+    trimmed = value.replace(microsecond=0)
+    if trimmed.tzinfo is None or trimmed.utcoffset() is None:
+        return trimmed
+    return trimmed.astimezone().replace(tzinfo=None)
+
+
 def iso_datetime(value: datetime | None) -> str | None:
     if value is None:
         return None
-    return value.replace(microsecond=0).isoformat()
+    return _normalize_datetime(value).isoformat()
 
 
 def iso_date(value: date | None) -> str | None:
@@ -29,7 +36,7 @@ def parse_date(value: str | None) -> date | None:
 def parse_datetime(value: str | None) -> datetime | None:
     if not value:
         return None
-    return datetime.fromisoformat(value)
+    return _normalize_datetime(datetime.fromisoformat(value.replace("Z", "+00:00")))
 
 
 def combine_date_time(day: date, value: time | None) -> datetime | None:

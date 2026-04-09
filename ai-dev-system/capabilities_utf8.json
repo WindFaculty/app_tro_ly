@@ -1,7 +1,7 @@
 ﻿{
   "artifact_dir": "D:\\Antigaravity_Code\\tro_ly\\ai-dev-system\\logs\\gui-agent\\20260329T154953Z-capabilities-unity-editor",
   "profile": "unity-editor",
-  "project_root": "D:\\Antigaravity_Code\\tro_ly\\unity-client",
+  "project_root": "D:\\antigaravity_code\\app_tro_ly\\apps\\unity-runtime",
   "available_tools": [
     "batch_execute",
     "debug_request_context",
@@ -975,3 +975,4 @@
     }
   ]
 }
+
